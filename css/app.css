@@ -427,3 +427,16 @@ body.mapmode .leaflet-bottom{bottom:calc(80px + var(--safe-b))}
 
 .mapbar .chip.gm{background:rgba(20,12,26,.95)!important;color:#ffd2b8!important;border-color:rgba(255,138,61,.7)!important}
 .mapbar .chip.gm.on{background:var(--sun)!important;color:#1c0710!important;border-color:transparent!important;font-weight:900}
+
+.lockbox{text-align:center;padding:22px 16px}.lockbox h3{justify-content:center;font-size:17px}
+.lockbtns{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.demo{position:relative;padding:14px;border-radius:16px;border:1px dashed rgba(255,138,61,.5);background:rgba(255,138,61,.05)}
+.demo .dl{position:absolute;top:-10px;inset-inline-start:14px;background:var(--sun);color:#1c0710;font-size:11px;font-weight:900;padding:2px 8px;border-radius:8px}
+
+/* ===== app shell: the page itself never scrolls/bounces, so the nav never moves ===== */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#top{position:fixed;top:0;left:0;right:0;background:linear-gradient(var(--bg) 75%,rgba(11,7,16,0))}
+main{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;max-width:none;margin:0;
+  padding:calc(60px + env(safe-area-inset-top)) 14px calc(112px + var(--safe-b))}
+main>.wrap{max-width:760px;margin:0 auto}
+.set.stack{flex-direction:column;align-items:stretch}.set.stack .seg{width:100%}.set.stack .seg button{flex:1}

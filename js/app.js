@@ -27,7 +27,9 @@ const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side"
 
 /* ---------- derived state ---------- */
 let REV;try{REV=new Set(JSON.parse(localStorage.getItem('lr_rev')||'[]'))}catch(e){REV=new Set()}
-const saveRev=()=>{try{localStorage.setItem('lr_rev',JSON.stringify([...REV]))}catch(e){}};
+let REVC;try{REVC=new Set(JSON.parse(localStorage.getItem('lr_revc')||'[]'))}catch(e){REVC=new Set()}
+const saveRev=()=>{try{localStorage.setItem('lr_rev',JSON.stringify([...REV]));localStorage.setItem('lr_revc',JSON.stringify([...REVC]))}catch(e){}};
+const hid=x=>locked(x)&&!REVC.has(x.id);
 const done=x=>Store.done(x.id);
 const BYNE={};IT.forEach(x=>{if(!BYNE[x.ne]||x.story)BYNE[x.ne]=x});
 const STORYN=STORY.map(x=>x.ne).sort((a,b)=>b.length-a.length);
@@ -47,7 +49,7 @@ function _avail(x){
 }
 function locked(x){const k='l'+x.id;let v=MEMO.get(k);if(v===undefined){v=_locked(x);MEMO.set(k,v)}return v}
 function _locked(x){
-  if(!S.spoil||done(x)||REV.has(x.id))return false;
+  if(!S.spoil||done(x))return false;
   if(x.c>curCh())return true;
   if(S.spoilLvl!=="strict")return false;
   const n=nextStory();
@@ -109,13 +111,14 @@ document.addEventListener("click",e=>{
   const sh=e.target.closest("[data-share]");if(sh){e.preventDefault();const x=BYS[sh.dataset.share];share(x.n+" · Leo",`${x.n} ב־GTA 6 – איך עושים, מה מקבלים ואיפה בדיוק 👇`,SITE+"#/i/"+x.s);return}
   const v=e.target.closest(".vid .ph");if(v){v.outerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${v.dataset.id}?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;}
 });
-function refreshSoft(){const y=scrollY;route(true);scrollTo(0,y);if(mapReady)drawPins()}
+function refreshSoft(){const m=$("#main"),y=m.scrollTop;route(true);m.scrollTop=y;if(mapReady)drawPins()}
 
 
 /* ---------- growth: share, what's new, install ---------- */
 const SITE="https://naorlevy27.github.io/Leo/";
 async function share(title,text,url){url=url||SITE;try{if(navigator.share){await navigator.share({title,text,url});return}}catch(e){return}
   try{await navigator.clipboard.writeText(text+"\n"+url);toast("הקישור הועתק – הדבק בוואטסאפ")}catch(e){prompt("העתק את הקישור:",url)}}
+const shareApp=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים, צ'יטים וכפתורים סודיים 👇");
 const lastSeen=+(localStorage.getItem("lr_seen")||0);
 const freshNews=NEWS.filter(n=>Date.parse(n.d)+86399e3>lastSeen);
 function whatsNew(){
@@ -295,8 +298,13 @@ function pageItem(slug){
   const x=BYS[slug];if(!x)return `<div class="empty">לא נמצא</div>`;
   const c=mainCat(x);
   let h=`<div class="ihead"><div class="meta">${glyph(x)}<span class="tag">${CAT[c]?CAT[c][1]+" "+CAT[c][0]:""}</span><span class="tag">פרק ${x.c}</span>${x.w&&WHO[x.w]?`<span class="tag">👤 ${WHO[x.w]}</span>`:""}${tags(x,4)}</div>
-  ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1><button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
+  ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1>${hid(x)?"":`<button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`}`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
   <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}${x.story&&!done(x)?`<button class="btn" data-upto="${esc(x.id)}" style="font-size:13px">✓ עד כאן</button>`:""}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
+  if(hid(x)){
+    h+=`<div class="blk lockbox"><div style="font-size:38px">🙈</div><h3 style="justify-content:center">התוכן מוסתר כדי לא לספיילר</h3><p class="muted">זה מפרק ${x.c}${x.c>curCh()?` – ואתה עכשיו בפרק ${curCh()}`:""}. אתה מחליט מה לראות:</p>
+    <div class="lockbtns">${!REV.has(x.id)?`<button class="btn" id="unspoil">👁 הצג רק את השם</button>`:""}<button class="btn pri" id="uncontent">📖 הצג מה עושים</button></div></div>`;
+    h+=commentsBlock("i:"+x.id);return h;
+  }
   /* what you get */
   const rw=x.rw||x.why;
   if(rw||x.nt)h+=`<div class="blk reward"><h3><span class="e">🎁</span>מה מקבלים</h3>${rw?`<p>${esc(rw)}</p>`:""}${x.nt&&x.nt!==rw?`<p class="muted" style="font-weight:500">${esc(x.nt)}</p>`:""}</div>`;
@@ -428,25 +436,36 @@ function gateGuide(){
 
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
-function pageSettings(){
-  let h=`<div class="sec" style="margin-top:4px"><h2>⚙ הגדרות</h2></div>`;
-  h+=`<div class="card cardlist">${accountBlock()}</div>`;
-  h+=`<div class="sec"><h2>תצוגה</h2></div><div class="card cardlist">`+
-    sw("spoil","בלי ספוילרים","מסתיר רק שמות. התיאור, השלבים והמיקום נשארים. 👁 ליד שורה מגלה את השם שלה.")+
-    `<div class="set"><div class="t"><b>מה להסתיר</b><small>"פרקים הבאים" – רואים את כל השמות בפרק שלך (נוח אם עושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>`+
-    `<div class="set"><div class="t"><b>שמות שגילית</b><small>${REV.size} שמות גלויים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
-    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;
-  h+=`<div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>סמן בבת אחת את כל מה שכבר סיימת</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>`;
-  h+=`<div class="sec"><h2>מפה</h2></div><div class="card cardlist">`+
-    sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו במפה.")+
-    sw("upTo","רק עד הפרק שלי","מראה במפה רק דברים שכבר אפשר לעשות.")+
-    sw("exactOnly","רק מיקומים מדויקים","מסתיר סיכות שהן אזור משוער.")+
-    `<div class="set"><div class="t"><b>סגנון מפה</b><small>המפה של המשחק, או מפה מקורית שציירנו (טובה לשיתוף פומבי).</small></div><div class="seg"><button data-ms="rockstar" class="${S.mapStyle==="rockstar"?"on":""}">משחק</button><button data-ms="original" class="${S.mapStyle==="original"?"on":""}">מקורית</button></div></div></div>`;
-  h+=`<div class="sec"><h2>ההתקדמות שלך</h2></div><div class="card cardlist">
-   <div class="set"><div class="t"><b>קוד התקדמות</b><small>העתק כגיבוי, או הדבק קוד מהגרסה הקודמת של האתר. מיזוג – לא מוחק כלום.</small></div></div>
+const ME=[
+ ["account","👤","החשבון שלי","שמירה בכל מכשיר","#4a8dff,#a77bff"],
+ ["view","🙈","ספוילרים ותצוגה","מה מוסתר ואיך","#ff3d8b,#ff8a3d"],
+ ["progress","📍","ההתקדמות שלי","איפה אני · גיבוי","#3fd08a,#2fc6d8"],
+ ["map","🗺️","המפה","מה מופיע עליה","#2fc6d8,#4a8dff"],
+ ["share","🤝","שתף עם חברים","שלח את Leo","#ffc23c,#ff3d8b"],
+ ["app","📲","האפליקציה","רענון · התקנה · קרדיטים","#c58cff,#ff4f9a"]];
+function pageSettings(sec){
+  if(!sec)return `<div class="ihead"><div class="kick">אני</div><h1 style="margin-top:4px">ההגדרות שלך</h1></div><div class="tiles">`+ME.map(t=>`<a class="tile" href="#/settings/${t[0]}" style="--g:linear-gradient(135deg,${t[4]})"><span class="ti">${t[1]}</span><b>${t[2]}</b><small>${t[3]}</small></a>`).join("")+`</div>`;
+  const T=ME.find(t=>t[0]===sec)||ME[0];
+  let h=`<div class="ihead"><div class="kick">אני</div><h1 style="margin-top:4px">${T[1]} ${T[2]}</h1></div>`;
+  if(sec==="account")h+=`<div class="card cardlist">${accountBlock()}</div><p class="muted" style="font-size:13px;margin:10px 4px">בלי חשבון – ההתקדמות נשמרת רק בטלפון הזה. עם חשבון – בכל מכשיר, ואפשר גם להגיב ולתת טיפים.</p>`;
+  if(sec==="view"){
+    const demo=STORY.find(x=>x.c===2)||STORY[5];
+    h+=`<div class="card cardlist">`+sw("spoil","בלי ספוילרים","דברים מפרקים שעוד לא הגעת אליהם – מוסתרים.")+`</div>
+    <div class="sec"><h2>ככה זה נראה</h2></div>
+    <div class="demo"><span class="dl">${S.spoil?"מוסתר":"גלוי"}</span><div class="row" style="--c:#ff4f9a;margin:0"><span class="gl story">L</span><div class="t"><b>${S.spoil?"🔒 משימת סיפור (שם מוסתר)":bdi(demo.n)}</b><small>פרק ${demo.c} · ${S.spoil?"מה עושים – מוסתר":esc((demo.steps||[demo.d||""])[0]||"")}</small></div>${S.spoil?`<span class="rev">👁</span>`:""}</div></div>
+    <p class="muted" style="font-size:13px;margin:8px 4px">במשימה מוסתרת יש שני כפתורים: <b>👁 הצג שם</b> ו־<b>📖 הצג מה עושים</b> – אתה מחליט מה לראות.</p>
+    <div class="card cardlist" style="margin-top:12px"><div class="set stack"><div class="t"><b>מה נחשב "עוד לא הגעת"</b><small>"פרקים הבאים" – כל מה שבפרק שלך גלוי (נוח כשעושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>
+    <div class="set"><div class="t"><b>מה שכבר גילית</b><small>${REV.size} שמות · ${REVC.size} תיאורים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
+    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;}
+  if(sec==="progress")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>בחר את המשימה האחרונה שסיימת – נסמן הכל עד אליה</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>
+   <div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>💾 קוד התקדמות</b><small>גיבוי, או העברה ממכשיר אחר / מהגרסה הקודמת. ייבוא רק מוסיף – לא מוחק.</small></div></div>
    <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" id="cpy">📋 העתק את הקוד שלי</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
-  h+=`<div class="card cardlist" style="margin-top:14px"><div class="set"><div class="t"><b>🔄 רענון האפליקציה</b><small>מוריד את הגרסה הכי חדשה. ההתקדמות שלך נשארת.</small></div><button class="btn sm pri" onclick="hardRefresh()">רענן</button></div></div>`;
-  h+=`<p class="dim" style="font-size:12px;margin:18px 4px">מפה ונתוני מיקום: <a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0). אומנות המפה © Rockstar Games. אתר מעריצים, לא רשמי.</p>`;
+  if(sec==="map")h+=`<div class="card cardlist">`+sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו.")+sw("upTo","רק עד הפרק שלי","בלי דברים מפרקים הבאים.")+sw("exactOnly","רק מיקומים מדויקים","בלי סיכות של 'אזור משוער'.")+`</div>
+   <p class="muted" style="font-size:13px;margin:10px 4px">טיפ: הכפתור <b>🎮 כמו במשחק</b> במפה מראה רק מה שאפשר לעשות עכשיו.</p>`;
+  if(sec==="share")h+=`<div class="blk" style="text-align:center"><div style="font-size:44px">🤝</div><h3 style="justify-content:center;font-size:18px">יש לך חברים שמשחקים?</h3><p class="muted">כל אחד שומר את ההתקדמות שלו – בלי הרשמה.</p><button class="btn pri wide" id="shapp">📤 שתף את Leo</button><button class="btn wide" id="cplink" style="margin-top:8px">🔗 העתק קישור</button></div>`;
+  if(sec==="app")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>🔄 רענון</b><small>מוריד את הגרסה הכי חדשה. ההתקדמות נשארת.</small></div><button class="btn sm pri" onclick="hardRefresh()">רענן</button></div>
+   <div class="set"><div class="t"><b>📲 על המסך הבית</b><small>${/iphone|ipad/i.test(navigator.userAgent)?"ב־Safari: שיתוף ⬆ › 'הוסף למסך הבית'":"בתפריט הדפדפן: 'התקן אפליקציה'"}</small></div></div></div>
+   <p class="dim" style="font-size:12px;margin:18px 4px">מפה ונתוני מיקום: <a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0). אתר מעריצים, לא רשמי. GTA ו־Rockstar Games הם סימנים של Take-Two.</p>`;
   return h;
 }
 function accountBlock(){
@@ -456,17 +475,18 @@ function accountBlock(){
   return `<div class="set"><div class="t"><b>👤 ${bdi(Cloud.profile&&Cloud.profile.name||Cloud.user.email)}</b><small>${esc(Cloud.user.email||"")} · ${st}</small></div><button class="btn sm" id="ren">שנה שם</button><button class="btn sm" id="out">יציאה</button></div>`;
 }
 function bindSettings(){
-  $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר")});
-  $("#swh").onclick=()=>whereSheet();
+  const on=(sel,f)=>{const e=$(sel);if(e)e.onclick=f};
+  $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר");if(k==="spoil")route(true)});
+  on("#swh",()=>whereSheet());
   $$("[data-sl]").forEach(b=>b.onclick=()=>{Store.setS("spoilLvl",b.dataset.sl);$$("[data-sl]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)drawPins();toast("נשמר")});
-  const rc=$("#revclr");if(rc)rc.onclick=()=>{REV.clear();saveRev();MEMO.clear();route(true);toast("השמות הוסתרו שוב")};
-  $$("[data-ms]").forEach(b=>b.onclick=()=>{Store.setS("mapStyle",b.dataset.ms);$$("[data-ms]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)setBase();toast("נשמר")});
-  $("#cpy").onclick=async()=>{const c=Store.code();try{await navigator.clipboard.writeText(c);toast("הקוד הועתק")}catch(e){$("#code").value=c;$("#code").select()}};
-  $("#imp").onclick=()=>{try{const n=Store.fromCode($("#code").value);toast(`יובאו ${n} סימונים ✓`);$("#code").value=""}catch(e){toast("הקוד לא תקין")}};
-  const g=$("#g");if(g)g.onclick=()=>Cloud.google();
-  const eb=$("#emb");if(eb)eb.onclick=async()=>{const v=$("#em").value.trim();if(!v.includes("@"))return toast("מייל לא תקין");const r=await Cloud.email(v);toast(r.error?"שגיאה בשליחה":"שלחנו קישור למייל ✉")};
-  const o=$("#out");if(o)o.onclick=()=>Cloud.out();
-  const rn=$("#ren");if(rn)rn.onclick=async()=>{const n=prompt("השם שיופיע בתגובות:",Cloud.profile&&Cloud.profile.name||"");if(n)await Cloud.rename(n.slice(0,40))};
+  on("#revclr",()=>{REV.clear();REVC.clear();saveRev();MEMO.clear();route(true);toast("הוסתר שוב")});
+  on("#cpy",async()=>{const c=Store.code();try{await navigator.clipboard.writeText(c);toast("הקוד הועתק")}catch(e){$("#code").value=c;$("#code").select()}});
+  on("#imp",()=>{try{const n=Store.fromCode($("#code").value);toast(`יובאו ${n} סימונים ✓`);$("#code").value=""}catch(e){toast("הקוד לא תקין")}});
+  on("#g",()=>Cloud.google());
+  on("#emb",async()=>{const v=$("#em").value.trim();if(!v.includes("@"))return toast("מייל לא תקין");const r=await Cloud.email(v);toast(r.error?"שגיאה בשליחה":"שלחנו קישור למייל ✉")});
+  on("#out",()=>Cloud.out());
+  on("#ren",async()=>{const n=prompt("השם שיופיע בתגובות:",Cloud.profile&&Cloud.profile.name||"");if(n)await Cloud.rename(n.slice(0,40))});
+  on("#shapp",()=>shareApp());on("#cplink",async()=>{try{await navigator.clipboard.writeText(SITE);toast("הקישור הועתק")}catch(e){prompt("הקישור:",SITE)}});
 }
 Cloud.sub(()=>{if(curPage==="settings")route(true)});
 
@@ -621,7 +641,7 @@ function drawPins(){
 }
 function previewHtml(o){
   if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);return `<div class="prev"><div class="meta" style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">${esc(k.i||"")} ${esc(k.n||o.k)}</span>${o.a?`<span class="tag">${bdi(o.a)}</span>`:""}</div><h3>${bdi(o.n)}</h3>${o.d?`<p class="muted ltr" style="text-align:left;font-size:13.5px">${esc(o.d.slice(0,220))}${o.d.length>220?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn${d?" ":""}" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
-  const x=o;const lk=false;
+  const x=o;const lk=hid(x);
   return `<div class="prev"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${glyph(x)}<span class="tag">פרק ${x.c}</span>${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור</span>`}${lk?"":tags(x,2)}</div><h3>${bdi(title(x))}</h3>${!lk&&x.sp?`<p class="muted" style="font-size:14px">${esc(x.sp)}</p>`:""}${!lk&&(x.rw||x.why)?`<p style="font-size:14px">🎁 ${esc(x.rw||x.why)}</p>`:""}<div class="acts"><a class="btn pri" href="#/i/${x.s}">לעמוד המשימה ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}</div></div>`;
 }
 function preview(o){openSheet(previewHtml(o))}
@@ -699,7 +719,7 @@ function route(soft){
   const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news"}[p]||"home";
   curPage=page;
   const isMap=page==="map";
-  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news"].includes(page));
+  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news"].includes(page)||(page==="settings"&&parts[1]));
   $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#msearch").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
   const navKey={home:"home",list:"list",item:"list",loc:"map",map:"map",guides:"guides",guide:"guides",settings:"settings",cheats:"guides",tips:"guides",buttons:"guides",news:"guides"}[page];
   $$("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===navKey));moveLens();
@@ -707,18 +727,19 @@ function route(soft){
   if(isMap){ensureMap();setTimeout(()=>map.invalidateSize(),30);if(!soft)focusMap(q);return}
   let h="";
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
-  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings();else if(page==="cheats")h=pageCheats();else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
-  $("#main").innerHTML=h;
-  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים וכפתורים סודיים 👇");const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
+  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
+  $("#main").innerHTML=`<div class="wrap">${h}</div>`;
+  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="guide")gateGuide();
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
+  const uc=$("#uncontent");if(uc)uc.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REVC.add(x.id);saveRev()}route(true)};
   if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null)setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
-  if(!soft)scrollTo(0,0);
+  if(!soft)$("#main").scrollTop=0;
 }
 window.AFF=await fetch("data/affine.json").then(r=>r.json());
 addEventListener("hashchange",()=>route());
