@@ -180,7 +180,7 @@ function pageHome(){
 const TABS=[["all","הכל","✨"],["story","סיפור","📖"],["side","משימות צד","🎭"],["op","כנופיות","💼"],["collect","אספנות","🃏"],["event","אירועים","🎲"],["more","עוד","⭐"]];
 const MORE=["money","vehicle","weapon","egg","tip"];
 const LF=Object.assign({tab:"all",ch:0,q:"",stat:"",avail:"",miss:0,kt:{},ex:{},open:{}},S.lists2||{});for(const k in LF.kt)if(LF.kt[k]!==1)delete LF.kt[k];for(const k in LF.ex)if(!LF.ex[k])delete LF.ex[k];
-function inTab(x){const c=mainCat(x);if(LF.tab==="all")return !x.tip;if(LF.tab==="more")return MORE.includes(c)||x.g.some(g=>MORE.includes(g));return c===LF.tab||x.g.includes(LF.tab)}
+function inTab(x){const c=mainCat(x);if(LF.tab==="all")return !x.tip&&c!=="collect";if(LF.tab==="more")return MORE.includes(c)||x.g.some(g=>MORE.includes(g));return c===LF.tab||x.g.includes(LF.tab)}
 function passes(x){
   if(!inTab(x))return false;
   const c=mainCat(x);
@@ -267,7 +267,7 @@ function filterSheet(){
   h+=`<div class="fsec"><div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שזמין עכשיו</b><small>בלי מה שעוד לא נפתח ובלי מה שפוספס</small></div><button class="sw${LF.avail==="now"?" on":""}" data-fa></button></div>
   <div class="set" style="padding:6px 0;border:0"><div class="t"><b>⏳❗ רק מה שעלול להיעלם</b><small>זמן מוגבל + דברים שנעלמים בנקודה מסוימת</small></div><button class="sw${LF.miss?" on":""}" data-fm></button></div></div>`;
   h+=`<div class="fsec"><b>אילו סוגים להציג</b><div class="chips wrap">`+Object.keys(CAT).filter(k=>k!=="tip").map(k=>`<button class="chip pick${LF.ex[k]?"":" on"}" style="--c:${CATC[k]}" data-fx="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("")+`</div></div>`;
-  if(LF.tab==="collect"||LF.tab==="all"){const anyK=Object.values(LF.kt).some(v=>v===1);h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">${anyK?"מוצגים רק הסוגים הצבועים":"מוצג הכל – בחר סוג כדי לראות רק אותו"}</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip pick${LF.kt[k]===1?" on":""}" style="--c:#ffc23c" data-fk="${k}">${KTE[k]||""} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`}
+  if(LF.tab==="collect"){const anyK=Object.values(LF.kt).some(v=>v===1);h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">${anyK?"מוצגים רק הסוגים הצבועים":"מוצג הכל – בחר סוג כדי לראות רק אותו"}</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip pick${LF.kt[k]===1?" on":""}" style="--c:#ffc23c" data-fk="${k}">${KTE[k]||""} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`}
   h+=`<div class="fact"><button class="btn" data-rm="all">נקה הכל</button><button class="btn pri" id="fdone">הצג ${IT.filter(passes).length} תוצאות</button></div>`;
   const sc=$("#sheet").classList.contains("on")?$("#sheet").scrollTop:0;
   openSheet(h);$("#sheet").scrollTop=sc;
@@ -633,6 +633,7 @@ function itemShown(x){
   if(S.exactOnly&&!x.ex)return false;
   const on=Object.keys(ML.cats).filter(k=>ML.cats[k]);
   if(on.length&&!on.includes(mainCat(x)))return false;
+  if(!on.length&&mainCat(x)==="collect")return false;
   return true;
 }
 function pinHtml(arr){
