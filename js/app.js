@@ -11,6 +11,7 @@ const [D,LD,EX]=await Promise.all([fetch("data/items.json").then(r=>r.json()),fe
 /* daily discoveries: extra.json items use the same shape; same id = update an existing item */
 (EX.items||[]).forEach(e=>{const i=D.items.findIndex(x=>x.id===e.id);if(i>=0)D.items[i]=Object.assign(D.items[i],e);else{e.g=e.g||["egg"];e.c=e.c||1;e.pos=e.pos==null?9999:e.pos;e.s=e.s||e.id.toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,60);e.isNew=1;D.items.push(e)}});
 const NEWS=(EX.news||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
+const TIPS2=(EX.tips||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 D.items.forEach(x=>x.ord=x.c*100000+x.pos);const IT=D.items.sort((a,b)=>a.ord-b.ord);
 const BY={},BYS={};IT.forEach(x=>{BY[x.id]=x;BYS[x.s]=x});
 const KINDS=LD.kinds;
@@ -21,24 +22,29 @@ const STORY=IT.filter(x=>x.story);
 const CAT={story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:"שניהם"};
+const CATC={story:"#ff4f9a",side:"#a77bff",op:"#ff8a3d",collect:"#ffc23c",event:"#2fc6d8",money:"#3fd08a",vehicle:"#4a8dff",weapon:"#ff5a5a",egg:"#b4e04a",tip:"#ffc23c"};
 const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side");
 
 /* ---------- derived state ---------- */
 const done=x=>Store.done(x.id);
 const BYNE={};IT.forEach(x=>{if(!BYNE[x.ne]||x.story)BYNE[x.ne]=x});
 const STORYN=STORY.map(x=>x.ne).sort((a,b)=>b.length-a.length);
-function ref(str){if(!str)return null;if(BYNE[str])return BYNE[str];const n=STORYN.find(n=>str.includes(n));return n?BYNE[n]:null}
-function nextStory(){return STORY.find(x=>!done(x))}
+const REFC=new Map();function ref(str){if(!str)return null;if(REFC.has(str))return REFC.get(str);const r=_ref(str);REFC.set(str,r);return r}
+function _ref(str){if(BYNE[str])return BYNE[str];const n=STORYN.find(n=>str.includes(n));return n?BYNE[n]:null}
+function nextStory(){if(MEMO.has('ns'))return MEMO.get('ns');const n=STORY.find(x=>!done(x));MEMO.set('ns',n);return n}
 function curCh(){const n=nextStory();return n?n.c:5}
 /* availability: now | later (unlocks after a mission you haven't done) | missed (its window closed) */
-function avail(x){
+const MEMO=new Map();Store.sub(()=>MEMO.clear());const _setS=Store.setS;Store.setS=(k,v)=>{MEMO.clear();_setS(k,v)};
+function avail(x){const k='a'+x.id;let v=MEMO.get(k);if(v===undefined){v=_avail(x);MEMO.set(k,v)}return v}
+function _avail(x){
   if(done(x))return "done";
   for(const f of ["bf","dl","lim"]){const r=ref(x[f]);if(r&&r!==x&&done(r))return "missed"}
   const a=ref(x.af);if(a&&a!==x&&!done(a))return "later";
   if(x.story){const n=nextStory();if(n&&x.ord>n.ord)return "later"}
   return "now";
 }
-function locked(x){
+function locked(x){const k='l'+x.id;let v=MEMO.get(k);if(v===undefined){v=_locked(x);MEMO.set(k,v)}return v}
+function _locked(x){
   if(!S.spoil||done(x))return false;
   if(x.c>curCh())return true;
   const n=nextStory();
@@ -59,7 +65,7 @@ function glyph(x,extra=""){
   if(c==="story")return `<span class="gl ${x.opt?"opt":"story"}${t}${d}${ms}${extra}">${esc(lt)}</span>`;
   if(c==="side")return `<span class="gl side${t}${d}${ms}${extra}">${esc(lt)}</span>`;
   const e=locked(x)?"🔒":(x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•");
-  return `<span class="gl coll${t}${d}${ms}${extra}">${e}</span>`;
+  return `<span class="gl coll${t}${d}${ms}${extra}" style="--c:${CATC[c]||"#ffc23c"}">${e}</span>`;
 }
 function tags(x,max=3){
   const a=[],av=avail(x);
@@ -80,7 +86,7 @@ function sub(x){
 }
 function row(x,cls=""){
   const av=avail(x);
-  return `<a class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
@@ -105,32 +111,25 @@ function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBo
 
 function pageHome(){
   const n=nextStory(),ch=curCh();
-  const all=IT.filter(x=>!x.tip),dn=all.filter(done).length;
-  const st=STORY.filter(done).length;
+  const chS=STORY.filter(x=>x.c===ch),chD=chS.filter(done).length;
+  const last=[...STORY].reverse().find(done);
   const pr=nextPonr();
-  const soon=IT.filter(x=>avail(x)==='now'&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&(!pr||x.ord<=pr.ord+0.5)).sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord)).slice(0,6);
-  const near=n?IT.filter(x=>avail(x)==='now'&&!locked(x)&&!x.story&&x.p===n.p&&!x.tip).slice(0,4):[];
-  let h=`<section class="hero"><div class="kick">Leo · פרק ${ch}</div><h1>${S.casual?"מה יש לגלות היום?":(n?"ממשיכים מאיפה שעצרת":"סיימת את הסיפור! 🎉")}</h1>`;
-  if(!S.casual){
-    h+=`<div class="ringrow">${ring(pct(dn,all.length),"מכל המשחק")}<div class="stat3"><div><b>${st}/${STORY.length}</b><span>סיפור</span></div><div><b>${dn}</b><span>סומנו</span></div><div><b>${soon.length}</b><span>ייסגרו בקרוב</span></div></div></div>`;
-  }
-  if(n){h+=`<a class="cont" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`}
+  const toPonr=pr&&n?STORY.filter(x=>x.ord>=n.ord&&x.ord<pr.ord).length:0;
+  const soon=IT.filter(x=>avail(x)==="now"&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&!x.story&&(!pr||x.ord<=pr.ord+0.5))
+    .sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord));
+  let h=`<section class="hero slim">
+    <div class="where"><div><div class="kick">אתה כאן</div><h1>פרק ${ch}</h1>${last?`<span class="muted">סיימת לאחרונה: ${bdi(last.n)}</span>`:`<span class="muted">עוד לא התחלת – בהצלחה!</span>`}</div>
+    ${S.casual?"":`<div class="mini-ring">${ring(pct(chD,chS.length),`${chD}/${chS.length}`)}</div>`}</div>`;
+  if(n)h+=`<a class="cont big" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`;
+  else h+=`<div class="cont big"><div class="t"><b>סיימת את הסיפור! 🎉</b><span class="muted">נשאר לך לאסוף דברים במפה</span></div></div>`;
   h+=`</section>`;
-  if(pr&&!S.casual)h+=`<div class="blk warn" style="margin-top:12px"><h3><span class="e">⚠</span>לפני <bdi>${esc(pr.n)}</bdi></h3><p class="muted" style="margin:0">זו נקודת אל־חזור. כדאי לסיים קודם את מה שמסומן ⏳ למטה.</p></div>`;
-  if(soon.length&&!S.casual)h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2><a href="#/list?miss=1">הכל</a></div>`+soon.map(row).join("");
-  if(near.length&&!S.casual)h+=`<div class="sec"><h2>📍 באותו אזור</h2></div>`+near.map(row).join("");
-  if(S.casual){
-    const pick=IT.filter(x=>!locked(x)&&(x.g.includes("egg")||x.g.includes("event"))).sort(()=>Math.random()-.5).slice(0,5);
-    h+=`<div class="sec"><h2>🥚 דברים מגניבים לגלות</h2></div>`+pick.map(row).join("");
+  if(pr&&!S.casual&&toPonr<=4)h+=`<div class="blk warn"><h3><span class="e">⚠</span>${toPonr===0?"המשימה הבאה":"עוד "+toPonr+" משימות עד"} נקודת אל־חזור</h3><p class="muted" style="margin:0">${bdi(pr.n)} סוגרת דברים לתמיד. סיים קודם את מה שלמטה.</p></div>`;
+  if(!S.casual){
+    if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2>${soon.length>4?`<a href="#/list?miss=1">עוד ${soon.length-4}</a>`:""}</div>`+soon.slice(0,4).map(row).join("")}
+    else h+=`<div class="blk okb"><h3><span class="e">✅</span>אין כרגע משהו שעומד להיסגר</h3><p class="muted" style="margin:0">אפשר להמשיך בסיפור בראש שקט.</p></div>`;
   }
-  if(NEWS.length)h+=`<div class="sec"><h2>🆕 מה חדש</h2><span class="dim" style="font-size:12px">מתעדכן כל יום</span></div><div class="card">${NEWS.slice(0,4).map(n=>`<div style="display:flex;gap:10px;padding:6px 0"><span class="dim ltr" style="font-size:12px;flex:none">${esc(n.d.slice(5).split("-").reverse().join("/"))}</span><span>${n.s?`<a href="#/i/${esc(n.s)}">${esc(n.t)}</a>`:esc(n.t)}</span></div>`).join("")}</div>`;
-  h+=`<div class="sec"><h2>לפי סוג</h2><a href="#/list">לרשימה</a></div><div class="grid2">`;
-  for(const c in CAT){if(c==="tip")continue;const a=IT.filter(x=>mainCat(x)===c);if(!a.length)continue;const d=a.filter(done).length;
-    h+=`<a class="catcard" href="#/list?cat=${c}"><div class="h"><span>${CAT[c][1]}</span>${CAT[c][0]}</div>${S.casual?`<span class="dim" style="font-size:12px">${a.length} פריטים</span>`:`<div class="bar"><i style="width:${pct(d,a.length)}%"></i></div><span class="dim" style="font-size:12px">${d}/${a.length}</span>`}</a>`}
-  h+=`</div>`;
-  if(!S.casual){h+=`<div class="sec"><h2>לפי פרק</h2></div>`;
-    for(let c=1;c<=5;c++){const a=IT.filter(x=>x.c===c&&!x.tip),d=a.filter(done).length;h+=`<a class="chrow" href="#/list?ch=${c}"><span class="n">פרק ${c}</span><div class="bar"><i style="width:${pct(d,a.length)}%"></i></div><span class="p">${pct(d,a.length)}%</span></a>`}}
-  h+=`<div class="sec"><h2>מדריכים קצרים</h2><a href="#/guides">הכל</a></div>`+GUIDES.slice(0,3).map(gcard).join("");
+  const tp=tipList(30);if(tp.length){const t=tp[Math.floor(Date.now()/864e5)%tp.length];h+=`<div class="sec"><h2>💡 טיפ היום</h2><a href="#/guides">עוד טיפים</a></div>`+tipHtml(t)}
+  if(NEWS.length){const nw=NEWS[0];h+=`<a class="newsline" href="${nw.s?"#/i/"+esc(nw.s):"#/list"}"><span>🆕</span><span>${esc(nw.t)}</span><span class="dim">‹</span></a>`}
   return h;
 }
 
@@ -161,7 +160,7 @@ function pageList(q){
   if(q.cat){const t=TABS.find(t=>t[0]===q.cat);LF.tab=t?q.cat:(MORE.includes(q.cat)?"more":"all")}if(q.ch)LF.ch=+q.ch;if(q.miss){LF.miss=1;LF.tab="all"}
   const list=IT.filter(passes);
   let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
-  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
+  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
   h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn${LF.ch?" on":""}" id="fch">📚 ${LF.ch?"פרק "+LF.ch:"כל הפרקים"} ▾</button>${S.casual?"":`<button class="fbtn${LF.avail==="now"?" on":""}" id="fnow">✅ זמין עכשיו</button>`}</div>`;
   const act=[];
@@ -333,7 +332,9 @@ async function loadComments(){
 
 /* guides */
 const gcard=g=>`<a class="gcard" href="#/g/${g.id}"><span class="e">${g.e}</span><div><b>${esc(g.t)}</b><small>${esc(g.d)}</small></div></a>`;
-const pageGuides=()=>`<div class="sec" style="margin-top:4px"><h2>מדריכים</h2></div><p class="muted" style="margin-top:0">הכל בפשטות – בלי מונחים מסובכים.</p>`+GUIDES.map(gcard).join("");
+function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)>cur)).slice(0,n)}
+const tipHtml=t=>`<div class="tip"><span class="e">💡</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
+const pageGuides=()=>{const tl=tipList(99),hid=TIPS2.length-tl.length;return `<div class="sec" style="margin-top:4px"><h2>💡 טיפים קטנים</h2><span class="dim" style="font-size:12px">מתעדכן כל יום</span></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין טיפים</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} טיפים נוספים ייפתחו בהמשך המשחק</p>`:"")+`<div class="sec"><h2>📘 מדריכים</h2></div><p class="muted" style="margin-top:0">הכל בפשטות – בלי מונחים מסובכים.</p>`+GUIDES.map(gcard).join("")};
 function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return `<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
 function gateGuide(){
@@ -390,55 +391,90 @@ Cloud.sub(()=>{if(curPage==="settings")route(true)});
 /* ---------- crisp vector map (land, buildings, roads, labels) – sharp at any zoom ---------- */
 let VEC=null,vecP=null;
 const loadVec=()=>vecP||(vecP=fetch("data/vec.json").then(r=>r.json()).then(d=>VEC=d));
-const VSTY={urban:"#ebe4f4",park:"#92d692",sand:"#f3e2b3",shallow:"#6adede",paved:"#e6e0d6",building:"#d0c1e6"};
-const RSTY={highway:["#fee187","#d9ae3c",2.4],main:["#fee8a0","#dcc078",1.8],street:["#fffdf6","#d6cab0",1.3],minor:["#ffffff","#dcd0b8",.9]};
-function addVector(m,opts={}){
-  const ren=L.canvas({padding:.4,tolerance:0});
-  const pane=m.createPane("vec");pane.style.zIndex=250;
-  const g=L.layerGroup();const roads={};
-  const ll=pts=>pts.map(p=>[-p[1],p[0]]);
-  VEC.land.forEach(poly=>{const rings=Array.isArray(poly[0][0])?poly.map(ll):[ll(poly)];g.addLayer(L.polygon(rings,{renderer:ren,pane:"vec",stroke:false,fillColor:"#f8ecd0",fillOpacity:1,interactive:false,smoothFactor:.5}))});
-  ["shallow","sand","urban","park","paved","building"].forEach(k=>(VEC.surf[k]||[]).forEach(r=>g.addLayer(L.polygon(r.map(ll),{renderer:ren,pane:"vec",stroke:k==="building",color:"#bfaedb",weight:.6,fillColor:VSTY[k],fillOpacity:1,interactive:false,smoothFactor:.5}))));
-  VEC.rails.forEach(l=>g.addLayer(L.polyline(ll(l),{renderer:ren,pane:"vec",color:"#9aa0ad",weight:1.2,dashArray:"4 4",interactive:false})));
-  ["minor","street","main","highway"].forEach(k=>{roads[k]={c:[],f:[]};(VEC.roads[k]||[]).forEach(l=>{const a=ll(l);const c=L.polyline(a,{renderer:ren,pane:"vec",color:RSTY[k][1],lineCap:"round",lineJoin:"round",interactive:false,smoothFactor:.6});roads[k].c.push(c);g.addLayer(c)})});
-  ["minor","street","main","highway"].forEach(k=>(VEC.roads[k]||[]).forEach((l,i)=>{const f=L.polyline(ll(l),{renderer:ren,pane:"vec",color:RSTY[k][0],lineCap:"round",lineJoin:"round",interactive:false,smoothFactor:.6});roads[k].f.push(f);g.addLayer(f)}));
-  const from=opts.from==null?4.75:opts.from;
-  function style(){
-    const z=m.getZoom();const on=z>=from;
-    if(on&&!m.hasLayer(g))g.addTo(m);if(!on&&m.hasLayer(g))m.removeLayer(g);
-    if(!on)return;
-    const sc=Math.pow(2,z-4.6);
-    for(const k in roads){const w=Math.max(1.2,RSTY[k][2]*sc);roads[k].c.forEach(l=>l.setStyle({weight:w+Math.max(1.5,w*.3)}));roads[k].f.forEach(l=>l.setStyle({weight:w}))}
+const LANDC="#86a982";const VSTY={urban:"#aeb3b6",park:"#6f9c63",sand:"#e6d5a2",shallow:"#5ea9cc",paved:"#c3c4c0",building:"#8f949b"};
+const RSTY={highway:["#f7f4ec","#7d8288",2.4],main:["#efede6","#868b90",1.8],street:["#e6e5e0","#90959a",1.3],minor:["#dcdcd8","#9a9fa3",.9]};
+/* Vector map drawn into canvas tiles: paths are built once (Path2D, map units), each tile just
+   transforms + fills, so panning is smooth and every zoom level is sharp. */
+let VIDX=null;
+function buildVecIndex(){
+  if(VIDX)return VIDX;
+  const CELL=16,grid=new Map(),feats=[];
+  const add=(kind,pts,closed,layer)=>{
+    let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const p=new Path2D();
+    const rings=Array.isArray(pts[0][0])?pts:[pts];
+    rings.forEach(r=>{r.forEach((q,i)=>{if(q[0]<x0)x0=q[0];if(q[0]>x1)x1=q[0];if(q[1]<y0)y0=q[1];if(q[1]>y1)y1=q[1];i?p.lineTo(q[0],q[1]):p.moveTo(q[0],q[1])});if(closed)p.closePath()});
+    const f={kind,layer,p,o:feats.length};feats.push(f);
+    for(let gx=Math.floor(x0/CELL);gx<=Math.floor(x1/CELL);gx++)for(let gy=Math.floor(y0/CELL);gy<=Math.floor(y1/CELL);gy++){const k=gx+","+gy;let c=grid.get(k);if(!c)grid.set(k,c=[]);c.push(f)}
+  };
+  VEC.land.forEach(poly=>add("fill",poly,true,0));
+  const SL={shallow:-1,sand:2,urban:3,park:4,paved:5,building:6};
+  for(const k in SL)(VEC.surf[k]||[]).forEach(r=>add(k,r,true,SL[k]));
+  VEC.rails.forEach(l=>add("rail",l,false,7));
+  const RL={minor:8,street:9,main:10,highway:11};
+  for(const k in RL)(VEC.roads[k]||[]).forEach(l=>add(k,l,false,RL[k]));
+  return VIDX={grid,CELL};
+}
+const VecTiles=L.GridLayer.extend({
+  createTile(c){
+    const t=document.createElement("canvas");const dpr=Math.min(window.devicePixelRatio||1,2.5);
+    t.width=t.height=256*dpr;const ctx=t.getContext("2d");
+    const sc=Math.pow(2,c.z),x0=c.x*256/sc,y0=c.y*256/sc,span=256/sc;
+    const {grid,CELL}=buildVecIndex();
+    const seen=new Set(),list=[];
+    for(let gx=Math.floor(x0/CELL);gx<=Math.floor((x0+span)/CELL);gx++)for(let gy=Math.floor(y0/CELL);gy<=Math.floor((y0+span)/CELL);gy++){const cell=grid.get(gx+","+gy);if(cell)for(const f of cell)if(!seen.has(f)){seen.add(f);list.push(f)}}
+    list.sort((a,b)=>a.layer-b.layer||a.o-b.o);
+    ctx.setTransform(dpr*sc,0,0,dpr*sc,-x0*dpr*sc,-y0*dpr*sc);
+    ctx.lineCap="round";ctx.lineJoin="round";
+    const px=v=>v/sc; // pixel width -> map units
+    const rw=k=>Math.max(c.z<4?.7:1.1,RSTY[k][2]*Math.pow(2,c.z-4.6));
+    const roads=[];
+    for(const f of list){
+      if(f.kind==="fill"){ctx.fillStyle=LANDC;ctx.fill(f.p)}
+      else if(VSTY[f.kind]){if(f.kind==="building"&&c.z<4)continue;ctx.fillStyle=VSTY[f.kind];ctx.fill(f.p);if(f.kind==="building"&&c.z>=6){ctx.strokeStyle="#767b82";ctx.lineWidth=px(.8);ctx.stroke(f.p)}}
+      else if(f.kind==="rail"){ctx.strokeStyle="#9aa0ad";ctx.lineWidth=px(1.4);ctx.setLineDash([px(5),px(4)]);ctx.stroke(f.p);ctx.setLineDash([])}
+      else{if(c.z<4&&f.kind==="minor"||c.z<3&&f.kind==="street")continue;roads.push(f)}
+    }
+    for(const f of roads){const w=rw(f.kind);ctx.strokeStyle=RSTY[f.kind][1];ctx.lineWidth=px(w+Math.max(1.5,w*.3));ctx.stroke(f.p)}
+    for(const f of roads){ctx.strokeStyle=RSTY[f.kind][0];ctx.lineWidth=px(rw(f.kind));ctx.stroke(f.p)}
+    return t;
   }
-  m.on("zoomend",style);style();
+});
+function addVector(m,opts={}){
+  const layer=new VecTiles({tileSize:256,minZoom:-1,maxZoom:12,minNativeZoom:1,maxNativeZoom:12,noWrap:true,bounds:BOUNDS,updateWhenZooming:false,keepBuffer:3,pane:"overlayPane"});
+  const pane=m.getPane("vec")||m.createPane("vec");pane.style.zIndex=250;layer.options.pane="vec";
+  layer.addTo(m);
   if(opts.labels!==false)addLabels(m);
-  return g;
+  return layer;
 }
 function addLabels(m){
   const pane=m.createPane("labels");pane.style.zIndex=450;pane.style.pointerEvents="none";
   const box=L.DomUtil.create("div","lbls",pane);
   const LB=VEC.lab;
+  const biz=LOCS.filter(l=>["shop","food","store","bank","leisure","civic","transport","safehouse","building","range","arcade","payday","fence"].includes(l.k)).map(l=>[l.n.replace(/ - [^-]+$/,""),l.x,l.y]);
+  let raf=0;
   function draw(){
-    const z=m.getZoom(),b=m.getBounds().pad(.1);box.innerHTML="";const taken=[];
-    const cand=[];
-    if(z<4.6)LB.dist.forEach(d=>cand.push({t:d[0],x:d[1],y:d[2],c:"ld",fs:z<3?13:16,pr:0}));
-    if(z>=3.3)LB.hood.forEach(h=>{if(z>=4.4||h[3]>=30)cand.push({t:h[0],x:h[1],y:h[2],c:"lh",fs:z>=6?14:12,pr:1+(h[3]>=30?0:1)})});
-    if(z>=3)LB.routes.forEach(r=>cand.push({t:r[0],x:r[2],y:r[3],c:"lr lr-"+r[1],fs:10,pr:2}));
-    if(z>=5.8)LB.street.forEach(s=>cand.push({t:s[0],x:s[1],y:s[2],c:"ls",fs:11,pr:3}));
-    if(z>=6.4)LB.places.forEach(p=>{if(z>=7.4||["civic","transport","leisure","hotel","nature"].includes(p[1]))cand.push({t:p[0],x:p[2],y:p[3],c:"lp",fs:z>=8?12:10.5,pr:4})});
+    const z=m.getZoom(),b=m.getBounds().pad(.05);box.innerHTML="";const taken=[];
+    const cand=[];const inb=(x,y)=>b.contains([-y,x]);
+    if(z<4.4)LB.dist.forEach(d=>inb(d[1],d[2])&&cand.push({t:d[0],x:d[1],y:d[2],c:"ld",fs:z<3?12:15,pr:0}));
+    if(z>=3.2)LB.hood.forEach(h=>{if((z>=4.2||h[3]>=30)&&inb(h[1],h[2]))cand.push({t:h[0],x:h[1],y:h[2],c:"lh",fs:z>=6?15:z>=5?13:11.5,pr:z>=6?2:1})});
+    if(z>=3.5)LB.routes.forEach(r=>inb(r[2],r[3])&&cand.push({t:r[0],x:r[2],y:r[3],c:"lr lr-"+r[1],fs:10,pr:1.5}));
+    if(z>=5.2)LB.street.forEach(s=>inb(s[1],s[2])&&cand.push({t:s[0],x:s[1],y:s[2],c:"ls",fs:12,pr:1.6}));
+    if(z>=5.4)LB.places.forEach(p=>{if((z>=6.6||["civic","transport","leisure","hotel","nature"].includes(p[1]))&&inb(p[2],p[3]))cand.push({t:p[0],x:p[2],y:p[3],c:"lp",fs:z>=7.5?12.5:11,pr:3})});
+    if(z>=6.2)biz.forEach(p=>inb(p[1],p[2])&&cand.push({t:p[0],x:p[1],y:p[2],c:"lp lb2",fs:z>=7.5?12:10.5,pr:4}));
     cand.sort((a,b)=>a.pr-b.pr);
-    let n=0;
+    let n=0;const frag=document.createDocumentFragment();
     for(const c of cand){
-      const lat=-c.y,lng=c.x;if(!b.contains([lat,lng]))continue;
-      const pt=m.latLngToLayerPoint([lat,lng]);const w=c.t.length*c.fs*.58+10,h=c.fs+8;
+      const pt=m.latLngToLayerPoint([-c.y,c.x]);const w=c.t.length*c.fs*.56+8,h=c.fs+6;
       const r=[pt.x-w/2,pt.y-h/2,pt.x+w/2,pt.y+h/2];
-      if(taken.some(t=>!(r[2]<t[0]||r[0]>t[2]||r[3]<t[1]||r[1]>t[3])))continue;
-      taken.push(r);
-      const e=document.createElement("div");e.className="lb "+c.c;e.textContent=c.t;e.style.cssText=`left:${pt.x}px;top:${pt.y}px;font-size:${c.fs}px`;box.appendChild(e);
-      if(++n>260)break;
+      let hit=false;for(const t of taken)if(!(r[2]<t[0]||r[0]>t[2]||r[3]<t[1]||r[1]>t[3])){hit=true;break}
+      if(hit)continue;taken.push(r);
+      const e=document.createElement("div");e.className="lb "+c.c;e.textContent=c.t;e.style.cssText=`left:${pt.x}px;top:${pt.y}px;font-size:${c.fs}px`;frag.appendChild(e);
+      if(++n>180)break;
     }
+    box.appendChild(frag);
   }
-  m.on("zoomend moveend",draw);draw();
+  const sched=()=>{cancelAnimationFrame(raf);raf=requestAnimationFrame(draw)};
+  m.on("zoomstart",()=>box.style.opacity=0);m.on("zoomend moveend",()=>{sched();box.style.opacity=1});sched();
 }
 
 let map=null,mapReady=false,layer=null,base=null,mini=null;
@@ -449,9 +485,8 @@ function setBase(){
   if(S.mapStyle==="original"){
     const M=window.AFF;const p=(fx,fy)=>[fx*M[0][0]+fy*M[1][0]+M[2][0],fx*M[0][1]+fy*M[1][1]+M[2][1]];
     const a=p(0,0),b=p(1,1);base=L.imageOverlay("map-original.jpg",[[-a[1],a[0]],[-b[1],b[0]]]).addTo(map);
-  }else base=L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minZoom:-1,minNativeZoom:0,maxNativeZoom:5,maxZoom:11,noWrap:true,bounds:BOUNDS,
-    attribution:'<a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0) · © Rockstar Games'}).addTo(map);
-  base.bringToBack&&base.bringToBack();
+  }else{base=null;map.attributionControl.addAttribution('<a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0)')}
+  base&&base.bringToBack&&base.bringToBack();
 }
 function itemShown(x){
   if(x.x==null||x.tip)return false;
@@ -467,13 +502,18 @@ function itemShown(x){
 function pinHtml(arr){
   const x=arr[0];const cnt=arr.length>1?`<span class="cnt">${arr.length}</span>`:"";
   if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}<span class="pl">${esc(x.n)}</span></div>`}
-  const nm=arr.length>1?`${title(x)} +${arr.length-1}`:title(x);
-  return `<div class="mpin${x.ex?"":" ap"}" style="position:relative">${glyph(x)}${cnt}<span class="pl">${esc(nm)}</span></div>`;
+  const nm=arr.length>1?`${title(x)} +${arr.length-1}`:title(x);const c=mainCat(x);
+  const ic=locked(x)?"🔒":(c==="story"||c==="side")?(x.w&&x.w.length===1?x.w:"★"):(x.t&&KTE[x.t]||CAT[c][1]);
+  return `<div class="tpin${done(x)?" done":""}${avail(x)==="missed"?" gone":""}${x.ex?"":" ap"}${timed(x)?" soon":missable(x)?" miss":""}" style="--c:${CATC[c]||"#ffc23c"}"><i><b>${esc(ic)}</b></i>${cnt}<span class="pl">${esc(nm)}</span></div>`;
 }
 function drawPins(){
   if(!map)return;
   if(layer)map.removeLayer(layer);
-  layer=L.markerClusterGroup({maxClusterRadius:38,disableClusteringAtZoom:4,showCoverageOnHover:false,spiderfyOnMaxZoom:false,chunkedLoading:true});
+  layer=L.markerClusterGroup({maxClusterRadius:46,disableClusteringAtZoom:5,showCoverageOnHover:false,spiderfyOnMaxZoom:false,chunkedLoading:true,animate:false,removeOutsideVisibleBounds:true,
+    iconCreateFunction(cl){const ms=cl.getAllChildMarkers();const cnt={};let n=0;ms.forEach(m=>{const c=m.options.col||"#ccc";const k=m.options.n||1;cnt[c]=(cnt[c]||0)+k;n+=k});
+      let a=0;const seg=Object.entries(cnt).sort((p,q)=>q[1]-p[1]).map(([c,v])=>{const s=`${c} ${a}deg ${a+=v/n*360}deg`;return s}).join(",");
+      const sz=n>=50?52:n>=15?46:40;
+      return L.divIcon({className:"",html:`<div class="clu" style="--g:conic-gradient(${seg});width:${sz}px;height:${sz}px"><span>${n}</span></div>`,iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]})}});
   const groups=new Map();
   const put=(o,x,y)=>{const k=Math.round(x*4)/4+","+Math.round(y*4)/4;if(!groups.has(k))groups.set(k,{x,y,a:[]});groups.get(k).a.push(o)};
   if(ML.mine)IT.filter(itemShown).forEach(x=>put(x,x.x,x.y));
@@ -481,7 +521,8 @@ function drawPins(){
   if(kOn.length)LOCS.filter(l=>kOn.includes(l.k)&&!(S.hideDone&&Store.done("L:"+l.id))).forEach(l=>put(Object.assign({L:1},l),l.x,l.y));
   groups.forEach(g=>{
     g.a.sort((p,q)=>(p.L?1:0)-(q.L?1:0)||(p.story?0:1)-(q.story?0:1));
-    const m=L.marker([-g.y,g.x],{icon:L.divIcon({className:"",html:pinHtml(g.a),iconSize:[28,28],iconAnchor:[14,14]})});
+    const f=g.a[0];const col=f.L?((KINDS[f.k]||{}).c||"#ccc"):(CATC[mainCat(f)]||"#ffc23c");
+    const m=L.marker([-g.y,g.x],{col,n:g.a.length,icon:L.divIcon({className:"",html:pinHtml(g.a),iconSize:f.L?[18,18]:[30,38],iconAnchor:f.L?[9,9]:[15,36]})});
     m.on("click",()=>g.a.length===1?preview(g.a[0]):groupSheet(g.a));
     layer.addLayer(m);
   });
@@ -512,14 +553,26 @@ function layersSheet(){
 }
 function mapChips(){
   const on=k=>ML.cats[k]?" on":"";
+  $("#msearch").innerHTML=`<span>🔎</span><input id="mq" placeholder="חיפוש במפה – משימה, מקום, שכונה"><button id="mlay2" aria-label="שכבות">🗂</button>`;
+  $("#mlay2").onclick=layersSheet;
+  const mq=$("#mq");mq.onkeydown=e=>{if(e.key==="Enter")mq.blur()};mq.oninput=()=>{clearTimeout(mq._t);mq._t=setTimeout(()=>mapSearch(mq.value),250)};
   $("#mapbar").innerHTML=`<button class="chip" id="mlay">🗂 שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip${on(k)}" data-mc="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("");
   $("#mlay").onclick=layersSheet;
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
 }
+function mapSearch(q){
+  q=q.trim().toLowerCase();if(q.length<2){closeSheet();return}
+  const res=[];
+  IT.forEach(x=>{if(x.x!=null&&!locked(x)&&(x.n+" "+x.ne).toLowerCase().includes(q))res.push({t:x.n,s:sub(x),go:()=>{location.hash="#/map?i="+x.s},g:glyph(x)})});
+  (VEC?VEC.lab.hood:[]).forEach(h=>{if(h[0].toLowerCase().includes(q))res.push({t:h[0],s:"שכונה / אזור",go:()=>{closeSheet();map.setView([-h[2],h[1]],5.5)},g:`<span class="gl coll">🏘️</span>`})});
+  LOCS.forEach(l=>{if(res.length<60&&l.n.toLowerCase().includes(q))res.push({t:l.n,s:(KINDS[l.k]||{}).n||l.k,go:()=>{location.hash="#/map?l="+encodeURIComponent(l.id)},g:`<span class="gl coll">${esc((KINDS[l.k]||{}).i||"📍")}</span>`})});
+  openSheet(`<h3 style="font-size:17px;margin:0 0 8px">${res.length?res.length+" תוצאות":"לא נמצא"}</h3>`+res.slice(0,40).map((r,i)=>`<a class="row" href="#" data-sr="${i}">${r.g}<div class="t"><b>${bdi(r.t)}</b><small>${esc(r.s)}</small></div></a>`).join(""));
+  $$("[data-sr]").forEach(a=>a.onclick=e=>{e.preventDefault();res[+a.dataset.sr].go()});
+}
 function ensureMap(){
   if(map)return;
-  map=L.map("map",{crs:L.CRS.Simple,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
-  map.attributionControl.setPrefix(false);loadVec().then(()=>addVector(map));
+  map=L.map("map",{crs:L.CRS.Simple,preferCanvas:true,fadeAnimation:false,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
+  map.attributionControl.setPrefix(false);$("#map").classList.add("loading");loadVec().then(()=>{addVector(map);$("#map").classList.remove("loading")});
   const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=5.3);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
@@ -531,7 +584,6 @@ function drawMini(x,y,o){
   if(mini){mini.remove();mini=null}
   const el=$("#mini");if(!el)return;
   mini=L.map(el,{crs:L.CRS.Simple,minZoom:1,maxZoom:8.5,zoomControl:false,attributionControl:false,maxBounds:BOUNDS.pad(0.2),scrollWheelZoom:false});
-  L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minNativeZoom:0,maxNativeZoom:5,maxZoom:11,noWrap:true,bounds:BOUNDS}).addTo(mini);
   mini.setView([-y,x],o.ex===0?5:7);const mm=mini;loadVec().then(()=>{if(mini===mm)addVector(mm)});
   if(o.ex===0)L.circle([-y,x],{radius:9,color:"#b9a2ff",weight:2,dashArray:"5 5",fillOpacity:.12}).addTo(mini);
   L.marker([-y,x],{icon:L.divIcon({className:"",html:o.L?`<span class="edot" style="background:${(KINDS[o.k]||{}).c};width:20px;height:20px"></span>`:`<div class="mpin">${glyph(o)}</div>`,iconSize:[28,28],iconAnchor:[14,14]})}).addTo(mini);
@@ -557,7 +609,7 @@ function route(soft){
   curPage=page;
   const isMap=page==="map";
   document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide"].includes(page));
-  $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
+  $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#msearch").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
   const navKey={home:"home",list:"list",item:"list",loc:"map",map:"map",guides:"guides",guide:"guides",settings:"settings"}[page];
   $$("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===navKey));moveLens();
   if(!soft)closeSheet();
@@ -579,6 +631,6 @@ window.AFF=await fetch("data/affine.json").then(r=>r.json());
 addEventListener("hashchange",()=>route());
 $("#back").onclick=()=>history.length>1?history.back():(location.hash="#/");
 route();
-document.body.classList.add("ready");
+document.body.classList.add("ready");setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>loadVec()),2500);
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 })();
