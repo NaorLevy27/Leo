@@ -360,18 +360,25 @@ function pageItem(slug){
   /* layer 1: what to do + what you get + navigate */
   const rw=x.rw||x.why;
   let main="";
+  const intro=[];
+  if(x.d&&x.steps&&x.steps.length)intro.push(esc(x.d));
+  if(x.loc&&x.steps)intro.push(`מתחילים ב־${bdi(x.loc.slice(-2).join(", "))}${x.sp?` – ${esc(x.sp)}`:""}.`);
+  if(x.w&&WHO[x.w]&&x.w!=="B")intro.push(`משחקים בתור ${WHO[x.w]}.`);
+  if(intro.length)main+=`<p class="intro">${intro.join(" ")}</p>`;
   if(x.steps&&x.steps.length)main+=`<ol class="steps">${x.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join("")}</ol>`;
   else if(x.d)main+=`<p style="font-size:15.5px">${esc(x.d)}</p>`;
   else if(x.sp)main+=`<p style="font-size:15.5px">${esc(x.sp)}</p>`;
   if(rw)main+=`<div class="getline"><span>🎁</span><b>${esc(rw)}</b></div>`;
-  h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?`<a class="btn pri wide" style="margin-top:12px" href="#/map?i=${x.s}">🗺️ פתח במפה הגדולה</a>`:`<p class="anyw">🌍 אין לזה נקודה קבועה – ${x.g.includes("event")?"זה יכול לקרות בכל מקום במפה, תוך כדי נסיעה":"זה פזור בכמה מקומות במפה"}.</p>`}</div>`;
+  if(x.tips&&x.tips.length)main+=`<div class="tipline"><span>💡</span><span>${esc(x.tips[0])}</span></div>`;
+  if(x.src==="kg")main+=`<p class="dim" style="font-size:12px;margin:8px 0 0">זה תקציר – מדריך מלא שלב־אחרי־שלב למשימה הזאת יתווסף בקרוב.</p>`;
+  h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?"":`<p class="anyw">🌍 אין לזה נקודה קבועה – ${x.g.includes("event")?"זה יכול לקרות בכל מקום במפה, תוך כדי נסיעה":"זה פזור בכמה מקומות במפה"}.</p>`}</div>`;
   /* layer 2: details on demand */
   if(x.loc||x.sp||x.x!=null){let w="";
     if(x.x!=null)w+=`<p style="margin:0 0 6px">${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור משוער</span>`}</p>`;
     if(x.loc)w+=`<div class="path">${x.loc.map(p=>`<span>${bdi(p)}</span>`).join("")}${x.st?`<span>${bdi(x.st)}</span>`:""}</div>`;
     if(x.sp&&(x.steps||x.d))w+=`<p>${esc(x.sp)}</p>`;if(x.lk)w+=`<p class="muted">👀 איך זה נראה: ${esc(x.lk)}</p>`;
-    if(x.x!=null)w+=`<div class="minimap" id="mini"></div>`;
-    h+=fold("📍","איפה בדיוק",w,"fwhere");}
+    if(x.x!=null)w+=`<div class="minimap" id="mini"></div><a class="btn pri wide" style="margin-top:10px" href="#/map?i=${x.s}">🗺️ פתח במפה הגדולה – בדיוק כאן</a>`;
+    h+=fold("📍","איפה בדיוק",w,"fwhere").replace("<details class=\"fold\" id=\"fwhere\">","<details class=\"fold\" id=\"fwhere\" open>");}
   const wh=[];
   if(x.af)wh.push(["נפתח אחרי",x.af]);if(x.in)wh.push(["במהלך",x.in]);if(x.prev)wh.push(["משימה קודמת",x.prev]);
   if(x.bf)wh.push(["נעלם אחרי",x.bf]);if(x.dl&&x.dl!==x.bf)wh.push(["תעשה לפני",x.dl]);if(x.lim)wh.push(["אחרון אפשרי",x.lim]);
@@ -780,10 +787,17 @@ function showRoute(){
   map.fitBounds(L.latLngBounds(r.map(x=>[-x.y,x.x])).pad(.2));
   $("#mapbar").insertAdjacentHTML("afterbegin",`<button class="chip on" id="rclr">🧭 מסלול · ${r.length} ✕</button>`);$("#rclr").onclick=()=>{map.removeLayer(RLAYER);RLAYER=null;$("#rclr").remove()};
 }
+let FOCUS=null;
 function focusMap(q){
   if(q.route){setTimeout(showRoute,300);return}
   if(q.at){const [ax,ay]=q.at.split(",").map(Number);map.setView([-ay,ax],7);L.marker([-ay,ax]).addTo(map);return}
-  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],6);setTimeout(()=>preview(x),250)}}
+  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){
+    if(FOCUS){map.removeLayer(FOCUS);FOCUS=null}
+    const ll=[-x.y,x.x];map.invalidateSize();map.setView(ll,x.ex?6.5:5.5,{animate:false});
+    FOCUS=L.layerGroup().addTo(map);
+    if(!x.ex)L.circle(ll,{radius:6,color:"#c58cff",weight:2,dashArray:"6 6",fillOpacity:.1,interactive:false}).addTo(FOCUS);
+    L.marker(ll,{zIndexOffset:2000,icon:L.divIcon({className:"",html:`<div class="focuspin"><span></span>${pinHtml([x])}</div>`,iconSize:[30,38],iconAnchor:[15,36]})}).on("click",()=>preview(x)).addTo(FOCUS);
+    setTimeout(()=>{map.panTo(ll,{animate:false});map.panBy([0,Math.round(map.getSize().y*0.22)],{animate:false});preview(x)},250)}}
   if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],7.5);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
 }
 function drawMini(x,y,o){
@@ -835,7 +849,7 @@ function route(soft){
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
   const uc=$("#uncontent");if(uc)uc.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REVC.add(x.id);saveRev()}route(true)};
-  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null){const f=$("#fwhere");if(f)f.addEventListener("toggle",()=>{if(f.open&&!f._m){f._m=1;drawMini(x.x,x.y,x)}})}document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
+  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null){const f=$("#fwhere");if(f){if(f.open){f._m=1;setTimeout(()=>drawMini(x.x,x.y,x),0)}f.addEventListener("toggle",()=>{if(f.open&&!f._m){f._m=1;drawMini(x.x,x.y,x)}})}}document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
   if(!soft)$("#main").scrollTop=0;
