@@ -444,6 +444,7 @@ function pageSettings(){
   h+=`<div class="sec"><h2>ההתקדמות שלך</h2></div><div class="card cardlist">
    <div class="set"><div class="t"><b>קוד התקדמות</b><small>העתק כגיבוי, או הדבק קוד מהגרסה הקודמת של האתר. מיזוג – לא מוחק כלום.</small></div></div>
    <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" id="cpy">📋 העתק את הקוד שלי</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
+  h+=`<div class="card cardlist" style="margin-top:14px"><div class="set"><div class="t"><b>🔄 רענון האפליקציה</b><small>מוריד את הגרסה הכי חדשה. ההתקדמות שלך נשארת.</small></div><button class="btn sm pri" onclick="hardRefresh()">רענן</button></div></div>`;
   h+=`<p class="dim" style="font-size:12px;margin:18px 4px">מפה ונתוני מיקום: <a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0). אומנות המפה © Rockstar Games. אתר מעריצים, לא רשמי.</p>`;
   return h;
 }
@@ -719,5 +720,12 @@ if(freshNews.length){const a=$('#nav a[data-k="home"]');if(a){const d=document.c
 $("#back").onclick=()=>history.length>1?history.back():(location.hash="#/");
 route();
 document.body.classList.add("ready");setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>loadVec()),2500);
-if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker"in navigator&&location.protocol.startsWith("http")){
+  navigator.serviceWorker.register("sw.js").then(reg=>{
+    const ask=()=>{const b=document.createElement("button");b.className="upd";b.textContent="✨ יש גרסה חדשה – לחץ לרענון";b.onclick=()=>location.reload();document.body.appendChild(b)};
+    reg.addEventListener("updatefound",()=>{const w=reg.installing;w&&w.addEventListener("statechange",()=>{if(w.state==="activated"&&navigator.serviceWorker.controller)ask()})});
+    document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")reg.update().catch(()=>{})});
+  }).catch(()=>{});
+}
+window.hardRefresh=async()=>{try{const ks=await caches.keys();await Promise.all(ks.filter(k=>k!=="lr-tiles").map(k=>caches.delete(k)));const rs=await navigator.serviceWorker.getRegistrations();await Promise.all(rs.map(r=>r.unregister()))}catch(e){}location.reload()};
 })();
