@@ -358,3 +358,4 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .tip{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;margin-bottom:7px;border-radius:14px;background:linear-gradient(135deg,rgba(255,194,74,.10),rgba(255,61,139,.05)),var(--card);border:1px solid rgba(255,194,74,.25)}
 .tip .e{font-size:20px}.tip b{display:block;font-weight:800;line-height:1.4}.tip small{display:block;color:var(--tx2);margin-top:3px;line-height:1.45}.tip>div{flex:1}
 #map.loading::after{content:"טוען מפה…";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:800 15px var(--head);z-index:500;pointer-events:none}
+.tip.btn{background:linear-gradient(135deg,rgba(74,141,255,.12),rgba(197,140,255,.06)),var(--card);border-color:rgba(74,141,255,.3)}

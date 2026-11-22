@@ -3,6 +3,10 @@
  "news": [
   {
    "d": "2026-11-22",
+   "t": "🎮 נוספו 18 כפתורים סודיים שהמשחק לא מספר עליהם"
+  },
+  {
+   "d": "2026-11-22",
    "t": "💡 חדש: טיפים קטנים מתעדכנים כל יום (למשל: דלת הרכב כנשק)"
   },
   {
@@ -79,13 +83,6 @@
   {
    "d": "2026-11-22",
    "c": 1,
-   "t": "דלת הרכב היא נשק: כשאתה ליד דלת פתוחה, לחץ ⬜ (ריבוע) כדי לטרוק אותה על מי שעומד לידה.",
-   "x": "שימושי נגד מישהו שמנסה לגנוב לך את הרכב או בקטטה ליד רכב.",
-   "src": "קהילה"
-  },
-  {
-   "d": "2026-11-22",
-   "c": 1,
    "t": "תא המטען = ארון בגדים ונשקים: ברכב האישי אפשר להחליף בגדים מהבגאז' – הדרך הכי מהירה להוריד את סמל ה'בגדים' כשהמשטרה מחפשת אותך.",
    "src": "https://beebom.com/gta-6-car-trunk-mechanic-store-weapons-and-clothes/"
   },
@@ -106,6 +103,150 @@
    "c": 1,
    "t": "תיבת הדואר בבית: תשלומים על משימות מגיעים לשם. תבדוק אותה מדי פעם.",
    "src": "VGC"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "בעיטת דלת תוך כדי נהיגה: ⬜ ריבוע (Xbox: X)",
+   "x": "פותח את הדלת בכוח על מי שלידך – אופנוענים, הולכי רגל, רכב צמוד.",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "רדיו מהיר: לחיצה כפולה על ⬅ בחצים",
+   "x": "מדליק/מכבה רדיו בלי תפריט.",
+   "src": "https://kotaku.com/here-are-some-super-useful-control-shortcuts-gta-6-doesnt-tell-you-about-2000759100"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "אורות גבוהים: ⭕ עיגול (Xbox: B)",
+   "x": "לחיצה = אורות, לחיצה כפולה מחליפה בין רגיל/גבוה/כבוי.",
+   "src": "https://kotaku.com/here-are-some-super-useful-control-shortcuts-gta-6-doesnt-tell-you-about-2000759100"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "לצאת מהרכב בלי לכבות מנוע: לחיצה כפולה על △ משולש (Xbox: Y)",
+   "x": "הרכב והרדיו ממשיכים לעבוד – מעולה לבריחה מהירה.",
+   "src": "https://kotaku.com/here-are-some-super-useful-control-shortcuts-gta-6-doesnt-tell-you-about-2000759100"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "להתכופף מאחורי ההגה: להחזיק ⭕ עיגול בזמן נהיגה",
+   "x": "מסתתרים מיריות.",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "לקלל נהגים: R3 בזמן נהיגה",
+   "x": "Jason/Lucia צועקים על הנהג הקרוב.",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "תפריט רכב נסתר: להחזיק ⬅ בחצים ואז סטיק ימני למעלה",
+   "x": "חלונות, ווינקרים, אורות חירום, כיבוי מנוע, פתיחת בגאז' וגג נפתח.",
+   "src": "https://www.keengamer.com/articles/guides/gta-6-all-hidden-controls-and-features-ps5-xbox/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "ווינקרים: ⬅ או ➡ בחצים בזמן נהיגה",
+   "x": "",
+   "src": "https://www.pcgamer.com/games/grand-theft-auto/15-hidden-gta-6-controls-and-features-you-should-know-about/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "לדבר עם אנשים מתוך הרכב: להחזיק ⬆ בחצים",
+   "x": "אותן אפשרויות שיחה כמו ברגל (L2).",
+   "src": "https://www.pcgamer.com/games/grand-theft-auto/15-hidden-gta-6-controls-and-features-you-should-know-about/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "להחליף כתף בכיוון: ⬅ בחצים תוך כדי כיוון",
+   "x": "",
+   "src": "https://www.pcgamer.com/games/grand-theft-auto/15-hidden-gta-6-controls-and-features-you-should-know-about/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "כוונת/סקופ של הנשק: לכוון ואז R3",
+   "x": "בלי סקופ – מצמצם פיזור.",
+   "src": "https://gta6info.com/wiki/Controls"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "ניווט מהיר: להחזיק ⬇ בחצים",
+   "x": "פאנל של מקומות קרובים – מסמנים יעד בלי לפתוח מפה.",
+   "src": "https://gta6info.com/wiki/Controls"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "להישען על רכב/קיר: להחזיק ⭕ עיגול לידו",
+   "x": "",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "להישען על מעקה: להחזיק L3 ליד מעקה",
+   "x": "",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "להחליף יד לחפץ שמחזיקים: ⬅ בחצים",
+   "x": "",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "מבט מגוף ראשון + זום: L2 ואז R3 (ידיים ריקות), R2 לזום",
+   "x": "לבדוק פרטים ופנים של אנשים. R3 שוב ליציאה.",
+   "src": "https://rockstarintel.com/30-hidden-gta-6-controls-and-secret-mechanics-you-probably-missed/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "פוקוס: L3+R3 ביחד",
+   "x": "מאט את הזמן ומדגיש איומים ופריטים.",
+   "src": "https://www.keengamer.com/articles/guides/gta-6-all-hidden-controls-and-features-ps5-xbox/"
+  },
+  {
+   "d": "2026-11-22",
+   "c": 1,
+   "k": "btn",
+   "t": "לסמן אצבע משולשת: להחזיק L2 על מישהו ואז R1",
+   "x": "",
+   "src": "https://www.pcgamer.com/games/grand-theft-auto/15-hidden-gta-6-controls-and-features-you-should-know-about/"
   }
  ]
 }
