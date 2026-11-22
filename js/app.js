@@ -13,7 +13,7 @@ const [D,LD,EX]=await Promise.all([fetch("data/items.json").then(r=>r.json()),fe
 const NEWS=(EX.news||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 const TIPS2=(EX.tips||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 D.items.forEach(x=>x.ord=x.c*100000+x.pos);const IT=D.items.sort((a,b)=>a.ord-b.ord);
-if(window.LANG==="en"){IT.forEach(x=>{if(x.ne)x.n=x.ne;[["sp","sp_e"],["why","why_e"],["d","d_e"],["lk","lk_e"],["k","k_e"],["nt","nt_e"],["st","st_e"],["wn","wn_e"]].forEach(([a,b])=>{if(x[b])x[a]=x[b]});
+if(window.LANG==="en"){IT.forEach(x=>{if(x.ne)x.n=x.ne;if(x.src==="guide"&&!x.sp_e)delete x.sp;[["sp","sp_e"],["why","why_e"],["d","d_e"],["lk","lk_e"],["k","k_e"],["nt","nt_e"],["st","st_e"],["wn","wn_e"]].forEach(([a,b])=>{if(x[b])x[a]=x[b]});
   if(x.steps_e)x.steps=x.steps_e;else if(x.src){delete x.steps;delete x.tips;delete x.ch;delete x.rw}});
   for(const k in D.KT)D.KT[k]=[D.KT[k][1]||D.KT[k][0],D.KT[k][1]];}
 const BY={},BYS={};IT.forEach(x=>{BY[x.id]=x;BYS[x.s]=x});
@@ -362,7 +362,8 @@ function pageItem(slug){
   let main="";
   const intro=[];
   if(x.d&&x.steps&&x.steps.length)intro.push(esc(x.d));
-  if(x.loc&&x.steps)intro.push(`מתחילים ב־${bdi(x.loc.slice(-2).join(", "))}${x.sp?` – ${esc(x.sp)}`:""}.`);
+  if(x.src==="guide"&&x.sp)intro.push(`איפה מתחילים: ${esc(x.sp)}.`);
+  else if(x.loc&&x.steps)intro.push(`מתחילים ב־${bdi(x.loc.slice(-2).join(", "))}${x.sp?` – ${esc(x.sp)}`:""}.`);
   if(x.w&&WHO[x.w]&&x.w!=="B")intro.push(`משחקים בתור ${WHO[x.w]}.`);
   if(intro.length)main+=`<p class="intro">${intro.join(" ")}</p>`;
   if(x.steps&&x.steps.length)main+=`<ol class="steps">${x.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join("")}</ol>`;
