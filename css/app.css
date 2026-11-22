@@ -878,7 +878,7 @@ a{color:var(--acc)}
 /* glyph: tinted icon, no loud plates */
 .gl,.gl.coll,.gl.story,.gl.side{width:36px;height:36px;border-radius:10px;font-family:var(--head);font-size:15px;font-weight:700;border:0;
   background:color-mix(in srgb,var(--c,var(--acc)) 16%,transparent);color:var(--c,var(--acc))}
-.gl.story{--c:#f42385}.gl.side{--c:#e879f9}
+
 .gl.opt{background:transparent;border:1.5px solid color-mix(in srgb,#ff3d8f 60%,transparent);color:#ff3d8f}
 .gl .ic{width:18px;height:18px;stroke-width:2}
 .row.kid .gl{width:30px;height:30px;border-radius:9px;font-size:13px}
@@ -1038,3 +1038,102 @@ a,.linkb,.morel{color:#ff6fb0}
 .answer{border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
 .answer .ah .ic{color:var(--acc)}
 #nav a.on b{color:var(--acc)}
+
+/* =====================================================================
+   v6 · LEO identity system (from the logo)
+   ink #0d0418 · night #170a26 · sky #5b0f86 · magenta #b5128f
+   hot pink #f42385 (action) · coral #ff5a6e · sun #ffad66 (time) · lettering #fcd6e3
+   signature: the sunset ramp + the striped sun, used in a few fixed places
+   display: Secular One · text: IBM Plex Sans Hebrew
+   ===================================================================== */
+@font-face{font-family:"Secular";font-display:swap;src:url(../fonts/secular-one-hebrew-400-normal.woff2) format("woff2");unicode-range:U+0590-05FF,U+200C-2010,U+20AA,U+25CC,U+FB1D-FB4F}
+@font-face{font-family:"Secular";font-display:swap;src:url(../fonts/secular-one-latin-400-normal.woff2) format("woff2");unicode-range:U+0000-00FF,U+2000-206F,U+20AC,U+2122}
+:root{
+  --bg:#0d0418;--bg2:#140822;--card:#1a0c2c;--card2:#24123a;--sep:rgba(252,214,227,.08);--line:rgba(252,214,227,.1);
+  --tx:#fff2f7;--tx2:#d9bcd4;--tx3:#947aa0;
+  --sky:#5b0f86;--magenta:#b5128f;--acc:#f42385;--coral:#ff5a6e;--sun:#ffad66;--lettering:#fcd6e3;--ink:#0d0418;
+  --warn:var(--sun);--peach:var(--sun);
+  --ramp:linear-gradient(90deg,#ffb066,#ff5a6e 30%,#f42385 55%,#b5128f 78%,#5b0f86);
+  --rampv:linear-gradient(180deg,#5b0f86 0%,#b5128f 38%,#f42385 66%,#ff5a6e 84%,#ffb066 100%);
+  --disp:"Secular","Plex",sans-serif;
+}
+html,body{background:var(--bg)}
+body{background:radial-gradient(90% 40% at 50% -8%,rgba(181,18,143,.38),transparent 70%),radial-gradient(60% 30% at 85% 0%,rgba(255,90,110,.18),transparent 70%),var(--bg) fixed}
+
+/* header with a striped horizon under it */
+#top{background:rgba(13,4,24,.78);border-bottom:0}
+#top::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:var(--ramp);
+  -webkit-mask:linear-gradient(90deg,#000 0 100%);opacity:.95}
+#top .brand span{font-family:var(--disp);font-size:22px;font-weight:400;color:var(--lettering);letter-spacing:0}
+#top .brand small{font-family:var(--head)}
+#top .brand img{width:34px;height:34px;border-radius:10px;box-shadow:0 4px 14px rgba(244,35,133,.35)}
+.iconbtn{background:rgba(252,214,227,.07)}
+
+/* display type */
+.ihead h1,.sec h2,.chead .cn,.pcard h3,.answer .ah b,.now .nt b,.feat b{font-family:var(--disp);font-weight:400;letter-spacing:0}
+.ihead h1{font-size:34px;line-height:1.05;color:var(--lettering)}
+.sec h2{font-size:23px;color:var(--lettering);display:flex;align-items:center;gap:9px}
+.sec h2::before,.grp.mk::before{content:"";width:18px;height:18px;border-radius:50%;flex:none;background:linear-gradient(180deg,#ffb066,#ff5a6e 55%,#f42385);
+  -webkit-mask:linear-gradient(180deg,#000 0 52%,transparent 52% 60%,#000 60% 72%,transparent 72% 80%,#000 80%);mask:linear-gradient(180deg,#000 0 52%,transparent 52% 60%,#000 60% 72%,transparent 72% 80%,#000 80%)}
+.grp{font-family:var(--head);font-weight:600;color:var(--tx3);font-size:13px}
+
+/* glyphs: solid brand-ramp plates, ink icons — lively but in-family */
+.gl,.gl.coll,.gl.story,.gl.side{background:var(--c,var(--acc));color:var(--ink);border-radius:11px}
+.gl.story{--c:#f42385;color:#fff}.gl.side{--c:#d34be0;color:#fff}
+.gl .ic{stroke-width:2.2}
+.gl.opt{background:transparent;border:2px solid #f42385;color:#f42385}
+
+/* rows & groups */
+.group,.chap.open,.glist{background:var(--card);border:1px solid var(--line)}
+.chap:not(.open) .chead{background:var(--card);border:1px solid var(--line)}
+.row{background:var(--card)}
+.chead .cn{font-size:21px;color:var(--lettering)}
+.chead .bar,.hwhere .chb{height:4px;background:rgba(252,214,227,.1)}
+.chead .bar i,.hwhere .chb i{background:var(--ramp)}
+.chk.on{background:var(--acc);border-color:var(--acc)}
+
+/* buttons */
+.btn.pri,.bigchk{background:var(--acc);color:#fff;box-shadow:0 6px 18px -6px rgba(244,35,133,.7)}
+.bigchk.on{background:var(--card2);color:var(--tx2);box-shadow:none}
+
+/* home hero: the real map, lit by the sunset */
+.hwhere .chn b{font-family:var(--disp);font-weight:400;font-size:17px;color:var(--lettering)}
+.now{border:1px solid var(--line);background:var(--card);box-shadow:0 18px 40px -18px rgba(244,35,133,.45)}
+.now .nmap{height:170px}
+.now .nmap::after{background:linear-gradient(180deg,rgba(91,15,134,.25) 0%,rgba(181,18,143,.12) 45%,var(--card) 100%)}
+.now .nmap::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(0deg,transparent 55%,rgba(13,4,24,.35))}
+.now .npin{top:66px;z-index:2;width:20px;height:20px;margin-left:-10px;box-shadow:0 0 0 7px rgba(244,35,133,.28),0 0 24px 6px rgba(244,35,133,.45)}
+.now .nk{color:var(--sun);font-weight:600;letter-spacing:0}
+.now .nt b{font-size:31px;line-height:1.05;color:var(--lettering)}
+.now .ngo{width:auto;height:auto;padding:9px 16px;border-radius:999px;gap:4px;display:inline-flex;align-items:center;font-weight:600;font-size:14px;box-shadow:0 6px 18px -6px rgba(244,35,133,.8)}
+.now .ngo::before{content:"יאללה"}
+.tag.soon,.tag.ponr{color:var(--sun);background:rgba(255,173,102,.13)}
+
+/* hub banner — one sunset moment per screen */
+.feat{position:relative;display:block;overflow:hidden;border-radius:20px;padding:18px 18px 16px;margin:6px 0 4px;background:var(--rampv);color:#fff;isolation:isolate;min-height:118px}
+.feat::before{content:"";position:absolute;z-index:-1;width:150px;height:150px;border-radius:50%;inset-inline-end:-30px;bottom:-54px;background:linear-gradient(180deg,#ffd29a,#ffad66 45%,#ff5a6e);
+  -webkit-mask:linear-gradient(180deg,#000 0 46%,transparent 46% 53%,#000 53% 64%,transparent 64% 71%,#000 71% 80%,transparent 80% 86%,#000 86%);mask:linear-gradient(180deg,#000 0 46%,transparent 46% 53%,#000 53% 64%,transparent 64% 71%,#000 71% 80%,transparent 80% 86%,#000 86%)}
+.feat .palm{position:absolute;z-index:-1;inset-inline-end:8px;bottom:-6px;width:92px;height:130px;color:#0d0418}
+.feat small{display:block;font-size:12.5px;font-weight:600;color:#ffe3ee;opacity:.9}
+.feat b{display:block;font-size:28px;line-height:1.05;margin:4px 0 6px;color:#fff;max-width:65%}
+.feat span{display:block;font-size:13.5px;color:#ffe3ee;max-width:62%;line-height:1.4}
+.glist .gi{color:#fff}
+
+/* tabs: selected one gets the ramp underline */
+.tab.on{background:transparent;color:var(--lettering);box-shadow:inset 0 -3px 0 0 #f42385;border-radius:0}
+.tab{border-radius:0!important;padding:8px 10px!important}
+.fbtn,.fbtn.on{background:var(--card);border:1px solid var(--line)}
+
+/* nav: active lens glows in brand pink */
+#nav a.on b{color:#fff}
+#nav .lens{background:linear-gradient(180deg,rgba(244,35,133,.55),rgba(181,18,143,.45))!important;box-shadow:0 4px 18px rgba(244,35,133,.45),inset 0 1px 0 rgba(255,255,255,.35)!important}
+
+/* answers / search keep the brand */
+.answer{background:var(--card);border:1px solid rgba(244,35,133,.4)}
+.answer .ah b{color:var(--lettering);font-size:22px}
+.search,.search.big,.search.ask{background:var(--card);border:1px solid var(--line)}
+#sheet{background:#170a26}
+.now .nmap{filter:saturate(1.25)}
+.now .nmap::after{background:linear-gradient(180deg,transparent 0%,rgba(26,12,44,.15) 50%,var(--card) 100%)}
+.glist .gi{color:var(--ink)}
+.glist .gi[style*="#6a1aa0"],.glist .gi[style*="#b5128f"],.glist .gi[style*="#d0148b"],.glist .gi[style*="#f42385"]{color:#fff}

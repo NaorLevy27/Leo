@@ -25,7 +25,7 @@ const STORY=IT.filter(x=>x.story);
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
-const CATC={story:"#f42385",side:"#e879f9",op:"#ff8a4c",collect:"#ffc14d",event:"#ff9ec4",money:"#ffd27a",vehicle:"#c792ff",weapon:"#fc5072",egg:"#ffb3a1",tip:"#ffc14d"};
+const CATC={story:"#f42385",side:"#d34be0",op:"#ff7a5c",collect:"#ffb35c",event:"#ff8fc0",money:"#ffd27a",vehicle:"#b58cff",weapon:"#ff5a6e",egg:"#ffc2b0",tip:"#ffb35c"};
 const CI={story:"book-open",side:"drama",op:"briefcase",collect:"layers",event:"dice-5",money:"banknote",vehicle:"car",weapon:"crosshair",egg:"egg",tip:"lightbulb"};
 const KTI={card:"layers",mag:"book-marked",book:"book-open",med:"sun",dive:"waves",flam:"bird",drone:"plane",wink:"camera",other:"sparkles"};
 const EI={"📲":"smartphone","🧭":"route","🎯":"target","🎁":"gift","💡":"lightbulb","📍":"map-pin","🕒":"clock","🅿️":"square-parking","▶":"play","🔗":"layers","💬":"message-circle","📝":"book-open","⌨️":"gamepad-2","⚠":"triangle-alert","🎮":"gamepad-2","🗺️":"map","🔑":"key-round","🚨":"siren","💵":"banknote","💾":"save","👁️":"scan-eye","✨":"sparkles","🌍":"navigation","🆕":"sparkles","⏳":"hourglass","🙈":"eye-off","👤":"user-round","🤝":"share-2","🌐":"languages","🕹️":"joystick","📖":"book-open","🎭":"drama","💼":"briefcase","🃏":"layers","🎲":"dice-5","🚗":"car","🔫":"crosshair","🥚":"egg","⭐":"star","🏘️":"house","🛣️":"route","💀":"skull","🔐":"lock"};
@@ -661,23 +661,23 @@ const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k
 /* hub: one colorful tile per small topic */
 const HUB=[
  ["#/news","sparkles","מה חדש","התגליות האחרונות","#f42385","t"],
- ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#a7098e","t"],
- ["#/cheats","joystick","צ'יטים","כל הקודים","#ff8a4c","t"],
- ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#f2a03d","t"],
- ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#fc5072"],
- ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#d0148b"],
- ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#8e0b8c"],
- ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#e8178e"],
- ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#ff8a4c"],
- ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#c44e6f"],
- ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#9c1371"],
- ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#6e5a68"]];
+ ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#ff7a5c","t"],
+ ["#/cheats","joystick","צ'יטים","כל הקודים","#b5128f","t"],
+ ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#ffad66","t"],
+ ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#6a1aa0"],
+ ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#ff5a6e"],
+ ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#d0148b"],
+ ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#e8905a"],
+ ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#f42385"],
+ ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#ff7a5c"],
+ ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#b5128f"],
+ ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#ffad66"]];
 const glist=(arr,hf)=>`<div class="glist">`+arr.map(t=>`<a href="${hf(t)}"><span class="gi" style="--c:${t[4]}">${ic(t[1])}</span><span class="t"><b>${t[2]}</b><small>${t[3]}</small></span><span class="chv">${ic("chevron-left")}</span></a>`).join("")+`</div>`;
 const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72","#ff9b78","#ffb37f","#ffc58a"];
 const skyAt=(i,n)=>SKY[Math.round(i/(Math.max(1,n-1))*(SKY.length-1))];
 const tileSky=list=>list.map((t,i)=>{const c=skyAt(i,list.length);return [...t.slice(0,4),c,t[5],i/(list.length-1)<.42]});
 const tileHtml=(href,t)=>(t=[...t],t[4]=t[4].startsWith("--")?`var(${t[4]})`:t[4],t)[5]?`<a class="tile big${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><span class="tt"><b>${t[2]}</b><small>${t[3]}</small></span></a>`:`<a class="tile${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><b>${t[2]}</b><small>${t[3]}</small></a>`;
-const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="glists${norm(AQ).length>=3?" dimmed":""}"><div class="grp">כלים</div>${glist(HUB.filter(t=>t[5]),t=>t[0])}<div class="grp">מדריכים</div>${glist(HUB.filter(t=>!t[5]),t=>t[0])}</div>`;
+const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="glists${norm(AQ).length>=3?" dimmed":""}"><a class="feat" href="#/news"><svg class="palm" viewBox="0 0 150 210" aria-hidden="true"><path fill="currentColor" d="M112 210C104 160 92 110 80 62l6-2c12 48 26 98 36 150zM82 58C60 40 30 38 4 52c26-8 52-4 78 10zM82 58C70 30 48 14 20 12c26 8 46 24 60 50zM82 58c8-30 26-46 54-50-24 12-40 28-52 54zM82 58c26-14 50-12 68 4-22-10-46-8-66 2zM82 60c-16 6-34 26-42 52 14-24 30-38 44-48zM84 60c20 6 36 24 44 48-14-20-28-34-44-44z"/></svg><small>מתעדכן כל יום</small><b>מה חדש ב־Leonida</b><span>${esc((NEWS[0]||{}).t||"תגליות, טיפים ומדריכים חדשים")}</span></a><div class="grp">כלים</div>${glist(HUB.filter(t=>t[5]&&t[0]!=="#/news"),t=>t[0])}<div class="grp">מדריכים</div>${glist(HUB.filter(t=>!t[5]),t=>t[0])}</div>`;
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
@@ -699,13 +699,13 @@ function gateGuide(){
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
- ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#d0148b",1],
- ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#f42385",1],
- ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#e8178e",1],
- ["map","map","המפה","מה מופיע עליה","#c44e6f"],
- ["share","share-2","שתף עם חברים","שלח את Leo","#ff8a4c"],
- ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#6e5a68"],
- ["lang","languages","English / עברית","Language","#a7098e"]];
+ ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#f42385",1],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#ff7a5c",1],
+ ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#b5128f",1],
+ ["map","map","המפה","מה מופיע עליה","#ffad66"],
+ ["share","share-2","שתף עם חברים","שלח את Leo","#6a1aa0"],
+ ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#ff5a6e"],
+ ["lang","languages","English / עברית","Language","#d0148b"]];
 function pageSettings(sec){
   if(!sec)return `<div class="ihead"><h1>אני</h1></div>${glist(ME.filter(t=>t[5]),t=>"#/settings/"+t[0])}<div style="height:14px"></div>${glist(ME.filter(t=>!t[5]),t=>"#/settings/"+t[0])}`;
   const T=ME.find(t=>t[0]===sec)||ME[0];
