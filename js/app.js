@@ -52,7 +52,8 @@ function _locked(x){
   const a=ref(x.af);if(a&&a.story&&!done(a)&&n&&a.ord>n.ord)return true;
   return false;
 }
-function title(x){return locked(x)?(x.story?`🔒 משימת סיפור בהמשך`:`🔒 נפתח בהמשך (פרק ${x.c})`):x.n}
+const REV=new Set();
+function title(x){return locked(x)&&!REV.has(x.id)?(x.story?`🔒 משימת סיפור (שם מוסתר)`:`🔒 שם מוסתר · פרק ${x.c}`):x.n}
 function missable(x){return !!x.m}
 function timed(x){return !!x.soon}
 function untilName(x){const r=ref(x.bf)||ref(x.dl)||ref(x.lim);return r&&!locked(r)?r.n:null}
@@ -61,16 +62,16 @@ function nextPonr(){const n=nextStory();if(!n)return null;return STORY.find(x=>x
 
 function glyph(x,extra=""){
   const c=mainCat(x),d=done(x)?" done":"",t=timed(x)?" time":missable(x)?" miss":"",ms=avail(x)==="missed"?" missed":"";
-  const lt=locked(x)?"":(x.w&&x.w.length===1?x.w:"");
+  const lt=x.w&&x.w.length===1?x.w:"";
   if(c==="story")return `<span class="gl ${x.opt?"opt":"story"}${t}${d}${ms}${extra}">${esc(lt)}</span>`;
   if(c==="side")return `<span class="gl side${t}${d}${ms}${extra}">${esc(lt)}</span>`;
-  const e=locked(x)?"🔒":(x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•");
+  const e=x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•";
   return `<span class="gl coll${t}${d}${ms}${extra}" style="--c:${CATC[c]||"#ffc23c"}">${e}</span>`;
 }
 function tags(x,max=3){
   const a=[],av=avail(x);
   if(av==="missed")a.push(`<span class="tag gone">❌ פוספס</span>`);
-  if(av==="later"&&!x.story){const r=ref(x.af);a.push(`<span class="tag">🔒 אחרי ${locked(x)?"משימה בהמשך":bdi(r?r.n:x.af)}</span>`)}
+  if(av==="later"&&!x.story){const r=ref(x.af);a.push(`<span class="tag">🔒 אחרי ${r?bdi(title(r)):bdi(x.af)}</span>`)}
   if(x.isNew)a.push(`<span class="tag ex">🆕 חדש</span>`);
   if(x.ponr)a.push(`<span class="tag ponr">⚠ אל־חזור</span>`);
   if(av!=="missed"&&av!=="done"){if(timed(x))a.push(`<span class="tag soon">⏳ עלול להיגמר בקרוב</span>`);else if(missable(x)){const u=untilName(x);a.push(`<span class="tag miss">❗ אפשר לפספס${u?` · עד ${bdi(u)}`:""}</span>`)}else if(forever(x))a.push(`<span class="tag ok">♾ אפשר גם בהמשך</span>`)}
@@ -80,8 +81,8 @@ function tags(x,max=3){
 function sub(x){
   const parts=[`פרק ${x.c}`];
   const c=mainCat(x);if(c!=="story")parts.push(CAT[c]?CAT[c][0]:c);
-  if(x.w&&WHO[x.w]&&!locked(x))parts.push(WHO[x.w]);
-  if(!locked(x)&&x.loc)parts.push(x.loc[x.loc.length-1].split(" – ")[0]);
+  if(x.w&&WHO[x.w])parts.push(WHO[x.w]);
+  if(x.loc)parts.push(x.loc[x.loc.length-1].split(" – ")[0]);
   return parts.join(" · ");
 }
 function row(x,cls=""){
@@ -142,7 +143,7 @@ function pageHome(){
   if(n)h+=`<a class="cont big" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`;
   else h+=`<div class="cont big"><div class="t"><b>סיימת את הסיפור! 🎉</b><span class="muted">נשאר לך לאסוף דברים במפה</span></div></div>`;
   h+=`</section>`;
-  if(pr&&!S.casual&&toPonr<=4)h+=`<div class="blk warn"><h3><span class="e">⚠</span>${toPonr===0?"המשימה הבאה":"עוד "+toPonr+" משימות עד"} נקודת אל־חזור</h3><p class="muted" style="margin:0">${bdi(pr.n)} סוגרת דברים לתמיד. סיים קודם את מה שלמטה.</p></div>`;
+  if(pr&&!S.casual&&toPonr<=4)h+=`<div class="blk warn"><h3><span class="e">⚠</span>${toPonr===0?"המשימה הבאה":"עוד "+toPonr+" משימות עד"} נקודת אל־חזור</h3><p class="muted" style="margin:0">${bdi(title(pr))} סוגרת דברים לתמיד. סיים קודם את מה שלמטה.</p></div>`;
   if(!S.casual){
     if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2>${soon.length>4?`<a href="#/list?miss=1">עוד ${soon.length-4}</a>`:""}</div>`+soon.slice(0,4).map(row).join("")}
     else h+=`<div class="blk okb"><h3><span class="e">✅</span>אין כרגע משהו שעומד להיסגר</h3><p class="muted" style="margin:0">אפשר להמשיך בסיפור בראש שקט.</p></div>`;
@@ -172,7 +173,7 @@ function passes(x){
   if(LF.avail==="now"&&av!=="now")return false;
   if(LF.miss&&!((missable(x)||timed(x))&&av==="now"))return false;
   const qq=LF.q.trim().toLowerCase();
-  if(qq&&(locked(x)||!((x.n+" "+x.ne+" "+(x.sp||"")+" "+(x.loc||[]).join(" ")).toLowerCase().includes(qq))))return false;
+  if(qq&&!(((locked(x)?"":x.n+" "+x.ne+" ")+(x.sp||"")+" "+(x.loc||[]).join(" ")).toLowerCase().includes(qq)))return false;
   return true;
 }
 function nFilters(){return (LF.ch?1:0)+(LF.stat?1:0)+(LF.avail?1:0)+(LF.miss?1:0)+Object.values(LF.ex).filter(Boolean).length+Object.values(LF.kt).filter(Boolean).length}
@@ -273,10 +274,9 @@ function related(x){
 }
 function pageItem(slug){
   const x=BYS[slug];if(!x)return `<div class="empty">לא נמצא</div>`;
-  if(locked(x))return `<div class="ihead"><div class="meta"><span class="tag">פרק ${x.c}</span></div><h1>🔒 מוסתר כדי לא לספיילר</h1><p class="muted">זה תוכן מפרק ${x.c}, ואתה עכשיו בפרק ${curCh()}.</p><button class="btn pri wide" id="unspoil">הצג בכל זאת</button><p class="dim" style="font-size:12.5px;margin-top:10px">אפשר לכבות את ההסתרה בהגדרות.</p></div>`;
   const c=mainCat(x);
   let h=`<div class="ihead"><div class="meta">${glyph(x)}<span class="tag">${CAT[c]?CAT[c][1]+" "+CAT[c][0]:""}</span><span class="tag">פרק ${x.c}</span>${x.w&&WHO[x.w]?`<span class="tag">👤 ${WHO[x.w]}</span>`:""}${tags(x,4)}</div>
-  <h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}
+  ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1><button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
   <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
   /* what you get */
   const rw=x.rw||x.why;
@@ -286,7 +286,7 @@ function pageItem(slug){
   const wh=[];
   if(x.af)wh.push(["נפתח אחרי",x.af]);if(x.in)wh.push(["במהלך",x.in]);if(x.prev)wh.push(["משימה קודמת",x.prev]);
   if(x.bf)wh.push(["נעלם אחרי",x.bf]);if(x.dl&&x.dl!==x.bf)wh.push(["תעשה לפני",x.dl]);if(x.lim)wh.push(["אחרון אפשרי",x.lim]);
-  const linkM=n=>{const y=IT.find(z=>z.ne===n);return y?`<a href="#/i/${y.s}">${bdi(y.n)}</a>`:bdi(n)};
+  const linkM=n=>{const y=IT.find(z=>z.ne===n);return y?`<a href="#/i/${y.s}">${bdi(title(y))}</a>`:bdi(n)};
   h+=`<div class="blk"><h3><span class="e">🕒</span>מתי לעשות</h3>`;
   if(x.ponr)h+=`<p class="tag ponr" style="display:block;padding:8px 10px;margin-bottom:8px">⚠ נקודת אל־חזור – שמור לפני ותסיים קודם את מה שמסומן ⏳ בפרק</p>`;
   const av=avail(x);
@@ -396,7 +396,7 @@ function pageSettings(){
   let h=`<div class="sec" style="margin-top:4px"><h2>⚙ הגדרות</h2></div>`;
   h+=`<div class="card cardlist">${accountBlock()}</div>`;
   h+=`<div class="sec"><h2>תצוגה</h2></div><div class="card cardlist">`+
-    sw("spoil","בלי ספוילרים","מסתיר שמות ופרטים של משימות מפרקים שעוד לא הגעת אליהם.")+
+    sw("spoil","בלי ספוילרים","מסתיר רק את השמות של משימות ודברים שעוד לא הגעת אליהם. התיאור, השלבים והמיקום נשארים.")+
     sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;
   h+=`<div class="sec"><h2>מפה</h2></div><div class="card cardlist">`+
     sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו במפה.")+
@@ -532,7 +532,6 @@ function itemShown(x){
   if(x.x==null||x.tip)return false;
   if(S.hideDone&&done(x))return false;
   if(S.upTo&&x.c>curCh())return false;
-  if(locked(x))return false;
   if(S.hideDone&&avail(x)==="missed")return false;
   if(S.exactOnly&&!x.ex)return false;
   const on=Object.keys(ML.cats).filter(k=>ML.cats[k]);
@@ -543,7 +542,7 @@ function pinHtml(arr){
   const x=arr[0];const cnt=arr.length>1?`<span class="cnt">${arr.length}</span>`:"";
   if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}<span class="pl">${esc(x.n)}</span></div>`}
   const nm=arr.length>1?`${title(x)} +${arr.length-1}`:title(x);const c=mainCat(x);
-  const ic=locked(x)?"🔒":(c==="story"||c==="side")?(x.w&&x.w.length===1?x.w:"★"):(x.t&&KTE[x.t]||CAT[c][1]);
+  const ic=(c==="story"||c==="side")?(x.w&&x.w.length===1?x.w:"★"):(x.t&&KTE[x.t]||CAT[c][1]);
   return `<div class="tpin${done(x)?" done":""}${avail(x)==="missed"?" gone":""}${x.ex?"":" ap"}${timed(x)?" soon":missable(x)?" miss":""}" style="--c:${CATC[c]||"#ffc23c"}"><i><b>${esc(ic)}</b></i>${cnt}<span class="pl">${esc(nm)}</span></div>`;
 }
 function drawPins(){
@@ -571,7 +570,7 @@ function drawPins(){
 }
 function previewHtml(o){
   if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);return `<div class="prev"><div class="meta" style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">${esc(k.i||"")} ${esc(k.n||o.k)}</span>${o.a?`<span class="tag">${bdi(o.a)}</span>`:""}</div><h3>${bdi(o.n)}</h3>${o.d?`<p class="muted ltr" style="text-align:left;font-size:13.5px">${esc(o.d.slice(0,220))}${o.d.length>220?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn${d?" ":""}" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
-  const x=o;const lk=locked(x);
+  const x=o;const lk=false;
   return `<div class="prev"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${glyph(x)}<span class="tag">פרק ${x.c}</span>${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור</span>`}${lk?"":tags(x,2)}</div><h3>${bdi(title(x))}</h3>${!lk&&x.sp?`<p class="muted" style="font-size:14px">${esc(x.sp)}</p>`:""}${!lk&&(x.rw||x.why)?`<p style="font-size:14px">🎁 ${esc(x.rw||x.why)}</p>`:""}<div class="acts"><a class="btn pri" href="#/i/${x.s}">לעמוד המשימה ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}</div></div>`;
 }
 function preview(o){openSheet(previewHtml(o))}
@@ -664,8 +663,8 @@ function route(soft){
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="guides"){const hb=document.querySelector('a[href="#hb"]');if(hb)hb.onclick=e=>{e.preventDefault();const t=$("#hbx");t&&t.scrollIntoView({behavior:"smooth"})}}
   if(page==="settings")bindSettings();
-  const un=$("#unspoil");if(un)un.onclick=()=>{Store.setS("spoil",false);route(true)};
-  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null&&!locked(x))setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x&&!locked(x)?x.n+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
+  const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);MEMO.clear()}route(true)};
+  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null)setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
   if(!soft)scrollTo(0,0);
