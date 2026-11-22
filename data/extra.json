@@ -1,1 +1,53 @@
-{"updated":"2026-11-22","news":[{"d":"2026-11-22","t":"האתר החדש עלה: עמוד לכל משימה, מפה מדויקת, מדריכים ותגובות"}],"items":[]}
+{
+ "updated": "2026-11-22",
+ "news": [
+  {
+   "d": "2026-11-22",
+   "t": "🆕 נמצא: הבית מהתמונה הנסתרת של San Andreas, עם מוסך של חובב קונספירציות ב־Belville",
+   "s": "c2-belville-conspiracy-garage"
+  },
+  {
+   "d": "2026-11-22",
+   "t": "האתר החדש עלה: עמוד לכל משימה, מפה מדויקת, מדריכים ותגובות"
+  }
+ ],
+ "items": [
+  {
+   "id": "c2-The conspiracy theorist's garage (Belville)",
+   "s": "c2-belville-conspiracy-garage",
+   "c": 2,
+   "g": [
+    "egg"
+   ],
+   "w": "B",
+   "n": "המוסך של חובב הקונספירציות ב־Belville",
+   "ne": "The conspiracy theorist's garage (Belville)",
+   "loc": [
+    "Leonard County",
+    "Belville",
+    "בית עם מוסך"
+   ],
+   "sp": "בית עם מוסך, עצי דקל וצמחייה, ב־Belville (מחוז Leonard). כתובת מדויקת עוד לא פורסמה, אז חפש בית שנראה כמו תמונת ה־'GTA 6' שהתגלתה ב־San Andreas ב־2021.",
+   "lk": "בית חד־קומתי עם מוסך סגור ועצי דקל מקדימה",
+   "why": "ביצת פסחא: ההוכחה שהתמונה הנסתרת מ־San Andreas Definitive Edition הייתה באמת GTA 6, ומחבוא עם רמזים על \"J\" ו־\"L\"",
+   "steps": [
+    "נוסעים ל־Belville במחוז Leonard",
+    "מחפשים את הבית עם המוסך ועצי הדקל",
+    "פורצים למוסך",
+    "קוראים את הפתקים על הקיר: הבחור מנסה לברוח מ־Leonida ולא מצליח, ומזכיר את J ואת L"
+   ],
+   "tips": [
+    "בדוק גם את הגרף על הקיר ואת הרמזים למספר 6",
+    "כשיתפרסם מיקום מדויק נעדכן את הסיכה"
+   ],
+   "pers": 1,
+   "x": 474.8,
+   "y": 423.0,
+   "ex": 0,
+   "q": "GTA 6 Belville conspiracy garage San Andreas screenshot house",
+   "src_urls": [
+    "https://www.dexerto.com/gta/gta-6-screenshot-hidden-in-san-andreas-back-in-2021-was-real-and-the-house-has-a-dark-secret-3429837/"
+   ]
+  }
+ ]
+}
