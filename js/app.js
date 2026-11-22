@@ -462,10 +462,15 @@ function buildVecIndex(){
   return VIDX={grid,CELL};
 }
 const VecTiles=L.GridLayer.extend({
-  createTile(c){
-    const t=document.createElement("canvas");const dpr=Math.min(window.devicePixelRatio||1,2.5);
-    t.width=t.height=256*dpr;const ctx=t.getContext("2d");
-    const sc=Math.pow(2,c.z),x0=c.x*256/sc,y0=c.y*256/sc,span=256/sc;
+  createTile(c,doneCb){
+    const t=document.createElement("canvas");t.width=t.height=1;
+    const q=VecTiles.q||(VecTiles.q=[]);q.push(()=>{if(!this._map){return}this._draw(t,c);doneCb(null,t)});
+    if(!VecTiles.busy){VecTiles.busy=true;const pump=()=>{const st=performance.now();while(q.length&&performance.now()-st<10)q.shift()();if(q.length)requestAnimationFrame(pump);else VecTiles.busy=false};requestAnimationFrame(pump)}
+    return t;
+  },
+  _draw(t,c){const dpr=Math.min(window.devicePixelRatio||1,2);
+    const TS=this.options.tileSize;t.width=t.height=TS*dpr;const ctx=t.getContext("2d");
+    const sc=Math.pow(2,c.z),x0=c.x*TS/sc,y0=c.y*TS/sc,span=TS/sc;
     const {grid,CELL}=buildVecIndex();
     const seen=new Set(),list=[];
     for(let gx=Math.floor(x0/CELL);gx<=Math.floor((x0+span)/CELL);gx++)for(let gy=Math.floor(y0/CELL);gy<=Math.floor((y0+span)/CELL);gy++){const cell=grid.get(gx+","+gy);if(cell)for(const f of cell)if(!seen.has(f)){seen.add(f);list.push(f)}}
@@ -473,21 +478,20 @@ const VecTiles=L.GridLayer.extend({
     ctx.setTransform(dpr*sc,0,0,dpr*sc,-x0*dpr*sc,-y0*dpr*sc);
     ctx.lineCap="round";ctx.lineJoin="round";
     const px=v=>v/sc; // pixel width -> map units
-    const rw=k=>Math.max(c.z<4?.7:1.1,RSTY[k][2]*Math.pow(2,c.z-4.6));
+    const zz=c.z;const rw=k=>Math.max(zz<4?.7:1.1,RSTY[k][2]*Math.pow(2,zz-4.6));
     const roads=[];
     for(const f of list){
       if(f.kind==="fill"){ctx.fillStyle=LANDC;ctx.fill(f.p)}
-      else if(VSTY[f.kind]){if(f.kind==="building"&&c.z<4)continue;ctx.fillStyle=VSTY[f.kind];ctx.fill(f.p);if(f.kind==="building"&&c.z>=6){ctx.strokeStyle="#767b82";ctx.lineWidth=px(.8);ctx.stroke(f.p)}}
+      else if(VSTY[f.kind]){if(f.kind==="building"&&zz<4)continue;ctx.fillStyle=VSTY[f.kind];ctx.fill(f.p);if(f.kind==="building"&&zz>=6){ctx.strokeStyle="#767b82";ctx.lineWidth=px(.8);ctx.stroke(f.p)}}
       else if(f.kind==="rail"){ctx.strokeStyle="#9aa0ad";ctx.lineWidth=px(1.4);ctx.setLineDash([px(5),px(4)]);ctx.stroke(f.p);ctx.setLineDash([])}
-      else{if(c.z<4&&f.kind==="minor"||c.z<3&&f.kind==="street")continue;roads.push(f)}
+      else{if(zz<4&&f.kind==="minor"||zz<3&&f.kind==="street")continue;roads.push(f)}
     }
     for(const f of roads){const w=rw(f.kind);ctx.strokeStyle=RSTY[f.kind][1];ctx.lineWidth=px(w+Math.max(1.5,w*.3));ctx.stroke(f.p)}
     for(const f of roads){ctx.strokeStyle=RSTY[f.kind][0];ctx.lineWidth=px(rw(f.kind));ctx.stroke(f.p)}
-    return t;
   }
 });
 function addVector(m,opts={}){
-  const layer=new VecTiles({tileSize:256,minZoom:-1,maxZoom:12,minNativeZoom:1,maxNativeZoom:12,noWrap:true,bounds:BOUNDS,updateWhenZooming:false,keepBuffer:3,pane:"overlayPane"});
+  const layer=new VecTiles({tileSize:512,zoomOffset:0,minZoom:-1,maxZoom:12,minNativeZoom:0,maxNativeZoom:11,noWrap:true,bounds:BOUNDS,updateWhenZooming:false,updateWhenIdle:true,keepBuffer:4,pane:"overlayPane"});
   const pane=m.getPane("vec")||m.createPane("vec");pane.style.zIndex=250;layer.options.pane="vec";
   layer.addTo(m);
   if(opts.labels!==false)addLabels(m);
@@ -503,7 +507,7 @@ function addLabels(m){
     const z=m.getZoom(),b=m.getBounds().pad(.05);box.innerHTML="";const taken=[];
     const cand=[];const inb=(x,y)=>b.contains([-y,x]);
     if(z<4.4)LB.dist.forEach(d=>inb(d[1],d[2])&&cand.push({t:d[0],x:d[1],y:d[2],c:"ld",fs:z<3?12:15,pr:0}));
-    if(z>=3.2)LB.hood.forEach(h=>{if((z>=4.2||h[3]>=30)&&inb(h[1],h[2]))cand.push({t:h[0],x:h[1],y:h[2],c:"lh",fs:z>=6?15:z>=5?13:11.5,pr:z>=6?2:1})});
+    if(z>=2.4)LB.hood.forEach(h=>{if((z>=3.8||h[3]>=30)&&inb(h[1],h[2]))cand.push({t:h[0],x:h[1],y:h[2],c:"lh",fs:z>=6?15:z>=5?13:11.5,pr:z>=6?2:1})});
     if(z>=3.5)LB.routes.forEach(r=>inb(r[2],r[3])&&cand.push({t:r[0],x:r[2],y:r[3],c:"lr lr-"+r[1],fs:10,pr:1.5}));
     if(z>=5.2)LB.street.forEach(s=>inb(s[1],s[2])&&cand.push({t:s[0],x:s[1],y:s[2],c:"ls",fs:12,pr:1.6}));
     if(z>=5.4)LB.places.forEach(p=>{if((z>=6.6||["civic","transport","leisure","hotel","nature"].includes(p[1]))&&inb(p[2],p[3]))cand.push({t:p[0],x:p[2],y:p[3],c:"lp",fs:z>=7.5?12.5:11,pr:3})});
@@ -548,7 +552,7 @@ function itemShown(x){
 function pinHtml(arr){
   const x=arr[0];const cnt=arr.length>1?`<span class="cnt">${arr.length}</span>`:"";
   if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}<span class="pl">${esc(x.n)}</span></div>`}
-  const nm=arr.length>1?`${title(x)} +${arr.length-1}`:title(x);const c=mainCat(x);
+  const nm0=locked(x)?"🔒":title(x);const nm=arr.length>1?`${nm0} +${arr.length-1}`:nm0;const c=mainCat(x);
   const ic=(c==="story"||c==="side")?(x.w&&x.w.length===1?x.w:"★"):(x.t&&KTE[x.t]||CAT[c][1]);
   return `<div class="tpin${done(x)?" done":""}${avail(x)==="missed"?" gone":""}${x.ex?"":" ap"}${timed(x)?" soon":missable(x)?" miss":""}" style="--c:${CATC[c]||"#ffc23c"}"><i><b>${esc(ic)}</b></i>${cnt}<span class="pl">${esc(nm)}</span></div>`;
 }
@@ -617,9 +621,9 @@ function mapSearch(q){
 }
 function ensureMap(){
   if(map)return;
-  map=L.map("map",{crs:L.CRS.Simple,preferCanvas:true,fadeAnimation:false,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
+  map=L.map("map",{crs:L.CRS.Simple,preferCanvas:true,fadeAnimation:false,tap:false,bounceAtZoomLimits:false,inertiaDeceleration:2600,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
   map.attributionControl.setPrefix(false);$("#map").classList.add("loading");loadVec().then(()=>{addVector(map);$("#map").classList.remove("loading")});
-  const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=5.3);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
+  const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=4.8);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
 function focusMap(q){

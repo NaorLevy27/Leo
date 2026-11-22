@@ -295,9 +295,9 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .seg.wide{display:flex}.seg.wide button{flex:1}
 .fact{position:sticky;bottom:0;display:flex;gap:8px;padding:12px 0 2px;background:var(--bg2)}.fact .btn{flex:1}.fact .btn.pri{flex:2}
 /* pin labels */
-.mpin .pl{display:none;position:absolute;top:50%;inset-inline-start:calc(100% + 4px);transform:translateY(-50%);white-space:nowrap;font:800 11px var(--head);color:#2a1630;
+.mpin .pl,.tpin .pl{display:none;position:absolute;top:50%;inset-inline-start:calc(100% + 4px);transform:translateY(-50%);white-space:nowrap;font:800 11px var(--head);color:#2a1630;
   text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 4px #fff;max-width:160px;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
-#map.lbl .mpin .pl{display:block}
+#map.lbl .mpin .pl,#map.lbl .tpin .pl{display:block}
 /* guide gating */
 .gbody .gated{display:none}
 .gbody tr.gated{display:table-row;opacity:.45;filter:blur(3px);pointer-events:none}
@@ -377,3 +377,13 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .code{flex:1;display:flex;flex-wrap:wrap;gap:4px}.code i{font-style:normal;width:28px;height:28px;border-radius:8px;background:var(--card2);border:1px solid #4a3554;display:grid;place-items:center;font-size:14px}
 .code.none{color:var(--tx3);font-size:13px}
 .rev{width:34px;height:34px;border-radius:50%;background:var(--card2);border:1px solid var(--line);flex:none;font-size:15px}
+
+/* map mode: lock the page so touches go to the map (iOS rubber-band / pull-to-refresh) */
+body.mapmode{overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%}
+#map{touch-action:none;-webkit-user-select:none;user-select:none}
+#map .leaflet-tile{will-change:transform}
+/* perf: no live blur over the moving map */
+body.mapmode #nav,body.mapmode .msearch,body.mapmode .mapbar .chip,body.mapmode #nav .lens{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03)),rgba(20,12,26,.94)}
+body.mapmode .msearch,body.mapmode .mapbar .chip{background:rgba(20,12,26,.95)}
+.tpin>i{box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.55)}
