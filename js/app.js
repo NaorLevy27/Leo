@@ -150,6 +150,32 @@ function whereSheet(ch){
   $$("[data-wm]").forEach(b=>b.onclick=()=>{const m=BY[b.dataset.wm];const n=markUpTo(m);closeSheet();toast(n?`✓ סומנו ${n} משימות עד ${m.n}`:"הכל כבר מסומן");refreshSoft()});
 }
 
+
+/* ---------- first visit: ask before showing anything ---------- */
+function pageWelcome(step){
+  step=+step||1;
+  const dots=`<div class="wdots">${[1,2,3].map(i=>`<i class="${i===step?"on":""}"></i>`).join("")}</div>`;
+  if(step===1)return `<div class="welcome"><img src="icons/logo.png" class="wlogo" alt="Leo"><h1>ברוך הבא ל־Leo</h1><p class="muted">המדריך ל־GTA VI – משימות, מפה, טיפים. שלוש שאלות קצרות ומתחילים.</p>
+    <div class="wopts"><button class="wopt" data-wl="he"><b>עברית</b></button><button class="wopt" data-wl="en"><b>English</b></button></div>${dots}</div>`;
+  if(step===2){const n=STORY.find(x=>x.c===2)||STORY[3];
+    const o=[["strict","🙈","בלי ספוילרים בכלל","רואים רק את המשימה הבאה. כל השאר – מוסתר עד שתחליט לגלות."],["ch","🙂","רק מה שבפרק שלי","שמות של משימות בפרק שלך גלויים. פרקים הבאים – מוסתרים."],["off","😎","תראה לי הכל","בלי הסתרות בכלל."]];
+    return `<div class="welcome"><h1>כמה ספוילרים?</h1><p class="muted">אפשר לשנות בכל רגע ב"אני".</p><div class="wopts col">${o.map(a=>`<button class="wopt" data-ws="${a[0]}"><span class="we">${a[1]}</span><div><b>${a[2]}</b><small>${a[3]}</small></div></button>`).join("")}</div>${dots}</div>`;}
+  return `<div class="welcome"><h1>איפה אתה במשחק?</h1><p class="muted">ככה "מה עושים עכשיו" יהיה נכון מהרגע הראשון.</p><div class="wopts col">
+    <button class="wopt" data-wp="new"><span class="we">🎮</span><div><b>עוד לא התחלתי / ממש בהתחלה</b></div></button>
+    <button class="wopt" data-wp="mid"><span class="we">📍</span><div><b>אני באמצע – אבחר משימה</b><small>בוחרים את המשימה האחרונה שסיימת</small></div></button>
+    <button class="wopt" data-wp="code"><span class="we">💾</span><div><b>יש לי קוד / קישור גיבוי</b></div></button></div>${dots}</div>`;
+}
+function bindWelcome(step){
+  step=+step||1;const go=n=>location.hash="#/welcome/"+n;
+  $$("[data-wl]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("lr_lang",b.dataset.wl)}catch(e){};if(b.dataset.wl!==(window.LANG||"he")){location.hash="#/welcome/2";location.reload()}else go(2)});
+  $$("[data-ws]").forEach(b=>b.onclick=()=>{const v=b.dataset.ws;Store.setS("spoil",v!=="off");Store.setS("spoilLvl",v==="strict"?"strict":"ch");go(3)});
+  const fin=()=>{localStorage.setItem("lr_onb","1");location.hash="#/"};
+  $$("[data-wp]").forEach(b=>b.onclick=()=>{const v=b.dataset.wp;
+    if(v==="new")return fin();
+    if(v==="mid"){localStorage.setItem("lr_onb","1");location.hash="#/";setTimeout(()=>whereSheet(1),300);return}
+    const c=prompt("הדבק את הקוד או את קישור הגיבוי:");if(c){try{const n=Store.fromCode(c.includes("#/restore/")?c.split("#/restore/")[1]:c);toast(`שוחזרו ${n} סימונים ✓`)}catch(e){toast("הקוד לא תקין")}}fin()});
+}
+
 /* ---------- pages ---------- */
 function pct(a,b){return b?Math.round(a/b*100):0}
 function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="${r}" fill="none" stroke="#1a1020" stroke-width="9"/><circle cx="48" cy="48" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 48 48)"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#ff9a3c"/><stop offset="1" stop-color="#ff3d8b"/></linearGradient></defs><text x="48" y="52" text-anchor="middle">${p}%</text><text class="s" x="48" y="68" text-anchor="middle">${esc(label)}</text></svg>`}
@@ -484,7 +510,7 @@ function pageSettings(sec){
     sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;}
   if(sec==="progress")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>בחר את המשימה האחרונה שסיימת – נסמן הכל עד אליה</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>
    <div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>💾 קוד התקדמות</b><small>גיבוי, או העברה ממכשיר אחר / מהגרסה הקודמת. ייבוא רק מוסיף – לא מוחק.</small></div></div>
-   <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm" id="cpy">📋 העתק את הקוד שלי</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
+   <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm pri" id="bkl">🔗 קישור גיבוי</button><button class="btn sm" id="cpy">📋 קוד</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
   if(sec==="map")h+=`<div class="card cardlist">`+sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו.")+sw("upTo","רק עד הפרק שלי","בלי דברים מפרקים הבאים.")+sw("exactOnly","רק מיקומים מדויקים","בלי סיכות של 'אזור משוער'.")+`</div>
    <p class="muted" style="font-size:13px;margin:10px 4px">טיפ: הכפתור <b>🎮 כמו במשחק</b> במפה מראה רק מה שאפשר לעשות עכשיו.</p>`;
   if(sec==="share")h+=`<div class="blk" style="text-align:center"><div style="font-size:44px">🤝</div><h3 style="justify-content:center;font-size:18px">יש לך חברים שמשחקים?</h3><p class="muted">כל אחד שומר את ההתקדמות שלו – בלי הרשמה.</p><button class="btn pri wide" id="shapp">📤 שתף את Leo</button><button class="btn wide" id="cplink" style="margin-top:8px">🔗 העתק קישור</button></div>`;
@@ -507,6 +533,7 @@ function bindSettings(){
   $$("[data-sl]").forEach(b=>b.onclick=()=>{Store.setS("spoilLvl",b.dataset.sl);$$("[data-sl]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)drawPins();toast("נשמר")});
   on("#revclr",()=>{REV.clear();REVC.clear();saveRev();MEMO.clear();route(true);toast("הוסתר שוב")});
   on("#cpy",async()=>{const c=Store.code();try{await navigator.clipboard.writeText(c);toast("הקוד הועתק")}catch(e){$("#code").value=c;$("#code").select()}});
+  on("#bkl",async()=>{const u=SITE+"#/restore/"+encodeURIComponent(Store.code());try{if(navigator.share)await navigator.share({title:"גיבוי Leo",text:"הקישור הזה משחזר את ההתקדמות שלי ב־Leo",url:u});else{await navigator.clipboard.writeText(u);toast("קישור הגיבוי הועתק – שמור אותו בפתקים")}}catch(e){}});
   on("#imp",()=>{try{const n=Store.fromCode($("#code").value);toast(`יובאו ${n} סימונים ✓`);$("#code").value=""}catch(e){toast("הקוד לא תקין")}});
   on("#g",()=>Cloud.google());
   on("#emb",async()=>{const v=$("#em").value.trim();if(!v.includes("@"))return toast("מייל לא תקין");const r=await Cloud.email(v);toast(r.error?"שגיאה בשליחה":"שלחנו קישור למייל ✉")});
@@ -773,8 +800,11 @@ let curPage="";
 function parse(){const h=location.hash.slice(1)||"/";const [p,qs]=h.split("?");const q={};(qs||"").split("&").filter(Boolean).forEach(kv=>{const [k,v]=kv.split("=");q[k]=decodeURIComponent(v||"")});return {parts:p.split("/").filter(Boolean),q}}
 function route(soft){
   const {parts,q}=parse();const p=parts[0]||"";
-  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news"}[p]||"home";
+  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news",welcome:"welcome",restore:"restore"}[p]||"home";
   curPage=page;
+  if(page==="restore"){try{const n=Store.fromCode(decodeURIComponent(parts.slice(1).join("/")));localStorage.setItem("lr_onb","1");toast(`שוחזרו ${n} סימונים ✓`)}catch(e){toast("קישור הגיבוי לא תקין")}location.hash="#/";return}
+  if(page!=="welcome"&&!localStorage.getItem("lr_onb")&&!Object.keys(Store.all()).length){location.hash="#/welcome/1";return}
+  if(page!=="welcome"&&!localStorage.getItem("lr_onb"))localStorage.setItem("lr_onb","1");
   const isMap=page==="map";
   document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news"].includes(page)||(page==="settings"&&parts[1]));
   $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#msearch").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
@@ -784,11 +814,12 @@ function route(soft){
   if(isMap){ensureMap();setTimeout(()=>map.invalidateSize(),30);if(!soft)focusMap(q);return}
   let h="";
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
-  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
+  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="welcome")h=pageWelcome(parts[1]);else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
   $("#main").innerHTML=`<div class="wrap">${h}</div>`;
   if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="guide")gateGuide();
+  if(page==="welcome")bindWelcome(parts[1]);document.body.classList.toggle("welcomemode",page==="welcome");
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
@@ -803,7 +834,7 @@ addEventListener("hashchange",()=>route());
 if(freshNews.length){const a=$('#nav a[data-k="home"]');if(a){const d=document.createElement('span');d.className='newdot';d.textContent=freshNews.length;a.appendChild(d)}}
 $("#back").onclick=()=>history.length>1?history.back():(location.hash="#/");
 route();
-document.body.classList.add("ready");setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>loadVec()),2500);
+document.body.classList.add("ready");try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>loadVec()),2500);
 if("serviceWorker"in navigator&&location.protocol.startsWith("http")){
   navigator.serviceWorker.register("sw.js").then(reg=>{
     const ask=()=>{const b=document.createElement("button");b.className="upd";b.textContent="✨ יש גרסה חדשה – לחץ לרענון";b.onclick=()=>location.reload();document.body.appendChild(b)};
