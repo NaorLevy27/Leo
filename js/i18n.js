@@ -6,7 +6,7 @@
   window.setLang=l=>{try{localStorage.setItem("lr_lang",l)}catch(e){}location.reload()};
   if(LANG!=="en")return;
   document.documentElement.lang="en";document.documentElement.dir="ltr";document.documentElement.classList.add("en");
-  const D={
+  const D={"נסה למשל":"Try for example","משימות ודברים":"Missions & things","מדריכים":"Guides","טיפים":"Tips","במפה":"On the map","מקומות ושכונות":"Places & neighbourhoods","לא מצאתי 🤔":"Nothing found 🤔","נסה מילה אחרת, באנגלית, או פחות מילים":"Try another word, or fewer words","לא מצאתי משהו עם כל המילים – אלה הכי קרובים:":"Nothing matches every word – closest matches:","לחץ כדי לראות אותן ברשימה (השמות יישארו מוסתרים עד שתבחר לחשוף)":"Tap to list them (names stay hidden until you reveal)","אפשר לכתוב בעברית או באנגלית, כמה מילים ביחד (\"כספת Vice Beach\"), וגם עם שגיאת כתיב קטנה.":"Type in English or Hebrew, several words together (\"safe Vice Beach\"), even with a small typo.","חיפוש":"Search","שכונה":"Neighbourhood","רחוב":"Street","מחוז / עיר":"County / city","יש קוד":"has a code",
   "בית":"Home","מפה":"Map","משימות":"Missions","מרכז":"Hub","אני":"Me","המדריך ל־Leonida":"The Leonida guide",
   "סיפור":"Story","משימות צד":"Side missions","מבצעי כנופיות":"Gang ops","כנופיות":"Gangs","אספנות":"Collectibles","אירועים אקראיים":"Random events","אירועים":"Events","כסף":"Money","רכבים":"Vehicles","נשקים":"Weapons","ביצי פסחא":"Easter eggs","טיפים":"Tips","הכל":"All","עוד":"More",
   "Jason":"Jason","Lucia":"Lucia","שניהם":"Both",

@@ -1280,7 +1280,8 @@
     "n": "Hauners H-AT",
     "ne": "Hauners H-AT",
     "u": "Blow up 100 vehicles",
-    "code": []
+    "code": [],
+    "kw": "רכב שטח טרקטורון atv"
    },
    {
     "cat": "רכבים",
@@ -1296,7 +1297,8 @@
      "Left",
      "Up",
      "Left"
-    ]
+    ],
+    "kw": "רכב car"
    },
    {
     "cat": "רכבים",
@@ -1312,7 +1314,8 @@
      "Right",
      "Right",
      "Up"
-    ]
+    ],
+    "kw": "כבאית fire truck"
    },
    {
     "cat": "רכבים",
@@ -1328,133 +1331,152 @@
      "Right",
      "Right",
      "Down"
-    ]
+    ],
+    "kw": "דחפור bulldozer"
    },
    {
     "cat": "רכבים",
     "n": "Interstate Ambulance",
     "ne": "Interstate Ambulance",
     "u": "לגלות אותו בתפריט ההתקדמות",
-    "code": []
+    "code": [],
+    "kw": "אמבולנס ambulance"
    },
    {
     "cat": "רכבים",
     "n": "Airboat 09",
     "ne": "Airboat 09",
     "u": "Complete 5 survival challenges",
-    "code": []
+    "code": [],
+    "kw": "סירה סירת ביצות airboat boat"
    },
    {
     "cat": "רכבים",
     "n": "Bravado Banshee",
     "ne": "Bravado Banshee",
     "u": "Complete all combat challenges",
-    "code": []
+    "code": [],
+    "kw": "מכונית ספורט car"
    },
    {
     "cat": "רכבים",
     "n": "Tuff BMX",
     "ne": "Tuff BMX",
     "u": "Complete 5 fitness challenges",
-    "code": []
+    "code": [],
+    "kw": "אופניים bicycle bike"
    },
    {
     "cat": "רכבים",
     "n": "Nagasaki Carbon RS",
     "ne": "Nagasaki Carbon RS",
     "u": "Complete all exploration challenges",
-    "code": []
+    "code": [],
+    "kw": "אופנוע ספורט motorcycle bike"
    },
    {
     "cat": "רכבים",
     "n": "'65 Vapid Dominator",
     "ne": "'65 Vapid Dominator",
     "u": "Complete all fitness challenges",
-    "code": []
+    "code": [],
+    "kw": "מכונית שרירים muscle car"
    },
    {
     "cat": "רכבים",
     "n": "Progen Emerus",
     "ne": "Progen Emerus",
     "u": "Complete all vehicle challenges",
-    "code": []
+    "code": [],
+    "kw": "סופרקאר supercar car"
    },
    {
     "cat": "רכבים",
     "n": "Inflatable Flamingo",
     "ne": "Inflatable Flamingo",
     "u": "Destroy 50 cocaine flamingos",
-    "code": []
+    "code": [],
+    "kw": "פלמינגו מתנפח צף flamingo"
    },
    {
     "cat": "רכבים",
     "n": "Vapid Stanier G2 Taxi",
     "ne": "Vapid Stanier G2 Taxi",
     "u": "Complete 5 sports challenges",
-    "code": []
+    "code": [],
+    "kw": "מונית taxi car"
    },
    {
     "cat": "רכבים",
     "n": "Hauners P-996 Lazer",
     "ne": "Hauners P-996 Lazer",
     "u": "Complete all challenges",
-    "code": []
+    "code": [],
+    "kw": "מטוס קרב jet plane"
    },
    {
     "cat": "רכבים",
     "n": "Lapwing Mallard",
     "ne": "Lapwing Mallard",
     "u": "Complete 5 vehicle challenges",
-    "code": []
+    "code": [],
+    "kw": "מטוס plane"
    },
    {
     "cat": "רכבים",
     "n": "Brimstone Golfer",
     "ne": "Brimstone Golfer",
     "u": "Complete all sports challenges",
-    "code": []
+    "code": [],
+    "kw": "עגלת גולף golf cart"
    },
    {
     "cat": "רכבים",
     "n": "Hauners Rhino Tank",
     "ne": "Hauners Rhino Tank",
     "u": "Complete all survival challenges",
-    "code": []
+    "code": [],
+    "kw": "טנק tank"
    },
    {
     "cat": "רכבים",
     "n": "Maibatsu Sanchez",
     "ne": "Maibatsu Sanchez",
     "u": "Complete 5 criminal challenges",
-    "code": []
+    "code": [],
+    "kw": "אופנוע שטח motocross dirt bike"
    },
    {
     "cat": "רכבים",
     "n": "Nagasaki Sea Sparrow",
     "ne": "Nagasaki Sea Sparrow",
     "u": "Complete 5 exploration challenges",
-    "code": []
+    "code": [],
+    "kw": "מסוק helicopter"
    },
    {
     "cat": "רכבים",
     "n": "Speeder 700 GT",
     "ne": "Speeder 700 GT",
     "u": "Complete 5 combat challenges",
-    "code": []
+    "code": [],
+    "kw": "סירה סירת מרוץ boat"
    },
    {
     "cat": "רכבים",
     "n": "Truffade Thrax",
     "ne": "Truffade Thrax",
     "u": "Complete all shopping challenges",
-    "code": []
+    "code": [],
+    "kw": "סופרקאר supercar car"
    },
    {
     "cat": "רכבים",
     "n": "Western Zombie Bobber",
     "ne": "Western Zombie Bobber",
     "u": "Complete all criminal challenges",
-    "code": []
+    "code": [],
+    "kw": "אופנוע chopper motorcycle bike"
    },
    {
     "cat": "עולם וזמן",

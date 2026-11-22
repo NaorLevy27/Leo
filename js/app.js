@@ -214,12 +214,137 @@ function passes(x){
   if(LF.stat==="missed"&&av!=="missed")return false;
   if(LF.avail==="now"&&av!=="now")return false;
   if(LF.miss&&!((missable(x)||timed(x))&&av==="now"))return false;
-  const qq=LF.q.trim().toLowerCase();
-  if(qq&&!(((locked(x)?"":x.n+" "+x.ne+" ")+(x.sp||"")+" "+(x.loc||[]).join(" ")).toLowerCase().includes(qq)))return false;
+  if(LF.q.trim()&&!itemMatches(x,LF.q))return false;
   return true;
 }
 function nFilters(){return (LF.ch?1:0)+(LF.stat?1:0)+(LF.avail?1:0)+(LF.miss?1:0)+Object.values(LF.ex).filter(Boolean).length+Object.values(LF.kt).filter(Boolean).length}
 const STL={"":"הכל",open:"עוד לא עשיתי",done:"עשיתי",missed:"פוספס"};
+/* ---------- search engine: normalised, multi-word, Hebrew⇄English synonyms, typo-tolerant, ranked ---------- */
+const FIN={"ך":"כ","ם":"מ","ן":"נ","ף":"פ","ץ":"צ"};
+const norm=s=>(s==null?"":String(s)).toLowerCase().replace(/[֑-ׇ]/g,"").replace(/[ךםןףץ]/g,c=>FIN[c]).replace(/<[^>]+>/g," ").replace(/['’`׳״"]/g,"").replace(/[־\-–—_'’`"״׳.,:;!?()\[\]{}\/\\|·•+*~#@%^&=<>…]/g," ").replace(/וו/g,"ו").replace(/יי/g,"י").replace(/\s+/g," ").trim();
+const SYNR=[["וילה","אחוזה","mansion","villa","estate"],["כספת","כספות","safe","safes","vault"],["רכב","מכונית","אוטו","car","vehicle","ride"],["סופרקאר","מכונית ספורט","supercar","sports car"],["אופנוע","bike","motorcycle","scooter"],["סירה","boat","jet ski","seashark"],["מסוק","helicopter","heli"],["מטוס","plane","airplane","jet"],["נשק","weapon","gun","guns"],["רובה","rifle","longarm","shotgun"],["אקדח","pistol","revolver"],["כסף","מזומן","cash","money","$"],["סוד","סודי","סודית","secret","hidden"],["ביצת פסחא","איסטר","easter egg","egg"],["אדום","red","ruby"],["ירוק","green"],["סגול","purple"],["כחול","blue"],["צהוב","yellow"],["שחור","black"],["לבן","white"],["ורוד","pink"],["זהב","gold","golden"],["דוב","דובים","דובון","דובונים","bear","bears","teddy","teddy bear"],["ואן","טנדר","מסחרית","van","rumpo","minivan"],["קלף","קלפים","card","cards","trading card"],["בייסבול","baseball"],["כדורסל","basketball","hoop"],["מחסן","warehouse","storage","lockup"],["כלב","dog"],["תנין","gator","alligator"],["כריש","shark"],["ביגפוט","bigfoot","skunk ape"],["חייזר","alien","ufo"],["רוח","ghost"],["שוד","robbery","heist","rob"],["בנק","bank","fleeca"],["תכשיט","jewelry","jewel"],["סמים","drugs","narcotics"],["משטרה","שוטר","police","cop","cops"],["שומר","מאבטח","guard","guards","security"],["קוד","code","codes"],["ציט","cheat","cheats"],["חוף","beach"],["אי","island"],["ביצה","swamp","grassrivers"],["שדה תעופה","airport","vcia"],["מועדון","club"],["מוסך","garage"],["מלון","hotel"],["משימה","mission","quest"],["אספנות","collectible","collectibles"],["אירוע","random event","event"],["טיפ","tip","tips"],["כפתור","button","buttons"],["מפה","map"],["פסל","statue"],["שעון","watch"],["תמונה","photo","picture"]].map(a=>a.map(norm));
+const SYN={};SYNR.forEach(g=>g.forEach(w=>{(SYN[w]=SYN[w]||new Set());g.forEach(v=>v!==w&&SYN[w].add(v))}));
+const PFX="הבלמוכש";
+const STOP=new Set(["עמ","של","את","על","או","גמ","יש","מה","איכ","איפה","זה","אני","רוצה","שיש","עוד","כמו","the","a","an","of","with","and","in","to","for","on","at","gta","6"].map(norm));
+const HTR={"א":"","ב":"b","ג":"g","ד":"d","ה":"","ו":"","ז":"s","ח":"","ט":"t","י":"","כ":"k","ל":"l","מ":"m","נ":"n","ס":"s","ע":"","פ":"p","צ":"ts","ק":"k","ר":"r","ש":"s","ת":"t"};
+const skel=w=>w.replace(/j/g,"g").replace(/ph/g,"p").replace(/[fp]/g,"p").replace(/[vw]/g,"b").replace(/[cqk]/g,"k").replace(/[zs]/g,"s").replace(/[aeiouyh]/g,"").replace(/(.)\1+/g,"$1");
+const hskel=w=>(w[0]==="ו"?"b":"")+[...(w[0]==="ו"?w.slice(1):w)].map(c=>HTR[c]!=null?HTR[c]:"").join("").replace(/(.)\1+/g,"$1");
+const SKC=new Map();function skelWords(t){let v=SKC.get(t);if(!v){v=t.split(" ").filter(w=>/^[a-z]/.test(w)).map(skel).filter(w=>w.length>=2);if(SKC.size>40000)SKC.clear();SKC.set(t,v)}return v}
+function qTerms(q){
+  const n=norm(q);if(!n)return [];
+  let words=n.split(" ").filter(w=>!STOP.has(w));if(!words.length)words=n.split(" ");const out=[];
+  for(let i=0;i<words.length;i++){
+    let w=words[i],two=i+1<words.length?w+" "+words[i+1]:null;
+    if(two&&SYN[two]){out.push([two,...SYN[two]]);i++;continue}
+    const alts=new Set([w]);
+    (SYN[w]||[]).forEach(v=>alts.add(v));
+    if(w.length>=4&&PFX.includes(w[0])){const s=w.slice(1);alts.add(s);(SYN[s]||[]).forEach(v=>alts.add(v))}
+    if(w.length>=4&&PFX.includes(w[0])&&PFX.includes(w[1])){alts.add(w.slice(2))}
+    [...alts].forEach(a=>{if(/[\u05d0-\u05ea]/.test(a)){const m=a.match(/^(.{2,})(ימ|ות|ה|ית)$/);if(m){alts.add(m[1]);(SYN[m[1]]||[]).forEach(v=>alts.add(v))}}});
+    const A=[...alts];if(/^[\u05d0-\u05ea]{3,}$/.test(w)){const k=hskel(w);if(k.length>=2)A.push("\u0001"+k)}
+    out.push(A);
+  }
+  return out;
+}
+function lev1(a,b){if(Math.abs(a.length-b.length)>1)return false;let i=0,j=0,e=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue}if(++e>1)return false;if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++}}return e+(a.length-i)+(b.length-j)<=1}
+function hitIn(txt,alts){
+  if(!txt)return 0;let best=0;
+  for(const a of alts){
+    if(a[0]==="\u0001"){if(best)continue;const k=a.slice(1);if(skelWords(txt).some(w=>k.length<3?w===k:w.startsWith(k)))best=.8;continue}
+    const lat=/^[a-z0-9$]/.test(a);let p=txt.indexOf(a),v=0;
+    while(p>=0){const pre=p===0?" ":txt[p-1],pre2=p<2?" ":txt[p-2];
+      if(pre===" ")v=Math.max(v,p===0?3:2);
+      else if(!lat&&(PFX.includes(pre)&&(pre2===" "||PFX.includes(pre2)&&(p<3||txt[p-3]===" "))))v=Math.max(v,1.6);
+      else if(!lat&&a.length>=4)v=Math.max(v,.7);
+      if(v>=2)break;p=txt.indexOf(a,p+1)}
+    if(v>best)best=v;if(best===3)break}
+  if(!best){const a0=alts[0];if(a0.length>=5&&!/\d/.test(a0)){for(const w of txt.split(" "))if(w.length>=5&&lev1(a0,w)){best=.6;break}}}
+  return best;
+}
+/* fields: [text, weight] – returns score or 0 if any term misses */
+function scoreF(fields,terms,part){
+  let tot=0,m=0;
+  for(const alts of terms){let b=0;for(const [t,w] of fields){const h=hitIn(t,alts);if(h&&h*w>b)b=h*w}if(b){m++;tot+=b}else if(!part)return 0}
+  if(!m)return 0;
+  if(part){const need=terms.length<=2?terms.length:Math.ceil(terms.length/2);if(m<need)return 0;return tot+(m===terms.length?1000:m*100)}
+  return tot;
+}
+const IX=new Map(),GTX=new Map();
+function guideText(g){const k=g.id+"|"+curCh()+"|"+S.spoil;if(GTX.has(k))return GTX.get(k);const t=document.createElement("template");t.innerHTML=g.h;if(S.spoil)t.content.querySelectorAll("[data-ch]").forEach(e=>{if(+e.dataset.ch>curCh())e.remove()});const v=norm(t.content.textContent);GTX.set(k,v);return v}
+function ixItem(x){
+  let o=IX.get(x.id);if(o)return o;
+  const k=(x.g||[]).map(g=>(CAT[g]||[""])[0]).join(" ");
+  let nb="";if(x.x!=null){for(const l of LOCS){const dx=l.x-x.x,dy=l.y-x.y;if(dx*dx+dy*dy<4)nb+=" "+l.n}}
+  o={pub:[[norm((x.loc||[]).join(" ")+" "+(x.st||"")),5],[norm(k),2],[norm(nb),2]],
+     nm:[[norm(x.n+" "+(x.ne||"")),10]],
+     sec:[[norm([x.sp,x.lk].join(" ")),4],[norm([x.why,x.d,x.k,x.rw,x.nt].join(" ")),3],[norm([...(x.steps||[]),...(x.tips||[]),x.ch].join(" ")),1.5]]};
+  IX.set(x.id,o);return o;
+}
+function searchAll(q,opts={}){
+  const terms=qTerms(q);const R={items:[],hidden:[],locs:[],places:[],guides:[],tips:[],cheats:[],terms};
+  if(!terms.length)return R;
+  const cur=curCh();
+  IT.forEach(x=>{const o=ixItem(x);
+    if(!locked(x)||opts.all){let s=scoreF([...o.nm,...o.pub,...(hid(x)&&!opts.all?[]:o.sec)],terms,1);if(s){if(done(x))s-=2;else if(avail(x)==="now")s+=2;R.items.push([s,x])}}
+    else{const s=scoreF([...o.nm,...o.pub,...o.sec],terms,1);if(s){R.hidden.push(x);if(s>=1000)R.hfull=(R.hfull||0)+1}}});
+  R.items.sort((a,b)=>b[0]-a[0]);R.full=R.items.filter(a=>a[0]>=1000).length;R.items=R.items.map(a=>a[1]);
+  LOCS.forEach(l=>{const s=scoreF([[norm(l.n),8],[norm((KINDS[l.k]||{}).n+" "+l.t+" "+(l.a||"")),3],[norm(l.d),1.5]],terms,1);if(s)R.locs.push([s,l])});
+  R.locs.sort((a,b)=>b[0]-a[0]);R.locs=R.locs.map(a=>a[1]);
+  if(VEC){const L=VEC.lab;
+    [["dist","🗺️","מחוז / עיר"],["hood","🏘️","שכונה"],["street","🛣️","רחוב"]].forEach(([k,e,t])=>(L[k]||[]).forEach(h=>{const s=scoreF([[norm(h[0]),9]],terms);if(s)R.places.push([s+(k==="dist"?2:k==="hood"?1:0),{n:h[0],x:h[1],y:h[2],e,t}])}));
+    (L.places||[]).forEach(p=>{const s=scoreF([[norm(p[0]),7],[norm(p[1]),2]],terms);if(s)R.places.push([s,{n:p[0],x:p[2],y:p[3],e:"📍",t:p[1]}])});
+    R.places.sort((a,b)=>b[0]-a[0]);R.places=R.places.map(a=>a[1]);}
+  (window.GUIDES||[]).forEach(g=>{const s=scoreF([[norm(g.t),9],[norm(g.d),5],[guideText(g),1.5]],terms,1);if(s)R.guides.push([s,g])});
+  R.guides.sort((a,b)=>b[0]-a[0]);R.guides=R.guides.map(a=>a[1]);
+  tipList(999).forEach(t=>{const s=scoreF([[norm(t.t),4]],terms,1);if(s)R.tips.push([s,t])});
+  R.tips.sort((a,b)=>b[0]-a[0]);R.tips=R.tips.map(a=>a[1]);
+  (CH.list||[]).forEach(c=>{const s=scoreF([[norm(c.n+" "+(c.ne||"")),8],[norm(c.cat+" "+(c.u||"")),2],[norm(c.kw||""),6],["ציט cheat cheats קוד code",3]],terms,1);if(s)R.cheats.push([s,c])});
+  R.cheats.sort((a,b)=>b[0]-a[0]);R.cheats=R.cheats.map(a=>a[1]);
+  return R;
+}
+function itemMatches(x,q){const terms=qTerms(q);if(!terms.length)return true;const o=ixItem(x);return !!scoreF([...o.nm,...o.pub,...(hid(x)?[]:o.sec)].filter(f=>!(locked(x)&&!REV.has(x.id)&&f===o.nm[0])),terms)}
+let SQ="",SALL=0;
+const SUGG=["כספת","וילה","רכב נדיר","כסף","נשק ייחודי","צ'יטים","כפתורים סודיים","ביצת פסחא","Moses","Vice Beach"];
+function pageSearch(q){
+  if(q&&q.q!=null)SQ=q.q;
+  return `<div class="search big"><span>🔎</span><input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="חפש הכל – משימה, מקום, רכב, טיפ…" value="${esc(SQ)}"><button id="sqx" class="dim"${SQ?"":" hidden"}>✕</button></div><div id="sres">${searchHtml()}</div>`;
+}
+function searchHtml(){
+  const q=SQ.trim();
+  if(norm(q).length<2){let h=`<div class="grp">נסה למשל</div><div class="chips wrap">`+SUGG.filter(s=>!(S.spoil&&s==="Moses"&&curCh()<2)).map(s=>`<button class="chip" data-sg="${esc(s)}">${esc(s)}</button>`).join("")+`</div>`;
+    h+=`<p class="dim" style="font-size:12.5px;margin:14px 2px">אפשר לכתוב בעברית או באנגלית, כמה מילים ביחד ("כספת Vice Beach"), וגם עם שגיאת כתיב קטנה.</p>`;return h}
+  const R=searchAll(q,{all:SALL});
+  const n=R.items.length+R.locs.length+R.places.length+R.guides.length+R.tips.length+R.cheats.length;
+  let h="";
+  const sec=(t,arr,f,max)=>{if(!arr.length)return;h+=`<div class="grp">${t} · ${arr.length}</div>`;h+=arr.slice(0,max).map(f).join("");if(arr.length>max)h+=`<div class="dim" style="font-size:12px;margin:4px 4px 0">ועוד ${arr.length-max} – נסה לדייק את החיפוש</div>`};
+  const hb=R.hidden.length&&!SALL?`<button class="blk hidres" id="sall"><b>🔒 עוד ${R.hidden.length} תוצאות מחלקים שעוד לא הגעת אליהם</b><small>לחץ כדי לראות אותן ברשימה (השמות יישארו מוסתרים עד שתבחר לחשוף)</small></button>`:"";
+  if(hb&&R.hfull&&!R.full)h+=hb;
+  if(R.items.length&&R.full===0&&R.terms.length>2)h+=`<div class="dim" style="font-size:12px;margin:2px 4px 6px">לא מצאתי משהו עם כל המילים – אלה הכי קרובים:</div>`;
+  sec("משימות ודברים",R.items,x=>row(x),25);
+  sec("מדריכים",R.guides,g=>`<a class="row" href="#/g/${g.id}"><span class="gl coll">${g.e}</span><div class="t"><b>${esc(g.t)}</b><small>${esc(g.d)}</small></div><span class="dim">‹</span></a>`,6);
+  sec("צ'יטים",R.cheats,c=>`<a class="row" href="#/cheats"><span class="gl coll">🎮</span><div class="t"><b>${bdi(c.n)}</b><small>${esc(c.cat||"")}${c.code&&c.code.length?" · יש קוד":""}</small></div><span class="dim">‹</span></a>`,6);
+  sec("טיפים",R.tips,t=>`<a class="row" href="#/${t.k==="btn"?"buttons":"tips"}"><span class="gl coll">${t.k==="btn"?"🎮":"💡"}</span><div class="t"><b style="font-weight:600;font-size:13.5px">${esc(t.t)}</b></div></a>`,6);
+  sec("במפה",R.locs,l=>`<a class="row" href="#/map?l=${encodeURIComponent(l.id)}"><span class="gl coll">${esc((KINDS[l.k]||{}).i||"📍")}</span><div class="t"><b>${bdi(l.n)}</b><small>${esc((KINDS[l.k]||{}).n||l.k)}${l.a?" · "+esc(l.a):""}</small></div><span class="dim">🗺️</span></a>`,12);
+  sec("מקומות ושכונות",R.places,p=>`<a class="row" href="#/map?at=${p.x},${p.y}"><span class="gl coll">${p.e}</span><div class="t"><b>${bdi(p.n)}</b><small>${esc(p.t)}</small></div><span class="dim">🗺️</span></a>`,8);
+  if(hb&&!(R.hfull&&!R.full))h+=hb;
+  if(!n&&!R.hidden.length)h+=`<div class="empty">לא מצאתי 🤔<br><small>נסה מילה אחרת, באנגלית, או פחות מילים</small></div>`;
+  return (n?`<div class="dim cnt">${n} תוצאות</div>`:"")+h;
+}
+function bindSearch(){
+  const i=$("#sq");if(!i)return;
+  const draw=()=>{$("#sres").innerHTML=searchHtml();$("#sqx").hidden=!SQ;bindSres()};
+  i.oninput=()=>{SQ=i.value;SALL=0;clearTimeout(i._t);i._t=setTimeout(()=>{history.replaceState(null,"","#/search?q="+encodeURIComponent(SQ));draw()},160)};
+  i.onkeydown=e=>{if(e.key==="Enter")i.blur()};
+  $("#sqx").onclick=()=>{SQ="";i.value="";draw();i.focus()};
+  if(!SQ)setTimeout(()=>i.focus(),80);
+  if(!VEC)loadVec().then(()=>{if(curPage==="search"&&SQ)draw()});
+  bindSres();
+}
+function bindSres(){
+  $$("[data-sg]").forEach(b=>b.onclick=()=>{SQ=b.dataset.sg;$("#sq").value=SQ;history.replaceState(null,"","#/search?q="+encodeURIComponent(SQ));$("#sres").innerHTML=searchHtml();$("#sqx").hidden=false;bindSres()});
+  const a=$("#sall");if(a)a.onclick=()=>{SALL=1;$("#sres").innerHTML=searchHtml();bindSres()};
+}
+
 function pageList(q){
   if(q.cat){const t=TABS.find(t=>t[0]===q.cat);LF.tab=t?q.cat:(MORE.includes(q.cat)?"more":"all")}if(q.ch)LF.ch=+q.ch;if(q.miss){LF.miss=1;LF.tab="all"}
   const list=IT.filter(passes);
@@ -234,6 +359,7 @@ function pageList(q){
   for(const k in LF.kt)if(LF.kt[k]===1)act.push([`רק ${D.KT[k][0]}`,"kt:"+k]);
   if(act.length)h+=`<div class="chips act">`+act.map(a=>`<button class="chip on" data-rm="${a[1]}">${esc(a[0])} ✕</button>`).join("")+`<button class="chip" data-rm="all">נקה הכל</button></div>`;
   h+=`<div class="dim cnt">${list.length} תוצאות</div>`;
+  if(LF.q.trim())h+=`<a class="sall" href="#/search?q=${encodeURIComponent(LF.q.trim())}">🔎 חפש "${esc(LF.q.trim())}" בכל האפליקציה – מפה, מדריכים, צ'יטים ›</a>`;
   if(!list.length)return h+`<div class="empty">אין תוצאות.<br><button class="btn sm" data-rm="all" style="margin-top:10px">נקה פילטרים</button></div>`;
   const cur=curCh();
   const mode=LF.sort||"chrono";
@@ -745,12 +871,12 @@ function mapChips(){
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
 }
 function mapSearch(q){
-  q=q.trim().toLowerCase();if(q.length<2){closeSheet();return}
-  const res=[];
-  IT.forEach(x=>{if(x.x!=null&&!locked(x)&&(x.n+" "+x.ne).toLowerCase().includes(q))res.push({t:x.n,s:sub(x),go:()=>{location.hash="#/map?i="+x.s},g:glyph(x)})});
-  (VEC?VEC.lab.hood:[]).forEach(h=>{if(h[0].toLowerCase().includes(q))res.push({t:h[0],s:"שכונה / אזור",go:()=>{closeSheet();map.setView([-h[2],h[1]],5.5)},g:`<span class="gl coll">🏘️</span>`})});
-  LOCS.forEach(l=>{if(res.length<60&&l.n.toLowerCase().includes(q))res.push({t:l.n,s:(KINDS[l.k]||{}).n||l.k,go:()=>{location.hash="#/map?l="+encodeURIComponent(l.id)},g:`<span class="gl coll">${esc((KINDS[l.k]||{}).i||"📍")}</span>`})});
-  openSheet(`<h3 style="font-size:17px;margin:0 0 8px">${res.length?res.length+" תוצאות":"לא נמצא"}</h3>`+res.slice(0,40).map((r,i)=>`<a class="row" href="#" data-sr="${i}">${r.g}<div class="t"><b>${bdi(r.t)}</b><small>${esc(r.s)}</small></div></a>`).join(""));
+  if(norm(q).length<2){closeSheet();return}
+  const R=searchAll(q),res=[];
+  R.items.filter(x=>x.x!=null).slice(0,15).forEach(x=>res.push({t:title(x),s:sub(x),go:()=>{location.hash="#/map?i="+x.s},g:glyph(x)}));
+  R.places.slice(0,10).forEach(p=>res.push({t:p.n,s:p.t,go:()=>{closeSheet();map.setView([-p.y,p.x],p.e==="🗺️"?4.5:p.e==="🏘️"?5.5:6.5)},g:`<span class="gl coll">${p.e}</span>`}));
+  R.locs.slice(0,25).forEach(l=>res.push({t:l.n,s:(KINDS[l.k]||{}).n||l.k,go:()=>{location.hash="#/map?l="+encodeURIComponent(l.id)},g:`<span class="gl coll">${esc((KINDS[l.k]||{}).i||"📍")}</span>`}));
+  openSheet(`<h3 style="font-size:17px;margin:0 0 8px">${res.length?res.length+" תוצאות":"לא נמצא"}</h3>`+res.map((r,i)=>`<a class="row" href="#" data-sr="${i}">${r.g}<div class="t"><b>${bdi(r.t)}</b><small>${esc(r.s)}</small></div></a>`).join("")+(R.hidden.length?`<p class="dim" style="font-size:12px;margin:10px 4px 0">🔒 עוד ${R.hidden.length} תוצאות מחלקים שעוד לא הגעת אליהם – בחיפוש הראשי (🔎 למעלה) אפשר לראות אותן</p>`:""));
   $$("[data-sr]").forEach(a=>a.onclick=e=>{e.preventDefault();res[+a.dataset.sr].go()});
 }
 /* community: report a find on the map (long-press, or the 📍 button) */
@@ -826,13 +952,13 @@ let curPage="";
 function parse(){const h=location.hash.slice(1)||"/";const [p,qs]=h.split("?");const q={};(qs||"").split("&").filter(Boolean).forEach(kv=>{const [k,v]=kv.split("=");q[k]=decodeURIComponent(v||"")});return {parts:p.split("/").filter(Boolean),q}}
 function route(soft){
   const {parts,q}=parse();const p=parts[0]||"";
-  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news",welcome:"welcome",restore:"restore"}[p]||"home";
+  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news",welcome:"welcome",restore:"restore",search:"search"}[p]||"home";
   curPage=page;
   if(page==="restore"){try{const n=Store.fromCode(decodeURIComponent(parts.slice(1).join("/")));localStorage.setItem("lr_onb","1");toast(`שוחזרו ${n} סימונים ✓`)}catch(e){toast("קישור הגיבוי לא תקין")}location.hash="#/";return}
   if(page!=="welcome"&&!localStorage.getItem("lr_onb")&&!Object.keys(Store.all()).length){location.hash="#/welcome/1";return}
   if(page!=="welcome"&&!localStorage.getItem("lr_onb"))localStorage.setItem("lr_onb","1");
   const isMap=page==="map";
-  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news"].includes(page)||(page==="settings"&&parts[1]));
+  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news","search"].includes(page)||(page==="settings"&&parts[1]));
   $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#msearch").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
   const navKey={home:"home",list:"list",item:"list",loc:"map",map:"map",guides:"guides",guide:"guides",settings:"settings",cheats:"guides",tips:"guides",buttons:"guides",news:"guides"}[page];
   $$("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===navKey));moveLens();
@@ -840,10 +966,11 @@ function route(soft){
   if(isMap){ensureMap();setTimeout(()=>map.invalidateSize(),30);if(!soft)focusMap(q);return}
   let h="";
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
-  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="welcome")h=pageWelcome(parts[1]);else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
+  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="welcome")h=pageWelcome(parts[1]);else if(page==="search")h=pageSearch(q);else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
   $("#main").innerHTML=`<div class="wrap">${h}</div>`;
   if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
+  if(page==="search")bindSearch();
   if(page==="guide")gateGuide();
   if(page==="welcome")bindWelcome(parts[1]);document.body.classList.toggle("welcomemode",page==="welcome");
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}

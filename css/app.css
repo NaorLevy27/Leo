@@ -523,3 +523,10 @@ body.welcomemode #nav,body.welcomemode #top{display:none}
 .tipline{display:flex;gap:8px;margin-top:8px;padding:9px 12px;border-radius:12px;background:rgba(74,141,255,.08);border:1px solid rgba(74,141,255,.25);font-size:13.5px}
 .focuspin{position:relative}.focuspin>span{position:absolute;left:50%;top:14px;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:rgba(255,61,139,.55);animation:pulse 1.6s ease-out infinite}
 @keyframes pulse{0%{transform:scale(1);opacity:.9}100%{transform:scale(5);opacity:0}}
+/* search */
+.search.big{position:sticky;top:0;z-index:5;margin:2px 0 8px;background:var(--bg2,#150d1c);border-color:rgba(255,138,61,.35)}
+.search.big input{padding:14px 0;font-size:16px}
+.search input::-webkit-search-cancel-button{display:none}
+.hidres{display:block;width:100%;text-align:start;color:var(--tx);font:inherit;cursor:pointer}
+.hidres small{display:block;color:var(--tx3);font-size:12px;margin-top:3px}
+.sall{display:block;margin:2px 4px 8px;font-size:12.5px;color:var(--teal)}
