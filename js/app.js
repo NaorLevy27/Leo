@@ -364,7 +364,7 @@ function pageItem(slug){
   else if(x.d)main+=`<p style="font-size:15.5px">${esc(x.d)}</p>`;
   else if(x.sp)main+=`<p style="font-size:15.5px">${esc(x.sp)}</p>`;
   if(rw)main+=`<div class="getline"><span>🎁</span><b>${esc(rw)}</b></div>`;
-  h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?`<a class="btn pri wide" style="margin-top:12px" href="#/map?i=${x.s}">🗺️ נווט במפה</a>`:""}</div>`;
+  h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?`<a class="btn pri wide" style="margin-top:12px" href="#/map?i=${x.s}">🗺️ פתח במפה הגדולה</a>`:`<p class="anyw">🌍 אין לזה נקודה קבועה – ${x.g.includes("event")?"זה יכול לקרות בכל מקום במפה, תוך כדי נסיעה":"זה פזור בכמה מקומות במפה"}.</p>`}</div>`;
   /* layer 2: details on demand */
   if(x.loc||x.sp||x.x!=null){let w="";
     if(x.x!=null)w+=`<p style="margin:0 0 6px">${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור משוער</span>`}</p>`;
@@ -694,9 +694,20 @@ function drawPins(){
   const c=$("#mcount");if(c)c.textContent=[...groups.values()].reduce((s,g)=>s+g.a.length,0);
 }
 function previewHtml(o){
-  if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);return `<div class="prev"><div class="meta" style="display:flex;gap:6px;flex-wrap:wrap"><span class="tag">${esc(k.i||"")} ${esc(k.n||o.k)}</span>${o.a?`<span class="tag">${bdi(o.a)}</span>`:""}</div><h3>${bdi(o.n)}</h3>${o.d?`<p class="muted ltr" style="text-align:left;font-size:13.5px">${esc(o.d.slice(0,220))}${o.d.length>220?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn${d?" ":""}" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
-  const x=o;const lk=hid(x);
-  return `<div class="prev"><div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">${glyph(x)}<span class="tag">פרק ${x.c}</span>${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור</span>`}${lk?"":tags(x,2)}</div><h3>${bdi(title(x))}</h3>${!lk&&x.sp?`<p class="muted" style="font-size:14px">${esc(x.sp)}</p>`:""}${!lk&&(x.rw||x.why)?`<p style="font-size:14px">🎁 ${esc(x.rw||x.why)}</p>`:""}<div class="acts"><a class="btn pri" href="#/i/${x.s}">לעמוד המשימה ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}</div></div>`;
+  if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);
+    return `<div class="pcard" style="--c:${k.c||"#ffc23c"}"><div class="pch"><span class="pic">${esc(k.i||"📍")}</span><span>${esc(k.n||o.k)}${o.a?` · ${bdi(o.a)}`:""}</span></div><h3>${bdi(o.n)}</h3>${o.d?`<p class="pwhat ltr">${esc(o.d.slice(0,180))}${o.d.length>180?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
+  const x=o,lk=hid(x),c=mainCat(x);
+  const what=lk?"":(x.steps&&x.steps[0])||x.d||x.sp||"";
+  const get=lk?"":(x.rw||x.why||"");
+  const where=lk?"":(x.steps||x.d)?(x.sp||""):"";
+  return `<div class="pcard" style="--c:${CATC[c]||"#ffc23c"}">
+   <div class="pch">${glyph(x)}<span>${CAT[c]?CAT[c][0]:""} · פרק ${x.c}${x.w&&WHO[x.w]?` · ${WHO[x.w]}`:""}</span>${x.ex?`<span class="pex">📍 מדויק</span>`:`<span class="pex ap">≈ אזור</span>`}</div>
+   <h3>${bdi(title(x))}</h3>${statusPill(x)?`<div style="margin:-2px 0 8px">${statusPill(x)}</div>`:""}
+   ${lk?`<p class="pwhat">🙈 התוכן מוסתר כדי לא לספיילר</p>`:""}
+   ${what?`<div class="pline"><span>🎯</span><p>${esc(what.length>140?what.slice(0,140)+"…":what)}</p></div>`:""}
+   ${get?`<div class="pline get"><span>🎁</span><p><b>${esc(get.length>110?get.slice(0,110)+"…":get)}</b></p></div>`:""}
+   ${where?`<div class="pline"><span>📍</span><p class="muted">${esc(where.length>110?where.slice(0,110)+"…":where)}</p></div>`:""}
+   <div class="acts"><a class="btn pri" href="#/i/${x.s}">${lk?"לעמוד":"פרטים מלאים"} ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}</div></div>`;
 }
 function preview(o){openSheet(previewHtml(o))}
 function groupSheet(a){
@@ -772,7 +783,7 @@ function showRoute(){
 function focusMap(q){
   if(q.route){setTimeout(showRoute,300);return}
   if(q.at){const [ax,ay]=q.at.split(",").map(Number);map.setView([-ay,ax],7);L.marker([-ay,ax]).addTo(map);return}
-  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],7);setTimeout(()=>preview(x),250)}}
+  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],6);setTimeout(()=>preview(x),250)}}
   if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],7.5);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
 }
 function drawMini(x,y,o){

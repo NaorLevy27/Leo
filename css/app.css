@@ -504,3 +504,17 @@ body.welcomemode #nav,body.welcomemode #top{display:none}
 .wopts:not(.col) .wopt{justify-content:center;font-size:17px}
 .wopt:active{transform:scale(.98)}.wopt .we{font-size:28px}.wopt b{display:block;font-size:16px}.wopt small{display:block;color:var(--tx2);font-size:12.5px;margin-top:2px}
 .wdots{display:flex;gap:6px;justify-content:center;margin-top:18px}.wdots i{width:8px;height:8px;border-radius:50%;background:#3a2a45}.wdots i.on{width:22px;border-radius:5px;background:var(--sun)}
+
+/* map preview card */
+.pcard{position:relative}
+.pcard::before{content:"";position:absolute;top:-8px;left:-16px;right:-16px;height:4px;background:var(--c);opacity:.9}
+.pch{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800;color:var(--tx2)}
+.pch .pic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--c) 25%,#1a1020);font-size:16px}
+.pch .pex{margin-inline-start:auto;font-size:11px;padding:3px 7px;border-radius:7px;background:rgba(255,138,61,.14);color:#ffb07a}.pch .pex.ap{background:rgba(197,140,255,.14);color:var(--purple)}
+.pcard h3{font-size:21px;margin:8px 0 6px}
+.pline{display:flex;gap:10px;align-items:flex-start;padding:9px 0;border-top:1px solid var(--line)}
+.pline span{font-size:16px;line-height:1.4}.pline p{margin:0;font-size:14px;line-height:1.45}
+.pline.get p b{color:#ffd37a}
+.pwhat{font-size:14px;color:var(--tx2);margin:0 0 6px}
+.pcard .acts{display:flex;gap:8px;margin-top:12px}.pcard .acts .btn{flex:1}.pcard .acts .btn.pri{flex:2}
+.anyw{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:rgba(47,198,216,.08);border:1px solid rgba(47,198,216,.3);font-size:13.5px}
