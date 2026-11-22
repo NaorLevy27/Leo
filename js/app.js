@@ -169,10 +169,7 @@ function pageHome(){
     if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2>${soon.length>4?`<a href="#/list?miss=1">עוד ${soon.length-4}</a>`:""}</div>`+soon.slice(0,4).map(row).join("")}
     else h+=`<div class="blk okb"><h3><span class="e">✅</span>אין כרגע משהו שעומד להיסגר</h3><p class="muted" style="margin:0">אפשר להמשיך בסיפור בראש שקט.</p></div>`;
   }
-  const tp=tipList(30);if(tp.length){const t=tp[Math.floor(Date.now()/864e5)%tp.length];h+=`<div class="sec"><h2>💡 טיפ היום</h2><a href="#/tips">עוד טיפים</a></div>`+tipHtml(t)}
   if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span>🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים מאז הביקור הקודם</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
-  h+=installBox();
-  h+=`<button class="sharebig" id="shr"><span>🤝</span><div><b>יש לך חבר שמשחק?</b><small>שלח לו את Leo – ההתקדמות של כל אחד נשמרת אצלו</small></div><span class="go">שתף</span></button>`;
   return h;
 }
 
@@ -205,7 +202,8 @@ function pageList(q){
   let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
   h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
-  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn" id="fwh">📍 איפה אני</button><button class="fbtn${LF.ch?" on":""}" id="fch">📚 ${LF.ch?"פרק "+LF.ch:"כל הפרקים"} ▾</button>${S.casual?"":`<button class="fbtn${LF.avail==="now"?" on":""}" id="fnow">✅ זמין עכשיו</button>`}</div>`;
+  const SORTN={chrono:"לפי הסדר",near:"הכי קרוב",soon:"מה נגמר קודם",type:"לפי סוג"};
+  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn on" id="fsort">↕ ${SORTN[LF.sort||"chrono"]} ▾</button></div>`;
   const act=[];
   if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["⏳❗ רק מה שעלול להיעלם","miss"]);
   for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
@@ -214,6 +212,24 @@ function pageList(q){
   h+=`<div class="dim cnt">${list.length} תוצאות</div>`;
   if(!list.length)return h+`<div class="empty">אין תוצאות.<br><button class="btn sm" data-rm="all" style="margin-top:10px">נקה פילטרים</button></div>`;
   const cur=curCh();
+  const mode=LF.sort||"chrono";
+  if(mode==="near"){
+    const r=routeFrom(list.filter(x=>x.x!=null&&avail(x)==="now"));
+    h+=`<div class="blk routeb"><h3><span class="e">🧭</span>מסלול מומלץ – מהמשימה הבאה, לפי קרבה</h3><p class="muted" style="margin:0 0 8px;font-size:13px">רק מה שאפשר לעשות עכשיו. כל תחנה – הכי קרובה לקודמת.</p><a class="btn pri wide" href="#/map?route=1">🗺️ הצג את המסלול במפה</a></div>`;
+    r.slice(0,40).forEach((x,i)=>{h+=`<div class="rstep"><span class="rn">${i+1}</span>${row(x)}</div>`});
+    if(!r.length)h+=`<div class="empty">אין כרגע דברים עם מיקום שזמינים עכשיו.</div>`;
+    return h;
+  }
+  if(mode==="soon"){
+    const u=list.filter(x=>(timed(x)||missable(x))&&avail(x)==="now").sort((a,b)=>(timed(b)-timed(a))||(((ref(a.bf)||{}).ord||9e9)-((ref(b.bf)||{}).ord||9e9)));
+    h+=`<div class="grp">⏳ עלול להיגמר בכל רגע · ❗ נעלם בנקודה ידועה</div>`+(u.map(x=>row(x)).join("")||`<div class="empty">אין כרגע משהו שעומד להיגמר 🎉</div>`);
+    return h;
+  }
+  if(mode==="type"){
+    for(const k in CAT){const a=list.filter(x=>mainCat(x)===k);if(!a.length)continue;const open=LF.open["t"+k]!=null?LF.open["t"+k]:false;
+      h+=`<section class="chap${open?" open":""}"><button class="chead" data-tog="t${k}"><span class="cn">${CAT[k][1]} ${CAT[k][0]}</span><span class="bar"><i style="width:${pct(a.filter(done).length,a.length)}%"></i></span><span class="cp">${a.filter(done).length}/${a.length}</span><span class="cv">${open?"▴":"▾"}</span></button>${open?a.map(x=>row(x)).join(""):""}</section>`}
+    return h;
+  }
   const timeline=LF.tab==="all"||LF.tab==="story"||LF.tab==="side";
   for(let c=1;c<=5;c++){
     const inC=list.filter(x=>x.c===c);if(!inC.length)continue;
@@ -236,8 +252,13 @@ function pageList(q){
   }
   return h;
 }
+function routeFrom(arr){
+  const n=nextStory();let cx=n&&n.x!=null?n.x:480,cy=n&&n.x!=null?n.y:520;const left=arr.filter(x=>x!==n);const out=n&&n.x!=null&&arr.includes(n)?[n]:[];
+  while(left.length){let bi=0,bd=1e18;for(let i=0;i<left.length;i++){const dx=left[i].x-cx,dy=left[i].y-cy,dd=dx*dx+dy*dy;if(dd<bd){bd=dd;bi=i}}const x=left.splice(bi,1)[0];out.push(x);cx=x.x;cy=x.y}
+  return out;
+}
 function filterSheet(){
-  let h=`<h3 style="font-size:19px;margin:0 0 4px">סינון</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">כל לחיצה מדליקה/מכבה. מה שצבוע = מוצג.</p>`;
+  let h=`<h3 style="font-size:19px;margin:0 0 4px">סינון</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">כל לחיצה מדליקה/מכבה. מה שצבוע = מוצג. · <button class="linkb" id="fwh2">📍 עדכן איפה אני</button></p>`;
   h+=`<div class="fsec"><b>פרק</b><div class="seg wide">`+[0,1,2,3,4,5].map(c=>`<button data-fc="${c}" class="${LF.ch===c?"on":""}">${c?c:"הכל"}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><b>מצב</b><div class="seg wide">`+Object.keys(STL).map(k=>`<button data-fs="${k}" class="${LF.stat===k?"on":""}">${STL[k]}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שזמין עכשיו</b><small>בלי מה שעוד לא נפתח ובלי מה שפוספס</small></div><button class="sw${LF.avail==="now"?" on":""}" data-fa></button></div>
@@ -254,7 +275,7 @@ function filterSheet(){
   $$("[data-fm]").forEach(b=>b.onclick=()=>{LF.miss=LF.miss?0:1;re()});
   $$("[data-fx]").forEach(b=>b.onclick=()=>{const k=b.dataset.fx;LF.ex[k]=!LF.ex[k];if(!LF.ex[k])delete LF.ex[k];re()});
   $$("[data-fk]").forEach(b=>b.onclick=()=>{const k=b.dataset.fk;if(LF.kt[k]===1)delete LF.kt[k];else LF.kt[k]=1;re()});
-  $("#fdone").onclick=closeSheet;
+  $("#fdone").onclick=closeSheet;const w2=$("#fwh2");if(w2)w2.onclick=()=>whereSheet();
   bindRm();
 }
 function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm;
@@ -264,10 +285,10 @@ function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm
 function bindList(){
   const save=()=>{Store.setS("lists2",LF);route(true)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
-  $("#fopen").onclick=filterSheet;$("#fwh").onclick=()=>whereSheet();
-  $("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
-  const fn=$("#fnow");if(fn)fn.onclick=()=>{LF.avail=LF.avail?"":"now";save()};
-  $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
+  $("#fopen").onclick=filterSheet;
+  $("#fsort").onclick=()=>{const M=[["chrono","📖 לפי הסדר","כמו במשחק – פרק אחרי פרק, ומה שנפתח אחרי כל משימה"],["near","🧭 הכי קרוב","מסלול מהמשימה הבאה – כל תחנה הכי קרובה לקודמת"],["soon","⏳ מה נגמר קודם","מה שעלול להיעלם – למעלה"],["type","🗂 לפי סוג","קלפים, רכבים, נשקים…"]];openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איך לסדר?</h3>`+M.map(m=>`<button class="row" style="width:100%;text-align:start" data-so="${m[0]}"><div class="t"><b>${m[1]}</b><small>${m[2]}</small></div>${(LF.sort||"chrono")===m[0]?"✓":""}</button>`).join(""));$$("[data-so]").forEach(b=>b.onclick=()=>{LF.sort=b.dataset.so;closeSheet();save()})};
+  if(false)$("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
+  $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=/^t/.test(b.dataset.tog)?b.dataset.tog:+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
   bindRm();
   const qx=$("#qx");if(qx)qx.onclick=()=>{LF.q="";save()};
   const q=$("#q");if(q){q.oninput=()=>{LF.q=q.value;clearTimeout(q._t);q._t=setTimeout(()=>{Store.setS("lists2",LF);const p=q.selectionStart;route(true);const n=$("#q");n.focus();n.setSelectionRange(p,p)},250)}}
@@ -299,7 +320,7 @@ function pageItem(slug){
   const c=mainCat(x);
   let h=`<div class="ihead"><div class="meta">${glyph(x)}<span class="tag">${CAT[c]?CAT[c][1]+" "+CAT[c][0]:""}</span><span class="tag">פרק ${x.c}</span>${x.w&&WHO[x.w]?`<span class="tag">👤 ${WHO[x.w]}</span>`:""}${tags(x,4)}</div>
   ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1>${hid(x)?"":`<button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`}`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
-  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}${x.story&&!done(x)?`<button class="btn" data-upto="${esc(x.id)}" style="font-size:13px">✓ עד כאן</button>`:""}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
+  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div>${x.story&&!done(x)&&!S.casual?`<button class="linkb" data-upto="${esc(x.id)}" style="margin:6px 4px 0">סיימתי גם את כל מה שלפני</button>`:""}</div>`;
   if(hid(x)){
     h+=`<div class="blk lockbox"><div style="font-size:38px">🙈</div><h3 style="justify-content:center">התוכן מוסתר כדי לא לספיילר</h3><p class="muted">זה מפרק ${x.c}${x.c>curCh()?` – ואתה עכשיו בפרק ${curCh()}`:""}. אתה מחליט מה לראות:</p>
     <div class="lockbtns">${!REV.has(x.id)?`<button class="btn" id="unspoil">👁 הצג רק את השם</button>`:""}<button class="btn pri" id="uncontent">📖 הצג מה עושים</button></div></div>`;
@@ -687,7 +708,17 @@ function ensureMap(){
   const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=4.8);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
+let RLAYER=null;
+function showRoute(){
+  if(RLAYER){map.removeLayer(RLAYER);RLAYER=null}
+  const r=routeFrom(IT.filter(x=>x.x!=null&&!x.tip&&avail(x)==="now"&&passes(x))).slice(0,25);if(!r.length)return toast("אין מסלול כרגע");
+  RLAYER=L.layerGroup().addTo(map);L.polyline(r.map(x=>[-x.y,x.x]),{color:"#ff3d8b",weight:4,opacity:.85,dashArray:"8 8"}).addTo(RLAYER);
+  r.forEach((x,i)=>L.marker([-x.y,x.x],{zIndexOffset:1000,icon:L.divIcon({className:"",html:`<div class="rpin">${i+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]})}).on("click",()=>preview(x)).addTo(RLAYER));
+  map.fitBounds(L.latLngBounds(r.map(x=>[-x.y,x.x])).pad(.2));
+  $("#mapbar").insertAdjacentHTML("afterbegin",`<button class="chip on" id="rclr">🧭 מסלול · ${r.length} ✕</button>`);$("#rclr").onclick=()=>{map.removeLayer(RLAYER);RLAYER=null;$("#rclr").remove()};
+}
 function focusMap(q){
+  if(q.route){setTimeout(showRoute,300);return}
   if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],7);setTimeout(()=>preview(x),250)}}
   if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],7.5);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
 }

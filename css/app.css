@@ -448,3 +448,8 @@ main>.wrap{max-width:760px;margin:0 auto}
 body.mapmode .ctl{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 86px)}
 body.mapmode .leaflet-bottom{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 68px)}
 main{padding-bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 96px)}
+
+.routeb{background:linear-gradient(135deg,rgba(255,61,139,.14),rgba(255,138,61,.08)),var(--card);border-color:rgba(255,61,139,.35)}
+.rstep{display:flex;align-items:center;gap:8px}.rstep .row{flex:1;margin-bottom:6px}
+.rn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sun);color:#1c0710;font-weight:900;font-size:12px;display:grid;place-items:center}
+.rpin{width:26px;height:26px;border-radius:50%;background:var(--sun);color:#1c0710;font:900 12px var(--head);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
