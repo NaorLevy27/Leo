@@ -25,7 +25,7 @@ const STORY=IT.filter(x=>x.story);
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
-const CATC={story:"#f42385",side:"#d34be0",op:"#ff7a5c",collect:"#ffb35c",event:"#ff8fc0",money:"#ffd27a",vehicle:"#b58cff",weapon:"#ff5a6e",egg:"#ffc2b0",tip:"#ffb35c"};
+const CATC={story:"#f29ac0",side:"#c7a3e6",op:"#f6b07e",collect:"#f8cf8a",event:"#a9b8f0",money:"#f2c49a",vehicle:"#9fa6ec",weapon:"#f2948c",egg:"#e2b6e8",tip:"#f8cf8a"};
 const CI={story:"book-open",side:"drama",op:"briefcase",collect:"layers",event:"dice-5",money:"banknote",vehicle:"car",weapon:"crosshair",egg:"egg",tip:"lightbulb"};
 const KTI={card:"layers",mag:"book-marked",book:"book-open",med:"sun",dive:"waves",flam:"bird",drone:"plane",wink:"camera",other:"sparkles"};
 const EI={"📲":"smartphone","🧭":"route","🎯":"target","🎁":"gift","💡":"lightbulb","📍":"map-pin","🕒":"clock","🅿️":"square-parking","▶":"play","🔗":"layers","💬":"message-circle","📝":"book-open","⌨️":"gamepad-2","⚠":"triangle-alert","🎮":"gamepad-2","🗺️":"map","🔑":"key-round","🚨":"siren","💵":"banknote","💾":"save","👁️":"scan-eye","✨":"sparkles","🌍":"navigation","🆕":"sparkles","⏳":"hourglass","🙈":"eye-off","👤":"user-round","🤝":"share-2","🌐":"languages","🕹️":"joystick","📖":"book-open","🎭":"drama","💼":"briefcase","🃏":"layers","🎲":"dice-5","🚗":"car","🔫":"crosshair","🥚":"egg","⭐":"star","🏘️":"house","🛣️":"route","💀":"skull","🔐":"lock"};
@@ -660,18 +660,18 @@ function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)
 const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k==="btn"?"🎮":"💡"}</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(t.d>"2026-11-22"&&Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
 /* hub: one colorful tile per small topic */
 const HUB=[
- ["#/news","sparkles","מה חדש","התגליות האחרונות","#f42385","t"],
- ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#ff7a5c","t"],
- ["#/cheats","joystick","צ'יטים","כל הקודים","#b5128f","t"],
- ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#ffad66","t"],
- ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#6a1aa0"],
- ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#ff5a6e"],
- ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#d0148b"],
- ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#e8905a"],
- ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#f42385"],
- ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#ff7a5c"],
- ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#b5128f"],
- ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#ffad66"]];
+ ["#/news","sparkles","מה חדש","התגליות האחרונות","#5a5bc0","t"],
+ ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#8a6cc0","t"],
+ ["#/cheats","joystick","צ'יטים","כל הקודים","#b076bf","t"],
+ ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#d06aa0","t"],
+ ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#e7849a"],
+ ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#ee9a86"],
+ ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#f2ae8c"],
+ ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#9a74c2"],
+ ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#5a5bc0"],
+ ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#8a6cc0"],
+ ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#b076bf"],
+ ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#d06aa0"]];
 const glist=(arr,hf)=>`<div class="glist">`+arr.map(t=>`<a href="${hf(t)}"><span class="gi" style="--c:${t[4]}">${ic(t[1])}</span><span class="t"><b>${t[2]}</b><small>${t[3]}</small></span><span class="chv">${ic("chevron-left")}</span></a>`).join("")+`</div>`;
 const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72","#ff9b78","#ffb37f","#ffc58a"];
 const skyAt=(i,n)=>SKY[Math.round(i/(Math.max(1,n-1))*(SKY.length-1))];
@@ -699,13 +699,13 @@ function gateGuide(){
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
- ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#f42385",1],
- ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#ff7a5c",1],
- ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#b5128f",1],
- ["map","map","המפה","מה מופיע עליה","#ffad66"],
- ["share","share-2","שתף עם חברים","שלח את Leo","#6a1aa0"],
- ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#ff5a6e"],
- ["lang","languages","English / עברית","Language","#d0148b"]];
+ ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#5a5bc0",1],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#8a6cc0",1],
+ ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#b076bf",1],
+ ["map","map","המפה","מה מופיע עליה","#d06aa0"],
+ ["share","share-2","שתף עם חברים","שלח את Leo","#e7849a"],
+ ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#ee9a86"],
+ ["lang","languages","English / עברית","Language","#f2ae8c"]];
 function pageSettings(sec){
   if(!sec)return `<div class="ihead"><h1>אני</h1></div>${glist(ME.filter(t=>t[5]),t=>"#/settings/"+t[0])}<div style="height:14px"></div>${glist(ME.filter(t=>!t[5]),t=>"#/settings/"+t[0])}`;
   const T=ME.find(t=>t[0]===sec)||ME[0];

@@ -1137,3 +1137,126 @@ body{background:radial-gradient(90% 40% at 50% -8%,rgba(181,18,143,.38),transpar
 .now .nmap::after{background:linear-gradient(180deg,transparent 0%,rgba(26,12,44,.15) 50%,var(--card) 100%)}
 .glist .gi{color:var(--ink)}
 .glist .gi[style*="#6a1aa0"],.glist .gi[style*="#b5128f"],.glist .gi[style*="#d0148b"],.glist .gi[style*="#f42385"]{color:#fff}
+
+/* =====================================================================
+   v7 · "Vice dusk" — the new logo + the GTA VI key-art palette.
+   Light pastel dusk: periwinkle sky → lilac → dusty pink → peach,
+   plum palm silhouettes, ink outline (#241341) for type, pink for action.
+   ===================================================================== */
+:root{
+  --ink:#241341;--tx:#241341;--tx2:#5b4876;--tx3:#8c7ba3;
+  --bg:#f3d2cf;--bg2:#fff7f4;--card:rgba(255,248,246,.86);--card2:rgba(255,255,255,.72);
+  --sep:rgba(36,19,65,.09);--line:rgba(36,19,65,.1);
+  --dusk:#4a4fb5;--peri:#8a84c9;--mauve:#a874b8;--rose:#d98aa8;--peach:#f1b090;--apricot:#e8955f;--plum:#714062;
+  --acc:#c93b78;--sun:#e8955f;--warn:#d9783f;--lettering:var(--ink);
+  --ramp:linear-gradient(90deg,#4a4fb5,#8a6cc0 28%,#d06aa0 55%,#ee9a86 78%,#f6c08a);
+  --rampv:linear-gradient(180deg,#5a5bc0 0%,#9a74c2 34%,#d886a8 66%,#f2ae8c 100%);
+}
+html{background:#f2b79a}
+body{background:linear-gradient(180deg,#8f93d6 0%,#b39bd2 22%,#d6a0be 48%,#efb3a4 74%,#f6c49c 100%) fixed;color:var(--tx)}
+a,.linkb,.morel,.sall{color:#7a3aa6}
+::selection{background:#f2a6c4}
+
+/* header */
+#top{background:rgba(255,246,243,.62);backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px)}
+#top .brand span{color:var(--ink)}#top .brand small{color:var(--tx2)}
+#top .brand img{box-shadow:0 4px 12px rgba(74,79,181,.35)}
+.iconbtn{background:rgba(255,255,255,.55);color:var(--ink)}
+
+/* type */
+.ihead h1,.sec h2,.chead .cn,.pcard h3,.answer .ah b,.hwhere .chn b{color:var(--ink);text-shadow:none}
+.ihead h1{font-size:36px}
+.ihead .imeta,.cnt,.grp,.fbar .cntl{color:var(--tx2)}
+.sec h2::before,.grp.mk::before{background:linear-gradient(180deg,#f6c08a,#ee9a86 50%,#d06aa0)}
+
+/* surfaces */
+.group,.chap.open,.glist,.row,.primary,.blk,.fold,.card,.gcard,.tip,.answer,.newsline,.search,.search.big,.search.ask,.chap:not(.open) .chead,.now{
+  background:var(--card);border:1px solid rgba(255,255,255,.6);box-shadow:0 8px 24px -14px rgba(74,40,110,.45)}
+.group>.row,.chap .row{background:transparent;border:0;box-shadow:none}
+.row:active,.group>.row:active,.glist a:active{background:rgba(36,19,65,.05)}
+.kids{background:rgba(36,19,65,.025)}
+.row .t b,.glist .t b{color:var(--ink)}.row .t small,.glist .t small{color:var(--tx3)}
+.row.done .t b{color:var(--tx3)}
+
+/* glyph plates: pastel dusk swatches, ink icons */
+.gl,.gl.coll,.gl.story,.gl.side{color:var(--ink)}
+.gl.story{--c:#f29ac0}.gl.side{--c:#c7a3e6}
+.gl.opt{border-color:#c93b78;color:#c93b78}
+.chk{border-color:rgba(36,19,65,.25)}.chk.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.chead .bar,.hwhere .chb{background:rgba(36,19,65,.1)}
+
+/* controls */
+.btn{background:rgba(36,19,65,.07);color:var(--ink)}
+.btn.pri,.bigchk,.now .ngo{background:var(--acc);color:#fff;box-shadow:0 8px 18px -8px rgba(201,59,120,.8)}
+.bigchk.on{background:rgba(36,19,65,.08);color:var(--tx2);box-shadow:none}
+.ishare{background:var(--card);color:var(--ink)}
+.tag{background:rgba(36,19,65,.07);color:var(--tx2)}
+.tag.soon,.tag.ponr{background:rgba(232,149,95,.2);color:#a8521f}
+.tag.miss,.tag.gone{background:rgba(201,59,120,.13);color:#a52a62}
+.tag.ok{background:rgba(74,79,181,.12);color:#3f43a0}
+.tag.ex{background:rgba(201,59,120,.12);color:#a52a62}
+.tab,.tab:not(.on){color:var(--tx2)}
+.tab.on{color:var(--ink);box-shadow:inset 0 -3px 0 0 var(--acc)}
+.fbtn,.fbtn.on{background:var(--card);border:1px solid rgba(255,255,255,.6);color:var(--ink)}
+.chip,.chip.on{background:rgba(255,255,255,.6);color:var(--tx2)}
+.chip.on{background:var(--acc);color:#fff}
+.chip.pick.on{background:var(--c);color:var(--ink)}
+.seg{background:rgba(36,19,65,.07)}.seg button{color:var(--tx2)}.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(36,19,65,.15)}
+.sw{background:rgba(36,19,65,.18)}.sw.on{background:var(--acc)}
+.set .t b{color:var(--ink)}.set .t small{color:var(--tx3)}
+.search input,.msearch input,input.in,textarea.in{color:var(--ink)}
+.search .ic{color:var(--tx3)}
+textarea.in,input.in,select.in{background:#fff;border-color:var(--line)}
+
+/* home */
+.hwhere .chn{color:var(--tx2)}
+.now .nmap::after{background:linear-gradient(180deg,transparent 0%,rgba(255,248,246,.1) 50%,rgba(255,248,246,.95) 100%)}
+.now .nmap::before{background:linear-gradient(0deg,transparent 55%,rgba(74,79,181,.25))}
+.now .nk{color:#a8521f}
+.now .nt b{color:var(--ink)}
+.now .ns{color:var(--tx3)}
+.now:not(.hasmap){background:var(--rampv)}
+.hint.warn{background:rgba(232,149,95,.18);color:#8f4418}
+
+/* hub banner + palm */
+.feat{background:var(--rampv);box-shadow:0 14px 30px -16px rgba(74,40,110,.6)}
+.feat .palm{color:#714062;opacity:.9}
+.feat::before{background:linear-gradient(180deg,#ffe0a6,#f6b483 50%,#ee8f8a)}
+.feat small,.feat span{color:#fff5f2}.feat b{color:#fff;text-shadow:0 2px 0 rgba(36,19,65,.35)}
+.glist .gi{box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+
+/* item page */
+.primary h3,.blk h3,.fold summary{color:var(--ink)}
+.blk h3 .e,.primary h3 .e,.fold summary .e{color:var(--acc)}
+.getline{background:rgba(246,192,138,.28)}.getline>span .ic{color:#c56a2a}
+.tipline{background:rgba(138,132,201,.14)}.tipline>span .ic,.pline>span .ic{color:#5a55b8}
+.steps li::marker,.steps .n{color:var(--acc)}
+.tbl th,.tbl td{border-color:var(--sep)}
+.anyw{background:rgba(74,79,181,.08);border-color:rgba(74,79,181,.25)}
+.gatebar,.demo{border-color:rgba(201,59,120,.4);background:rgba(201,59,120,.05)}
+
+/* sheets, toast, banner */
+#sheet{background:#fff7f4;color:var(--ink);box-shadow:0 -10px 40px rgba(36,19,65,.25)}
+.fact{background:#fff7f4}
+#scrim{background:rgba(36,19,65,.3)}
+.toast{background:#fff;color:var(--ink);border:0;box-shadow:0 10px 30px rgba(36,19,65,.25)}
+.upd{background:var(--acc);color:#fff}
+.answer .gbody{color:var(--tx2)}.answer .gbody b{color:var(--ink)}
+.answer .btn{background:rgba(36,19,65,.08);color:var(--ink)}
+
+/* nav: light liquid glass on the dusk */
+#nav{background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(255,255,255,.34)),rgba(255,240,240,.25)!important;box-shadow:0 12px 30px rgba(74,40,110,.28),inset 0 1px 0 rgba(255,255,255,.9)!important}
+#nav a{color:rgba(36,19,65,.62)}#nav a.on{color:var(--ink)}
+#nav a.on b{color:var(--acc)}
+#nav .lens{background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(255,236,244,.8))!important;box-shadow:0 4px 14px rgba(201,59,120,.25),inset 0 1px 0 #fff!important}
+.newdot{background:var(--acc);color:#fff}
+body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(255,255,255,.45))!important}
+
+/* map chrome on light glass */
+.msearch{background:rgba(255,248,246,.85)!important;border:1px solid rgba(255,255,255,.7)!important;color:var(--ink)}
+#mapbar .chip{background:rgba(255,248,246,.88);color:var(--ink)}
+#mapbar .chip.on{background:var(--acc);color:#fff}
+.ctl button{background:rgba(255,248,246,.92);color:var(--ink);border-color:rgba(255,255,255,.7)}
+.ctl .rep{background:var(--acc)!important;color:#fff}
+.pcard h3{color:var(--ink)}
+.glist .gi,.glist .gi[style]{color:#fff}
