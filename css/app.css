@@ -379,12 +379,12 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .rev{width:34px;height:34px;border-radius:50%;background:var(--card2);border:1px solid var(--line);flex:none;font-size:15px}
 
 /* map mode: lock the page so touches go to the map (iOS rubber-band / pull-to-refresh) */
-body.mapmode{overflow:hidden;overscroll-behavior:none;position:fixed;inset:0;width:100%}
+html:has(body.mapmode),body.mapmode{overflow:hidden;overscroll-behavior:none;height:100%}
 #map{touch-action:none;-webkit-user-select:none;user-select:none}
 #map .leaflet-tile{will-change:transform}
 /* perf: no live blur over the moving map */
 body.mapmode #nav,body.mapmode .msearch,body.mapmode .mapbar .chip,body.mapmode #nav .lens{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
-body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03)),rgba(20,12,26,.94)}
+body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(20,12,26,.88)}
 body.mapmode .msearch,body.mapmode .mapbar .chip{background:rgba(20,12,26,.95)}
 .tpin>i{box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.55)}
 .linkb{color:#ffb07a;font:inherit;font-size:11px;letter-spacing:0;text-decoration:underline;text-transform:none;padding:0}
@@ -417,17 +417,13 @@ body.mapmode .leaflet-bottom{bottom:calc(84px + var(--safe-b))}
 .mapbar .chip.pick.on{background:var(--c);color:#14080f;border-color:transparent}
 body.sheeton .upd{display:none}
 .upd{display:flex;align-items:center;gap:8px}
-/* nav bar: docked, full width, tidy */
-#nav{left:0;right:0;transform:none;bottom:0;width:auto;border-radius:22px 22px 0 0;padding:6px 8px calc(6px + var(--safe-b));
-  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.03)),rgba(14,9,20,.86)}
-#nav::after{left:12%;right:12%;border-radius:22px 22px 60% 60%/22px 22px 100% 100%;height:40%}
-#nav a{padding:6px 0 5px;font-size:11px}
-#nav .lens{top:6px;bottom:calc(6px + var(--safe-b));border-radius:16px}
-main{padding-bottom:calc(92px + var(--safe-b))}
-#map{bottom:0}
-body.mapmode .ctl{bottom:calc(84px + var(--safe-b))}
-body.mapmode .leaflet-bottom{bottom:calc(66px + var(--safe-b))}
-#sheet{bottom:calc(70px + var(--safe-b))}
-.toast{bottom:calc(80px + var(--safe-b))}
-.upd{bottom:calc(80px + var(--safe-b))}
-@media(min-width:760px){#nav{left:50%;right:auto;transform:translateX(-50%);width:460px;bottom:12px;border-radius:24px;padding-bottom:6px}#nav .lens{bottom:6px}}
+/* floating pill nav (restored) – same position on every page */
+#nav{left:50%;right:auto;transform:translateX(-50%);width:min(calc(100% - 24px),460px);bottom:calc(10px + var(--safe-b));border-radius:30px;padding:6px}
+#nav .lens{top:6px;bottom:6px;border-radius:24px}
+#sheet{bottom:calc(86px + var(--safe-b))}
+.toast,.upd{bottom:calc(94px + var(--safe-b))}
+body.mapmode .ctl{bottom:calc(98px + var(--safe-b))}
+body.mapmode .leaflet-bottom{bottom:calc(80px + var(--safe-b))}
+
+.mapbar .chip.gm{background:rgba(20,12,26,.95)!important;color:#ffd2b8!important;border-color:rgba(255,138,61,.7)!important}
+.mapbar .chip.gm.on{background:var(--sun)!important;color:#1c0710!important;border-color:transparent!important;font-weight:900}
