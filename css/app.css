@@ -735,3 +735,78 @@ a{color:var(--aqua)}
 .tiles.dimmed{opacity:.45}
 #gbody h2.flash{animation:flash 1.6s ease-out}
 @keyframes flash{0%{background:color-mix(in srgb,var(--sunny) 35%,transparent)}100%{background:transparent}}
+
+/* =====================================================================
+   v3 · "Leo sunset" — the logo as the whole palette.
+   Violet sky → magenta → hot pink → coral → peach sun, ink-violet
+   silhouettes, pale-pink lettering with a dark offset (like the logo).
+   ===================================================================== */
+:root{
+  --bg:#16031f;--bg2:#1f0630;--card:#2a0a42;--card2:#36104f;--line:#4a1a68;
+  --tx:#fff0f5;--tx2:#e7bfd8;--tx3:#b083ad;
+  --ink:#16021f;--lettering:#fcd6e3;
+  --violet:#6a0a82;--magenta:#c8158d;--hotpink:#f42385;--coral:#fc5072;--peach:#ffab7a;--sunny:#ffcf7a;
+  --aqua:#ff9cc2;--flamingo:#f42385;--sunset:#fc5072;--lilac:#d79bff;
+  --p-flamingo:#ff7fb0;--p-aqua:#ff9a8a;--p-sun:#ffc58a;--p-lilac:#e29cf0;--p-mint:#ffb3c9;--p-sky:#d7a6ff;--p-coral:#ff8c86;--p-peach:#ffbe8f;
+  --teal:var(--aqua);--pink:var(--hotpink);--gold:var(--sunny);--green:#ff9cc2;--purple:var(--lilac);
+}
+body{background:linear-gradient(180deg,#2e0a4d 0%,#1d052f 34%,var(--bg) 70%) fixed}
+#top{background:linear-gradient(180deg,rgba(46,10,77,.97),rgba(46,10,77,.86));border-bottom:0}
+#top .brand span{color:var(--lettering);text-shadow:2px 2px 0 var(--ink)}
+#top .brand small{color:var(--tx3);text-shadow:none}
+.iconbtn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.08)}
+
+/* lettering: pale pink with an ink offset, the way the logo is drawn */
+.ihead h1,.sec h2,.chead .cn,.pcard h3{color:var(--lettering);text-shadow:3px 3px 0 var(--ink)}
+.sec h2{text-shadow:2px 2px 0 var(--ink)}
+
+/* rows */
+.row{background:var(--card)}
+.row:active{background:var(--card2)}
+.row.tl{border-color:color-mix(in srgb,var(--hotpink) 55%,transparent)}
+.gl.story{background:var(--hotpink);color:var(--lettering)}
+.gl.side{background:var(--magenta);color:var(--lettering)}
+.gl.opt{border-color:var(--hotpink);color:var(--hotpink)}
+.chk.on{background:var(--lettering);border-color:var(--lettering);color:var(--ink)}
+.chead .bar i{background:linear-gradient(90deg,var(--peach),var(--hotpink))}
+
+/* buttons: the logo's pale-pink lettering as the call to action */
+.btn.pri,.now .nb{background:var(--lettering);color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.bigchk{border-color:var(--lettering);color:var(--lettering)}
+.bigchk.on{background:var(--lettering);color:var(--ink);box-shadow:3px 3px 0 var(--ink)}
+.tab.on{color:var(--ink)}
+.fbtn.on{border-color:color-mix(in srgb,var(--peach) 55%,var(--line));color:var(--peach);background:color-mix(in srgb,var(--peach) 8%,var(--card))}
+.fbtn b{background:var(--peach)}
+.chip.on{background:color-mix(in srgb,var(--hotpink) 18%,var(--card));border-color:var(--hotpink);color:var(--lettering)}
+a,.linkb{color:var(--aqua)}
+
+/* home poster = the logo scene: striped sun + palm silhouette */
+.now{background:linear-gradient(180deg,#4a0b6e 0%,#8d0f86 46%,#d4167f 78%,#f2456f 100%);min-height:270px}
+.now::before{background:linear-gradient(180deg,#ffd08a 6%,#ffa070 40%,#ff5a86 82%);width:230px;height:230px;inset-inline-end:-40px;bottom:-30px}
+.now .palm{position:absolute;z-index:-1;inset-inline-end:-6px;bottom:-4px;width:150px;height:210px;color:var(--ink);pointer-events:none}
+.now .nk{color:var(--lettering);opacity:.85}
+.now .nt b{color:var(--lettering);text-shadow:3px 3px 0 var(--ink)}
+.now .ns{color:#ffd6e6}
+.hwhere .chn{color:var(--lettering)}.hwhere .chn i{color:var(--peach)}
+
+/* hub + me tiles: colours run down the grid like the logo's sky */
+.tile{color:var(--ink)}
+.tile.dark{color:var(--lettering)}
+.tile.dark .ti .ic{color:var(--lettering)}
+.tile b{text-shadow:none}
+.tile.dark b{text-shadow:2px 2px 0 rgba(22,2,31,.55)}
+
+/* answer card */
+.answer{background:var(--lettering)}
+.answer .btn{background:var(--ink);color:var(--lettering)}
+
+/* nav */
+#nav a.on b{color:var(--peach)}
+.newdot{background:var(--hotpink);color:var(--lettering)}
+
+/* sheets / search */
+#sheet{background:#22072f}
+.search.big,.search.ask{border-color:color-mix(in srgb,var(--hotpink) 45%,var(--line))}
+.search.ask .ic{color:var(--peach)}
+.getline>span .ic{color:var(--peach)}.tipline>span .ic,.pline>span .ic{color:var(--aqua)}
+.blk h3 .e,.primary h3 .e,.fold summary .e{color:var(--peach)}
