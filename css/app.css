@@ -235,3 +235,6 @@ textarea.in{min-height:76px;resize:vertical}
 .marker-cluster span{line-height:1}
 
 .leaflet-bottom{bottom:calc(80px + var(--safe-b))}
+
+#top .brand span{display:flex;flex-direction:column;line-height:1.05}
+#top .brand small{font-size:10.5px;font-weight:700;color:var(--tx2);letter-spacing:0}

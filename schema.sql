@@ -1,4 +1,4 @@
--- Leonida Route – Supabase schema. Paste into Supabase › SQL Editor › Run (once).
+-- Leo – Supabase schema. Paste into Supabase › SQL Editor › Run (once).
 
 -- profiles: public display name per user
 create table if not exists profiles(

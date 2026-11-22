@@ -87,7 +87,7 @@ function pageHome(){
   const pr=nextPonr();
   const soon=IT.filter(x=>!done(x)&&missable(x)&&x.c===ch&&(!pr||x.ord<=pr.ord+0.5)).slice(0,5);
   const near=n?IT.filter(x=>!done(x)&&!x.story&&x.p===n.p&&!x.tip).slice(0,4):[];
-  let h=`<section class="hero"><div class="kick">Leonida Route · פרק ${ch}</div><h1>${S.casual?"מה יש לגלות היום?":(n?"ממשיכים מאיפה שעצרת":"סיימת את הסיפור! 🎉")}</h1>`;
+  let h=`<section class="hero"><div class="kick">Leo · פרק ${ch}</div><h1>${S.casual?"מה יש לגלות היום?":(n?"ממשיכים מאיפה שעצרת":"סיימת את הסיפור! 🎉")}</h1>`;
   if(!S.casual){
     h+=`<div class="ringrow">${ring(pct(dn,all.length),"מכל המשחק")}<div class="stat3"><div><b>${st}/${STORY.length}</b><span>סיפור</span></div><div><b>${dn}</b><span>סומנו</span></div><div><b>${soon.length}</b><span>ייסגרו בקרוב</span></div></div></div>`;
   }
@@ -414,7 +414,7 @@ function route(soft){
   if(page==="list")bindList();
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{Store.setS("spoil",false);route(true)};
-  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null&&!locked(x))setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x&&!locked(x)?x.n+" · ":"")+"Leonida Route"}else document.title="Leonida Route";
+  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null&&!locked(x))setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x&&!locked(x)?x.n+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
   if(!soft)scrollTo(0,0);
