@@ -1,0 +1,22 @@
+# עדכון יומי – איך מוסיפים תגליות
+
+כל תגלית חדשה נכנסת ל־`data/extra.json` (לא נוגעים ב־items.json הגדול):
+
+```json
+{"updated":"YYYY-MM-DD",
+ "news":[{"d":"YYYY-MM-DD","t":"טקסט קצר בעברית","s":"slug-של-הפריט (לא חובה)"}],
+ "items":[{
+   "id":"c3-Unique English Name","s":"c3-unique-english-name",
+   "c":3, "g":["egg"], "w":"B", "n":"שם בעברית", "ne":"English name",
+   "loc":["County","Area","Spot"], "sp":"איפה בדיוק", "lk":"איך זה נראה",
+   "why":"מה מקבלים", "steps":["שלב 1","שלב 2"], "tips":["טיפ"],
+   "m":1, "pers":1, "veh":1, "x":480.5, "y":500.2, "ex":1,
+   "v":["https://www.youtube.com/watch?v=..."], "q":"search words",
+   "src_urls":["https://..."]
+ }]}
+```
+- `g`: story | side | event | egg | vehicle | weapon | op | money | collect | tip
+- `x`,`y`: יחידות המפה (0–1024) מ־Open GTA 6 Map; `ex:1` רק כשהמיקום מאומת ממקור מדויק.
+- אותו `id` כמו פריט קיים = עדכון/תיקון שלו.
+- `m:1` = אפשר לפספס, `pers:1` = אפשר גם בהמשך.
+- כותבים במילים שלנו; לא מעתיקים טקסט ממקורות.

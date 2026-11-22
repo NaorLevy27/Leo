@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Leonida Route</title>
+<meta name="description" content="המדריך בעברית ל־GTA VI: כל המשימות, מפה מדויקת, טיפים ומעקב התקדמות.">
+<meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="stylesheet" href="vendor/leaflet.css">
+<link rel="stylesheet" href="vendor/MarkerCluster.css">
+<link rel="stylesheet" href="vendor/MarkerCluster.Default.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<header id="top">
+  <button class="iconbtn" id="back" aria-label="חזרה">→</button>
+  <a class="brand" href="#/"><i>L</i>Leonida Route</a>
+  <span class="sp"></span>
+  <a class="iconbtn" href="#/settings" aria-label="הגדרות">⚙</a>
+</header>
+<main id="main"><div class="empty">טוען…</div></main>
+<div id="map" hidden></div>
+<div id="mapbar" class="mapbar" hidden></div>
+<div id="mctl" class="ctl" hidden><button id="zin" aria-label="הגדל">+</button><button id="zout" aria-label="הקטן">−</button><button id="zfit" aria-label="כל המפה">⤢</button></div>
+<nav id="nav">
+  <a href="#/" data-k="home"><b>🏠</b>בית</a>
+  <a href="#/map" data-k="map"><b>🗺️</b>מפה</a>
+  <a href="#/list" data-k="list"><b>📋</b>משימות</a>
+  <a href="#/guides" data-k="guides"><b>📘</b>מדריכים</a>
+  <a href="#/settings" data-k="settings"><b>👤</b>אני</a>
+</nav>
+<div id="scrim"></div>
+<div id="sheet" role="dialog"></div>
+<div id="toast" class="toast"></div>
+<script src="config.js"></script>
+<script src="vendor/leaflet.js"></script>
+<script src="vendor/leaflet.markercluster.js"></script>
+<script src="vendor/supabase.js"></script>
+<script src="js/store.js"></script>
+<script src="js/cloud.js"></script>
+<script src="js/guides.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
