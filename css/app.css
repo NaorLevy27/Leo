@@ -453,3 +453,9 @@ main{padding-bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 96p
 .rstep{display:flex;align-items:center;gap:8px}.rstep .row{flex:1;margin-bottom:6px}
 .rn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--sun);color:#1c0710;font-weight:900;font-size:12px;display:grid;place-items:center}
 .rpin{width:26px;height:26px;border-radius:50%;background:var(--sun);color:#1c0710;font:900 12px var(--head);display:grid;place-items:center;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+
+/* English (LTR) tweaks */
+html.en .gbody,html.en .tip{direction:rtl}
+html.en .ltr{text-align:left}
+html.en .cont .go{transform:scaleX(-1)}
+html.en .ishare,html.en .chead .cv{direction:ltr}

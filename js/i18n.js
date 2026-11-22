@@ -1,0 +1,64 @@
+/* English mode: translates the Hebrew UI after it renders (text nodes + placeholders).
+   Data fields are swapped to their English versions in app.js. */
+(function(){
+  const LANG=(()=>{try{return localStorage.getItem("lr_lang")||"he"}catch(e){return "he"}})();
+  window.LANG=LANG;
+  window.setLang=l=>{try{localStorage.setItem("lr_lang",l)}catch(e){}location.reload()};
+  if(LANG!=="en")return;
+  document.documentElement.lang="en";document.documentElement.dir="ltr";document.documentElement.classList.add("en");
+  const D={
+  "בית":"Home","מפה":"Map","משימות":"Missions","מרכז":"Hub","אני":"Me","המדריך ל־Leonida":"The Leonida guide",
+  "סיפור":"Story","משימות צד":"Side missions","מבצעי כנופיות":"Gang ops","כנופיות":"Gangs","אספנות":"Collectibles","אירועים אקראיים":"Random events","אירועים":"Events","כסף":"Money","רכבים":"Vehicles","נשקים":"Weapons","ביצי פסחא":"Easter eggs","טיפים":"Tips","הכל":"All","עוד":"More",
+  "Jason":"Jason","Lucia":"Lucia","שניהם":"Both",
+  "אתה כאן":"You are here","אתה כאן ·":"You are here ·","לא נכון? עדכן":"Not right? Update","סיימת לאחרונה:":"Last finished:","עוד לא התחלת – בהצלחה!":"Not started yet – good luck!","המשימה הבאה":"Next mission","סיימת את הסיפור! 🎉":"Story finished! 🎉","נשאר לך לאסוף דברים במפה":"Collectibles are left on the map",
+  "⏳ לפני שזה נגמר":"⏳ Before it's gone","אין כרגע משהו שעומד להיסגר":"Nothing is about to close","אפשר להמשיך בסיפור בראש שקט.":"Carry on with the story.","נקודת אל־חזור":"point of no return",
+  "⚙ סינון":"⚙ Filter","סינון":"Filter","תוצאות":"results","אין תוצאות.":"No results.","נקה פילטרים":"Clear filters","נקה הכל":"Clear all","נקה":"Clear","בכל זמן בפרק":"Any time in this chapter",
+  "↕ לפי הסדר ▾":"↕ In order ▾","↕ הכי קרוב ▾":"↕ Nearest ▾","↕ מה נגמר קודם ▾":"↕ Ending first ▾","↕ לפי סוג ▾":"↕ By type ▾",
+  "איך לסדר?":"Sort by","📖 לפי הסדר":"📖 In order","🧭 הכי קרוב":"🧭 Nearest","⏳ מה נגמר קודם":"⏳ Ending first","🗂 לפי סוג":"🗂 By type",
+  "כמו במשחק – פרק אחרי פרק, ומה שנפתח אחרי כל משימה":"Like the game – chapter by chapter, with what unlocks after each mission","מסלול מהמשימה הבאה – כל תחנה הכי קרובה לקודמת":"A route from your next mission – each stop is the closest to the last","מה שעלול להיעלם – למעלה":"What may disappear – first","קלפים, רכבים, נשקים…":"Cards, vehicles, weapons…",
+  "מסלול מומלץ – מהמשימה הבאה, לפי קרבה":"Suggested route – from your next mission, by distance","רק מה שאפשר לעשות עכשיו. כל תחנה – הכי קרובה לקודמת.":"Only what you can do now. Each stop is the closest to the previous one.","🗺️ הצג את המסלול במפה":"🗺️ Show the route on the map",
+  "פרק":"Chapter","מצב":"Status","עוד לא עשיתי":"Not done","עשיתי":"Done","פוספס":"Missed","רק מה שזמין עכשיו":"Only available now","בלי מה שעוד לא נפתח ובלי מה שפוספס":"Hides locked and missed items","⏳❗ רק מה שעלול להיעלם":"⏳❗ Only what may disappear","זמן מוגבל + דברים שנעלמים בנקודה מסוימת":"Time-limited + things that vanish at a set point","אילו סוגים להציג":"Types to show","סוגי אספנות":"Collectible types","מוצג הכל – בחר סוג כדי לראות רק אותו":"Showing all – pick a type to see only it","מוצגים רק הסוגים הצבועים":"Showing only the coloured types","כל לחיצה מדליקה/מכבה. מה שצבוע = מוצג.":"Each tap turns on/off. Coloured = shown.","📍 עדכן איפה אני":"📍 Update where I am","נפתח אחרי המשימה הזאת":"Unlocks after this mission",
+  "⏳ עלול להיגמר בקרוב":"⏳ May end soon","❗ אפשר לפספס":"❗ Missable","♾ אפשר גם בהמשך":"♾ Can do later","❌ פוספס":"❌ Missed","⚠ אל־חזור":"⚠ No return","🆕 חדש":"🆕 New","🚗 רכב":"🚗 Vehicle","📍 מדויק":"📍 Exact","≈ אזור":"≈ Area","חדש":"New",
+  "סמן שעשיתי ✓":"Mark as done ✓","✓ עשיתי את זה":"✓ Done","סיימתי גם את כל מה שלפני":"I also finished everything before","🎁":"🎁",
+  "מה מקבלים":"What you get","מה עושים":"What to do","מתי לעשות":"When","שלב אחרי שלב":"Step by step","איך עושים":"How to","טיפים":"Tips","בחירות":"Choices","איך שומרים את הרכב":"How to keep the car","איפה בדיוק":"Where exactly","סרטון":"Video","קשור":"Related","פתח במפה הגדולה ›":"Open on the big map ›","תגובות וטיפים מהקהילה":"Community comments & tips",
+  "נפתח אחרי":"Unlocks after","במהלך":"During","משימה קודמת":"Previous mission","נעלם אחרי":"Gone after","תעשה לפני":"Do before","אחרון אפשרי":"Last chance",
+  "חלק מהסיפור – נפתח לבד כשמגיעים.":"Part of the story – unlocks by itself.","לפני ואחרי בסיפור":"Before and after in the story","נפתח אחרי אותה משימה":"Unlocks after the same mission","באותו מקום":"Same place",
+  "התוכן מוסתר כדי לא לספיילר":"Hidden to avoid spoilers","👁 הצג רק את השם":"👁 Show only the name","📖 הצג מה עושים":"📖 Show what to do","👁 הצג את השם":"👁 Show the name","🔒 משימת סיפור (שם מוסתר)":"🔒 Story mission (name hidden)",
+  "חיפוש במפה – משימה, מקום, שכונה":"Search the map – mission, place, area","חפש משימה, מקום, רכב…":"Search a mission, place, vehicle…","🗂 שכבות":"🗂 Layers","🎮 כמו במשחק":"🎮 Like in game","🎮 הכל":"🎮 All","שכבות במפה":"Map layers","המשימות והפריטים שלי":"My missions & items","כל מה שברשימה – עם הסימונים שלך":"Everything in the list – with your marks","לעמוד המשימה ›":"Mission page ›","לעמוד המלא ›":"Full page ›","סמן ✓":"Mark ✓","✓ עשיתי":"✓ Done","דברים בנקודה הזאת":"things at this spot","לחץ על פריט כדי לראות אותו":"Tap an item to view it","פעילויות":"Activities","פשע":"Crime","מקומות":"Places","אחר":"Other","שכונה / אזור":"Neighbourhood","לא נמצא":"Not found","טוען…":"Loading…","טוען מפה…":"Loading map…",
+  "מה בא לך לדעת?":"What do you want to know?","המרכז":"Hub","כפתורים סודיים":"Secret buttons","מה שהמשחק לא מספר":"What the game won't tell you","צ'יטים":"Cheats","כל הקודים":"All codes","מתעדכן כל יום":"Updated daily","מה חדש":"What's new","תגליות אחרונות":"Latest finds","בריחה מהמשטרה":"Escaping the police","כוכבים ועקבות":"Stars & clues","גניבת רכב":"Stealing cars","טרקר או בלי":"Tracker or not","לשמור רכב":"Keeping a car","רישום ומוסך":"Register & garage","כסף ו־BuckMe":"Money & BuckMe","איפה לשמור":"Where to keep it","נקודות אל־חזור":"Points of no return","מה נסגר לתמיד":"What closes forever","סימני המפה":"Map icons","מה כל סמל אומר":"What each icon means","פוקוס וטלפון":"Focus & phone","האפליקציות":"The apps","איך משתמשים":"How to use","3 דברים":"3 things",
+  "ההגדרות שלך":"Your settings","החשבון שלי":"My account","שמירה בכל מכשיר":"Save on every device","ספוילרים ותצוגה":"Spoilers & display","מה מוסתר ואיך":"What's hidden and how","ההתקדמות שלי":"My progress","איפה אני · גיבוי":"Where I am · backup","המפה":"The map","מה מופיע עליה":"What shows on it","שתף עם חברים":"Share with friends","שלח את Leo":"Send Leo","האפליקציה":"The app","רענון · התקנה · קרדיטים":"Refresh · install · credits","שפה":"Language",
+  "בלי ספוילרים":"No spoilers","דברים מפרקים שעוד לא הגעת אליהם – מוסתרים.":"Things from chapters you haven't reached are hidden.","ככה זה נראה":"This is how it looks","מוסתר":"Hidden","גלוי":"Visible","מה נחשב \"עוד לא הגעת\"":"What counts as \"not reached\"","פרקים הבאים":"Later chapters","כל מה שאחרי הבאה":"Everything after next","מה שכבר גילית":"What you revealed","הסתר שוב":"Hide again","מצב 'סתם מתעניין'":"'Just browsing' mode","בלי סימונים ואחוזים – רק לגלות ולקרוא.":"No checkmarks or percentages – just explore.",
+  "📍 איפה אתה בסיפור":"📍 Where you are in the story","עדכן":"Update","💾 קוד התקדמות":"💾 Progress code","📋 העתק את הקוד שלי":"📋 Copy my code","ייבא":"Import","הדבק כאן קוד…":"Paste a code here…",
+  "הסתר מה שעשיתי":"Hide what I did","רק עד הפרק שלי":"Only up to my chapter","רק מיקומים מדויקים":"Exact locations only","יש לך חברים שמשחקים?":"Friends who play?","📤 שתף את Leo":"📤 Share Leo","🔗 העתק קישור":"🔗 Copy link","🔄 רענון":"🔄 Refresh","רענן":"Refresh","📲 על המסך הבית":"📲 On your home screen",
+  "📍 איפה אתה בסיפור?":"📍 Where are you in the story?","סיימתי עד כאן":"I finished up to here","✓ סומן":"✓ Marked",
+  "✓ סומן – כל הכבוד":"✓ Marked – nice","הסימון הוסר":"Unmarked","נשמר":"Saved","הקוד הועתק":"Code copied","הקישור הועתק":"Link copied","הקישור הועתק – הדבק בוואטסאפ":"Link copied – paste it in WhatsApp","הכל כבר מסומן":"Already all marked",
+  "✨ יש גרסה חדשה – לחץ לרענון":"✨ New version – tap to refresh",
+  "🆕 מה חדש":"🆕 What's new","💡 טיפים":"💡 Tips","🎮 כפתורים סודיים":"🎮 Secret buttons","PS5 · ב־Xbox בסוגריים":"PS5 · Xbox in brackets","🕹️ כל הצ'יטים":"🕹️ All cheats","רק עם קוד":"With code only","העתק":"Copy","עוד לא התגלה":"Not found yet","שחקן":"Player","קרב":"Combat","עולם וזמן":"World & time","פילטרים למסך":"Screen filters",
+  "התגובות יופעלו כשהאתר יחובר לשרת (Supabase). ההוראות ב־README.":"Comments turn on once the site is connected (Supabase).","עוד אין תגובות. תהיה הראשון לתת טיפ!":"No comments yet – be the first!","התחבר כדי להגיב":"Sign in to comment","פרסם":"Post","השב":"Reply","מחק":"Delete","דווח":"Report",
+  "מדריך":"Guide","מדריכים":"Guides","🔒 אחרי":"🔒 After","🔒 עוד לא זמין – נפתח אחרי":"🔒 Not available yet – unlocks after","חפש עוד סרטונים ב־YouTube":"Search more videos on YouTube","❗ אפשר לפספס · עד":"❗ Missable · until","⏳ עלול להיגמר בקרוב":"⏳ May end soon","– הצעה עם זמן מוגבל (שעון חול / שיחת טלפון). כדאי לעשות עכשיו, לפני שממשיכים בסיפור.":"– a time-limited offer (hourglass / phone call). Do it now, before moving on in the story.","❗ אפשר לפספס":"❗ Missable","♾ אפשר גם בהמשך":"♾ Can do later","– לא צריך למהר.":"– no rush.","נעלם אחרי":"Gone after",". יש לך זמן עד אז, אבל לא אחרי.":". You have time until then, but not after.","– אם לא עושים בזמן, זה נעלם לתמיד.":"– if you don't do it in time, it's gone forever.","⚠ נקודת אל־חזור – שמור לפני ותסיים קודם את מה שמסומן ⏳ בפרק":"⚠ Point of no return – save first and finish what's marked ⏳ in this chapter","אחרי הרישום – החנה במוסך (נפתח ב־Daily Driver). רכב לא רשום נעלם בסוף, גם במוסך.":"After registering, park it in a garage (unlocks in Daily Driver). Unregistered cars eventually vanish, even in a garage.","המדריך המלא ›":"Full guide ›","היכן":"Where"
+  };
+  const RX=[
+   [/^פרק (\d)$/,"Chapter $1"],[/^פרק (\d) · /,"Ch. $1 · "],[/^(\d+) תוצאות$/,"$1 results"],[/^🔒 שם מוסתר · פרק (\d)$/,"🔒 Name hidden · Ch. $1"],[/^🔒 אחרי (.*)$/,"🔒 After $1"],[/^❗ אפשר לפספס · עד (.*)$/,"❗ Missable · until $1"],
+   [/^ב־(.*)$/,"In $1"],[/^👀 איך זה נראה: (.*)$/,"👀 What it looks like: $1"],[/^הצג (\d+) תוצאות$/,"Show $1 results"],[/^(\d+) דברים בנקודה הזאת$/,"$1 things at this spot"],[/^✓ סומנו (\d+) משימות עד (.*)$/,"✓ Marked $1 missions up to $2"],[/^עוד (\d+)$/,"$1 more"],[/^פרק (\d) · (\d+)\/(\d+)$/,"Chapter $1 · $2/$3"],
+   [/^אתה כאן ·\s*$/,"You are here · "],[/^נפתח אחרי המשימה הזאת · (\d+)$/,"Unlocks after this mission · $1"],[/^(\d+) חדשים מאז הביקור הקודם$/,"$1 new since your last visit"]
+  ];
+  const PART={"אספנות":"Collectibles","משימות צד":"Side missions","כסף":"Money","רכבים":"Vehicles","נשקים":"Weapons","ביצי פסחא":"Easter eggs","מבצעי כנופיות":"Gang ops","אירועים אקראיים":"Random events","שניהם":"Both","טיפים":"Tips"};
+  function tr(t){
+    const s=t.trim();if(!s||!/[֐-׿]/.test(s))return null;
+    if(D[s])return t.replace(s,D[s]);
+    for(const [r,v] of RX)if(r.test(s))return t.replace(s,s.replace(r,v).split(" · ").map(p=>PART[p]||D[p]||p.replace(/^פרק (\d)$/,"Ch. $1")).join(" · "));
+    if(s.includes(" · ")){const o=s.split(" · ").map(p=>PART[p]||D[p]||p.replace(/^פרק (\d)$/,"Ch. $1"));if(o.join(" · ")!==s)return t.replace(s,o.join(" · "))}
+    return null;
+  }
+  function walk(root){
+    if(!root)return;
+    const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;const todo=[];
+    while(n=w.nextNode()){const v=tr(n.nodeValue);if(v!=null)todo.push([n,v])}
+    todo.forEach(([n,v])=>n.nodeValue=v);
+    if(root.querySelectorAll)[root,...root.querySelectorAll("[placeholder],[aria-label]")].filter(e=>e.getAttribute).forEach(e=>{["placeholder","aria-label"].forEach(a=>{const v=e.getAttribute(a);if(v){const x=tr(v);if(x!=null)e.setAttribute(a,x)}})});
+  }
+  window.trUI=walk;
+  let busy=false;
+  const mo=new MutationObserver(ms=>{if(busy)return;busy=true;try{for(const m of ms){m.addedNodes.forEach(n=>{if(n.nodeType===3){const v=tr(n.nodeValue);if(v!=null)n.nodeValue=v}else if(n.nodeType===1)walk(n)})}}finally{busy=false}});
+  document.addEventListener("DOMContentLoaded",()=>{walk(document.body);mo.observe(document.body,{childList:true,subtree:true})});
+})();

@@ -13,15 +13,18 @@ const [D,LD,EX]=await Promise.all([fetch("data/items.json").then(r=>r.json()),fe
 const NEWS=(EX.news||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 const TIPS2=(EX.tips||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 D.items.forEach(x=>x.ord=x.c*100000+x.pos);const IT=D.items.sort((a,b)=>a.ord-b.ord);
+if(window.LANG==="en"){IT.forEach(x=>{if(x.ne)x.n=x.ne;[["sp","sp_e"],["why","why_e"],["d","d_e"],["lk","lk_e"],["k","k_e"],["nt","nt_e"],["st","st_e"],["wn","wn_e"]].forEach(([a,b])=>{if(x[b])x[a]=x[b]});
+  if(x.steps_e)x.steps=x.steps_e;else if(x.src){delete x.steps;delete x.tips;delete x.ch;delete x.rw}});
+  for(const k in D.KT)D.KT[k]=[D.KT[k][1]||D.KT[k][0],D.KT[k][1]];}
 const BY={},BYS={};IT.forEach(x=>{BY[x.id]=x;BYS[x.s]=x});
-const KINDS=LD.kinds;
+const KINDS=LD.kinds;if(window.LANG==="en")for(const k in KINDS)KINDS[k].n=KINDS[k].en||KINDS[k].n;
 const LOCS=LD.locs.map(a=>({id:a[0],k:a[1],x:a[2],y:a[3],n:a[4],t:a[5],d:a[6],a:a[7]}));
 const LBY={};LOCS.forEach(l=>LBY[l.id]=l);
 const STORY=IT.filter(x=>x.story);
 
-const CAT={story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
+const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
-const WHO={J:"Jason",L:"Lucia",B:"שניהם"};
+const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
 const CATC={story:"#ff4f9a",side:"#a77bff",op:"#ff8a3d",collect:"#ffc23c",event:"#2fc6d8",money:"#3fd08a",vehicle:"#4a8dff",weapon:"#ff5a5a",egg:"#b4e04a",tip:"#ffc23c"};
 const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side");
 
@@ -401,7 +404,7 @@ async function loadComments(){
 
 
 /* ---------- cheats ---------- */
-const CH=EX.cheats||{list:[]};
+const CH=EX.cheats||{list:[]};if(window.LANG==="en")CH.list.forEach(c=>{c.n=c.ne});
 const ARW={Up:"⬆",Down:"⬇",Left:"⬅",Right:"➡"};
 function pageCheats(){
   const known=CH.list.filter(c=>c.code.length).length;
@@ -440,7 +443,7 @@ const pageGuides=()=>`<div class="ihead"><div class="kick">המרכז</div><h1 s
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
-function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return `<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
+function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return (window.LANG==="en"?`<p class="tag" style="display:block;padding:8px 10px;margin:0 0 10px">This guide is in Hebrew for now – English is coming soon.</p>`:"")+`<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
 function gateGuide(){
   const b=$("#gbody");if(!b)return;const cur=curCh();let first=true;
@@ -463,7 +466,8 @@ const ME=[
  ["progress","📍","ההתקדמות שלי","איפה אני · גיבוי","#3fd08a,#2fc6d8"],
  ["map","🗺️","המפה","מה מופיע עליה","#2fc6d8,#4a8dff"],
  ["share","🤝","שתף עם חברים","שלח את Leo","#ffc23c,#ff3d8b"],
- ["app","📲","האפליקציה","רענון · התקנה · קרדיטים","#c58cff,#ff4f9a"]];
+ ["app","📲","האפליקציה","רענון · התקנה · קרדיטים","#c58cff,#ff4f9a"],
+ ["lang","🌐","English / עברית","Language · שפה","#2fc6d8,#3fd08a"]];
 function pageSettings(sec){
   if(!sec)return `<div class="ihead"><div class="kick">אני</div><h1 style="margin-top:4px">ההגדרות שלך</h1></div><div class="tiles">`+ME.map(t=>`<a class="tile" href="#/settings/${t[0]}" style="--g:linear-gradient(135deg,${t[4]})"><span class="ti">${t[1]}</span><b>${t[2]}</b><small>${t[3]}</small></a>`).join("")+`</div>`;
   const T=ME.find(t=>t[0]===sec)||ME[0];
@@ -484,6 +488,7 @@ function pageSettings(sec){
   if(sec==="map")h+=`<div class="card cardlist">`+sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו.")+sw("upTo","רק עד הפרק שלי","בלי דברים מפרקים הבאים.")+sw("exactOnly","רק מיקומים מדויקים","בלי סיכות של 'אזור משוער'.")+`</div>
    <p class="muted" style="font-size:13px;margin:10px 4px">טיפ: הכפתור <b>🎮 כמו במשחק</b> במפה מראה רק מה שאפשר לעשות עכשיו.</p>`;
   if(sec==="share")h+=`<div class="blk" style="text-align:center"><div style="font-size:44px">🤝</div><h3 style="justify-content:center;font-size:18px">יש לך חברים שמשחקים?</h3><p class="muted">כל אחד שומר את ההתקדמות שלו – בלי הרשמה.</p><button class="btn pri wide" id="shapp">📤 שתף את Leo</button><button class="btn wide" id="cplink" style="margin-top:8px">🔗 העתק קישור</button></div>`;
+  if(sec==="lang")h+=`<div class="blk" style="text-align:center"><div style="font-size:40px">🌐</div><div class="lockbtns"><button class="btn${window.LANG!=="en"?" pri":""}" onclick="setLang('he')">עברית</button><button class="btn${window.LANG==="en"?" pri":""}" onclick="setLang('en')">English</button></div><p class="dim" style="font-size:12.5px;margin-top:10px">English: missions, map and menus. Guides & tips are still in Hebrew – coming soon.</p></div>`;
   if(sec==="app")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>🔄 רענון</b><small>מוריד את הגרסה הכי חדשה. ההתקדמות נשארת.</small></div><button class="btn sm pri" onclick="hardRefresh()">רענן</button></div>
    <div class="set"><div class="t"><b>📲 על המסך הבית</b><small>${/iphone|ipad/i.test(navigator.userAgent)?"ב־Safari: שיתוף ⬆ › 'הוסף למסך הבית'":"בתפריט הדפדפן: 'התקן אפליקציה'"}</small></div></div></div>
    <p class="dim" style="font-size:12px;margin:18px 4px">מפה ונתוני מיקום: <a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0). אתר מעריצים, לא רשמי. GTA ו־Rockstar Games הם סימנים של Take-Two.</p>`;
