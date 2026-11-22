@@ -389,3 +389,21 @@ body.mapmode .msearch,body.mapmode .mapbar .chip{background:rgba(20,12,26,.95)}
 .tpin>i{box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.55)}
 .linkb{color:#ffb07a;font:inherit;font-size:11px;letter-spacing:0;text-decoration:underline;text-transform:none;padding:0}
 .fbar .fbtn{padding:10px 6px;font-size:12.5px}
+
+/* hub tiles */
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.tile{position:relative;overflow:hidden;display:flex;flex-direction:column;gap:2px;min-height:112px;padding:14px;border-radius:20px;color:#fff;background:var(--g);box-shadow:0 8px 22px rgba(0,0,0,.35)}
+.tile::after{content:"";position:absolute;inset:0;background:radial-gradient(120% 80% at 100% 0,rgba(255,255,255,.28),transparent 55%);pointer-events:none}
+.tile .ti{font-size:30px;line-height:1;margin-bottom:auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.25))}
+.tile b{font-size:16px;font-weight:900;text-shadow:0 1px 3px rgba(0,0,0,.25)}
+.tile small{font-size:12px;opacity:.9;font-weight:700}
+/* map: full screen, no top bar */
+body.mapmode #top{display:none}
+body.mapmode .msearch{top:max(10px,calc(env(safe-area-inset-top) + 8px))}
+body.mapmode .mapbar{top:max(66px,calc(env(safe-area-inset-top) + 64px))}
+body.mapmode .ctl{bottom:calc(100px + var(--safe-b))}
+body.mapmode .leaflet-bottom{bottom:calc(84px + var(--safe-b))}
+/* sheet sits above the nav instead of under it */
+#sheet{bottom:calc(84px + var(--safe-b));border-radius:22px;margin:0 8px;max-width:744px;left:0;right:0;padding-bottom:16px;max-height:70vh}
+@media(min-width:760px){#sheet{margin:0 auto}}
+#sheet:not(.on){transform:translateY(calc(100% + 120px))}

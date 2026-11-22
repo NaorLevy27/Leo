@@ -166,7 +166,7 @@ function pageHome(){
     if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2>${soon.length>4?`<a href="#/list?miss=1">עוד ${soon.length-4}</a>`:""}</div>`+soon.slice(0,4).map(row).join("")}
     else h+=`<div class="blk okb"><h3><span class="e">✅</span>אין כרגע משהו שעומד להיסגר</h3><p class="muted" style="margin:0">אפשר להמשיך בסיפור בראש שקט.</p></div>`;
   }
-  const tp=tipList(30);if(tp.length){const t=tp[Math.floor(Date.now()/864e5)%tp.length];h+=`<div class="sec"><h2>💡 טיפ היום</h2><a href="#/guides">עוד טיפים</a></div>`+tipHtml(t)}
+  const tp=tipList(30);if(tp.length){const t=tp[Math.floor(Date.now()/864e5)%tp.length];h+=`<div class="sec"><h2>💡 טיפ היום</h2><a href="#/tips">עוד טיפים</a></div>`+tipHtml(t)}
   if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span>🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים מאז הביקור הקודם</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   h+=installBox();
   h+=`<button class="sharebig" id="shr"><span>🤝</span><div><b>יש לך חבר שמשחק?</b><small>שלח לו את Leo – ההתקדמות של כל אחד נשמרת אצלו</small></div><span class="go">שתף</span></button>`;
@@ -392,7 +392,24 @@ function drawCheats(f){
 const gcard=g=>`<a class="gcard" href="#/g/${g.id}"><span class="e">${g.e}</span><div><b>${esc(g.t)}</b><small>${esc(g.d)}</small></div></a>`;
 function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)>cur)).slice(0,n)}
 const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k==="btn"?"🎮":"💡"}</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(t.d>"2026-11-22"&&Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
-const pageGuides=()=>{const tl=tipList(999),hid=TIPS2.length-tl.length,bt=tl.filter(t=>t.k==="btn"),ot=tl.filter(t=>t.k!=="btn");return `<div class="hub"><a href="#/cheats"><span>🕹️</span>צ'יטים</a><a href="#hb"><span>🎮</span>כפתורים סודיים</a><a href="#/g/police"><span>🚨</span>משטרה</a><a href="#/g/keep-cars"><span>🅿️</span>שמירת רכב</a></div><div class="sec" style="margin-top:4px"><h2>💡 טיפים קטנים</h2><span class="dim" style="font-size:12px">מתעדכן כל יום</span></div>`+(ot.map(tipHtml).join("")||`<div class="empty">עוד אין טיפים</div>`)+(bt.length?`<div class="sec" id="hbx"><h2>🎮 כפתורים סודיים</h2><span class="dim" style="font-size:12px">PS5 · ב־Xbox בסוגריים</span></div>`+bt.map(tipHtml).join(""):"")+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} טיפים נוספים ייפתחו בהמשך המשחק</p>`:"")+`<div class="sec"><h2>📘 מדריכים</h2></div><p class="muted" style="margin-top:0">הכל בפשטות – בלי מונחים מסובכים.</p>`+GUIDES.map(gcard).join("")};
+/* hub: one colorful tile per small topic */
+const HUB=[
+ ["#/buttons","🎮","כפתורים סודיים","מה שהמשחק לא מספר","#4a8dff,#a77bff"],
+ ["#/cheats","🕹️","צ'יטים","כל הקודים","#ff3d8b,#ff8a3d"],
+ ["#/tips","💡","טיפים","מתעדכן כל יום","#ffc23c,#ff8a3d"],
+ ["#/news","🆕","מה חדש","תגליות אחרונות","#3fd08a,#2fc6d8"],
+ ["#/g/police","🚨","בריחה מהמשטרה","כוכבים ועקבות","#ff5a5a,#ff3d8b"],
+ ["#/g/steal-cars","🔑","גניבת רכב","טרקר או בלי","#4a8dff,#2fc6d8"],
+ ["#/g/keep-cars","🅿️","לשמור רכב","רישום ומוסך","#a77bff,#ff4f9a"],
+ ["#/g/money","💵","כסף ו־BuckMe","איפה לשמור","#3fd08a,#b4e04a"],
+ ["#/g/saves","💾","נקודות אל־חזור","מה נסגר לתמיד","#ffc23c,#ff5a5a"],
+ ["#/g/map-icons","🗺️","סימני המפה","מה כל סמל אומר","#2fc6d8,#4a8dff"],
+ ["#/g/focus","👁️","פוקוס וטלפון","האפליקציות","#ff8a3d,#ffc23c"],
+ ["#/g/how-site","✨","איך משתמשים","3 דברים","#c58cff,#ff4f9a"]];
+const pageGuides=()=>`<div class="ihead"><div class="kick">המרכז</div><h1 style="margin-top:4px">מה בא לך לדעת?</h1></div><div class="tiles">`+HUB.map(t=>`<a class="tile" href="${t[0]}" style="--g:linear-gradient(135deg,${t[4]})"><span class="ti">${t[1]}</span><b>${t[2]}</b><small>${t[3]}</small></a>`).join("")+`</div>`;
+function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
+  return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
+const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
 function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return `<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
 function gateGuide(){
@@ -672,24 +689,23 @@ let curPage="";
 function parse(){const h=location.hash.slice(1)||"/";const [p,qs]=h.split("?");const q={};(qs||"").split("&").filter(Boolean).forEach(kv=>{const [k,v]=kv.split("=");q[k]=decodeURIComponent(v||"")});return {parts:p.split("/").filter(Boolean),q}}
 function route(soft){
   const {parts,q}=parse();const p=parts[0]||"";
-  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats"}[p]||"home";
+  const page={"":"home",list:"list",i:"item",l:"loc",map:"map",guides:"guides",g:"guide",settings:"settings",cheats:"cheats",tips:"tips",buttons:"buttons",news:"news"}[p]||"home";
   curPage=page;
   const isMap=page==="map";
-  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats"].includes(page));
+  document.body.classList.toggle("mapmode",isMap);document.body.classList.toggle("sub",["item","loc","guide","cheats","tips","buttons","news"].includes(page));
   $("#map").hidden=!isMap;$("#mapbar").hidden=!isMap;$("#msearch").hidden=!isMap;$("#mctl").hidden=!isMap;$("#main").hidden=isMap;
-  const navKey={home:"home",list:"list",item:"list",loc:"map",map:"map",guides:"guides",guide:"guides",settings:"settings",cheats:"guides"}[page];
+  const navKey={home:"home",list:"list",item:"list",loc:"map",map:"map",guides:"guides",guide:"guides",settings:"settings",cheats:"guides",tips:"guides",buttons:"guides",news:"guides"}[page];
   $$("#nav a").forEach(a=>a.classList.toggle("on",a.dataset.k===navKey));moveLens();
   if(!soft)closeSheet();
   if(isMap){ensureMap();setTimeout(()=>map.invalidateSize(),30);if(!soft)focusMap(q);return}
   let h="";
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
-  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings();else if(page==="cheats")h=pageCheats();
+  else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings();else if(page==="cheats")h=pageCheats();else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
   $("#main").innerHTML=h;
-  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=whatsNew;const sh=$("#shr");if(sh)sh.onclick=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים וכפתורים סודיים 👇");const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
+  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים וכפתורים סודיים 👇");const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="guide")gateGuide();
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
-  if(page==="guides"){const hb=document.querySelector('a[href="#hb"]');if(hb)hb.onclick=e=>{e.preventDefault();const t=$("#hbx");t&&t.scrollIntoView({behavior:"smooth"})}}
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
   if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null)setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
