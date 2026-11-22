@@ -472,7 +472,9 @@ Cloud.sub(()=>{if(curPage==="settings")route(true)});
 /* ---------- map ---------- */
 /* ---------- crisp vector map (land, buildings, roads, labels) – sharp at any zoom ---------- */
 let VEC=null,vecP=null;
-const loadVec=()=>vecP||(vecP=fetch("data/vec.json").then(r=>r.json()).then(d=>VEC=d));
+const loadVec=()=>vecP||(vecP=fetch("data/vec-lo.json").then(r=>r.json()).then(d=>{d.surf.building=[];d.roads.minor=[];VEC=d;return d}));
+let hiP=null;const VLAYERS=[];
+function loadHi(){return hiP||(hiP=fetch("data/vec-hi.json").then(r=>r.json()).then(h=>{VEC.surf.building=h.surf.building;VEC.roads.minor=h.roads.minor;VIDX=null;VLAYERS.forEach(l=>l._map&&l.redraw())}))}
 const LANDC="#86a982";const VSTY={urban:"#aeb3b6",park:"#6f9c63",sand:"#e6d5a2",shallow:"#5ea9cc",paved:"#c3c4c0",building:"#8f949b"};
 const RSTY={highway:["#f7f4ec","#7d8288",2.4],main:["#efede6","#868b90",1.8],street:["#e6e5e0","#90959a",1.3],minor:["#dcdcd8","#9a9fa3",.9]};
 /* Vector map drawn into canvas tiles: paths are built once (Path2D, map units), each tile just
@@ -526,9 +528,10 @@ const VecTiles=L.GridLayer.extend({
   }
 });
 function addVector(m,opts={}){
-  const layer=new VecTiles({tileSize:512,zoomOffset:0,minZoom:-1,maxZoom:12,minNativeZoom:0,maxNativeZoom:11,noWrap:true,bounds:BOUNDS,updateWhenZooming:false,updateWhenIdle:true,keepBuffer:4,pane:"overlayPane"});
+  const layer=new VecTiles({tileSize:512,zoomOffset:0,minZoom:opts.from==null?4:opts.from,maxZoom:12,minNativeZoom:0,maxNativeZoom:11,noWrap:true,bounds:BOUNDS,updateWhenZooming:false,updateWhenIdle:true,keepBuffer:4,pane:"overlayPane"});
   const pane=m.getPane("vec")||m.createPane("vec");pane.style.zIndex=250;layer.options.pane="vec";
-  layer.addTo(m);
+  layer.addTo(m);VLAYERS.push(layer);
+  const hz=()=>{if(m.getZoom()>=4.4)loadHi()};m.on("zoomend",hz);hz();
   if(opts.labels!==false)addLabels(m);
   return layer;
 }
@@ -565,7 +568,7 @@ function addLabels(m){
 
 let map=null,mapReady=false,layer=null,base=null,mini=null;
 const BOUNDS=L.latLngBounds([-800,160],[-160,832]);
-const ML=Object.assign({mine:true,cats:{},kinds:{}},S.mapLayers||{});
+const ML=Object.assign({mine:true,cats:{},kinds:{},game:true},S.mapLayers||{});
 function setBase(){
   if(base)map.removeLayer(base);
   if(S.mapStyle==="original"){
@@ -579,6 +582,7 @@ function itemShown(x){
   if(S.hideDone&&done(x))return false;
   if(S.upTo&&x.c>curCh())return false;
   if(S.hideDone&&avail(x)==="missed")return false;
+  if(ML.game){if(done(x)||avail(x)!=="now")return false;if(x.story&&x!==nextStory())return false}
   if(S.exactOnly&&!x.ex)return false;
   const on=Object.keys(ML.cats).filter(k=>ML.cats[k]);
   if(on.length&&!on.includes(mainCat(x)))return false;
@@ -641,8 +645,9 @@ function mapChips(){
   $("#msearch").innerHTML=`<span>🔎</span><input id="mq" placeholder="חיפוש במפה – משימה, מקום, שכונה"><button id="mlay2" aria-label="שכבות">🗂</button>`;
   $("#mlay2").onclick=layersSheet;
   const mq=$("#mq");mq.onkeydown=e=>{if(e.key==="Enter")mq.blur()};mq.oninput=()=>{clearTimeout(mq._t);mq._t=setTimeout(()=>mapSearch(mq.value),250)};
-  $("#mapbar").innerHTML=`<button class="chip" id="mlay">🗂 שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip${on(k)}" data-mc="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("");
+  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">🎮 ${ML.game?"כמו במשחק":"הכל"}</button><button class="chip" id="mlay">🗂 שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip${on(k)}" data-mc="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("");
   $("#mlay").onclick=layersSheet;
+  $("#mgame").onclick=()=>{ML.game=!ML.game;Store.setS("mapLayers",ML);mapChips();drawPins();toast(ML.game?"🎮 רואים רק מה שאפשר לעשות עכשיו":"רואים הכל")};
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
 }
 function mapSearch(q){
@@ -657,7 +662,7 @@ function mapSearch(q){
 function ensureMap(){
   if(map)return;
   map=L.map("map",{crs:L.CRS.Simple,preferCanvas:true,fadeAnimation:false,tap:false,bounceAtZoomLimits:false,inertiaDeceleration:2600,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
-  map.attributionControl.setPrefix(false);$("#map").classList.add("loading");loadVec().then(()=>{addVector(map);$("#map").classList.remove("loading")});
+  map.attributionControl.setPrefix(false);L.imageOverlay("data/overview.webp",[[-820,150],[-150,850]],{interactive:false,pane:"tilePane"}).addTo(map);setTimeout(()=>loadVec().then(()=>addVector(map)),60);
   const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=4.8);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
@@ -669,7 +674,7 @@ function drawMini(x,y,o){
   if(mini){mini.remove();mini=null}
   const el=$("#mini");if(!el)return;
   mini=L.map(el,{crs:L.CRS.Simple,minZoom:1,maxZoom:8.5,zoomControl:false,attributionControl:false,maxBounds:BOUNDS.pad(0.2),scrollWheelZoom:false});
-  mini.setView([-y,x],o.ex===0?5:7);const mm=mini;loadVec().then(()=>{if(mini===mm)addVector(mm)});
+  mini.setView([-y,x],o.ex===0?5:7);L.imageOverlay("data/overview.webp",[[-820,150],[-150,850]],{interactive:false,pane:"tilePane"}).addTo(mini);const mm=mini;loadVec().then(()=>{if(mini===mm)addVector(mm)});
   if(o.ex===0)L.circle([-y,x],{radius:9,color:"#b9a2ff",weight:2,dashArray:"5 5",fillOpacity:.12}).addTo(mini);
   L.marker([-y,x],{icon:L.divIcon({className:"",html:o.L?`<span class="edot" style="background:${(KINDS[o.k]||{}).c};width:20px;height:20px"></span>`:`<div class="mpin">${glyph(o)}</div>`,iconSize:[28,28],iconAnchor:[14,14]})}).addTo(mini);
 }

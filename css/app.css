@@ -407,4 +407,5 @@ body.mapmode .leaflet-bottom{bottom:calc(84px + var(--safe-b))}
 #sheet{bottom:calc(84px + var(--safe-b));border-radius:22px;margin:0 8px;max-width:744px;left:0;right:0;padding-bottom:16px;max-height:70vh}
 @media(min-width:760px){#sheet{margin:0 auto}}
 #sheet:not(.on){transform:translateY(calc(100% + 120px))}
-.upd{position:fixed;z-index:120;top:max(12px,env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:11px 18px;border-radius:14px;background:var(--sun);color:#1c0710;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.upd{position:fixed;z-index:120;bottom:calc(96px + var(--safe-b));left:50%;transform:translateX(-50%);padding:11px 18px;border-radius:14px;background:var(--sun);color:#1c0710;font-weight:900;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.mapbar .chip.gm{border-color:rgba(255,138,61,.6)}
