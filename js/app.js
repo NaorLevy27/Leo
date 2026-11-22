@@ -26,6 +26,8 @@ const CATC={story:"#ff4f9a",side:"#a77bff",op:"#ff8a3d",collect:"#ffc23c",event:
 const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side");
 
 /* ---------- derived state ---------- */
+let REV;try{REV=new Set(JSON.parse(localStorage.getItem('lr_rev')||'[]'))}catch(e){REV=new Set()}
+const saveRev=()=>{try{localStorage.setItem('lr_rev',JSON.stringify([...REV]))}catch(e){}};
 const done=x=>Store.done(x.id);
 const BYNE={};IT.forEach(x=>{if(!BYNE[x.ne]||x.story)BYNE[x.ne]=x});
 const STORYN=STORY.map(x=>x.ne).sort((a,b)=>b.length-a.length);
@@ -45,14 +47,14 @@ function _avail(x){
 }
 function locked(x){const k='l'+x.id;let v=MEMO.get(k);if(v===undefined){v=_locked(x);MEMO.set(k,v)}return v}
 function _locked(x){
-  if(!S.spoil||done(x))return false;
+  if(!S.spoil||done(x)||REV.has(x.id))return false;
   if(x.c>curCh())return true;
+  if(S.spoilLvl!=="strict")return false;
   const n=nextStory();
   if(x.story&&n&&x.ord>n.ord)return true;
   const a=ref(x.af);if(a&&a.story&&!done(a)&&n&&a.ord>n.ord)return true;
   return false;
 }
-const REV=new Set();
 function title(x){return locked(x)&&!REV.has(x.id)?(x.story?`🔒 משימת סיפור (שם מוסתר)`:`🔒 שם מוסתר · פרק ${x.c}`):x.n}
 function missable(x){return !!x.m}
 function timed(x){return !!x.soon}
@@ -87,7 +89,7 @@ function sub(x){
 }
 function row(x,cls=""){
   const av=avail(x);
-  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">👁</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
@@ -102,6 +104,7 @@ document.addEventListener("click",e=>{
   if(b){e.preventDefault();e.stopPropagation();const x=BY[b.dataset.chk];const on=Store.toggle(x.id);toast(on?"✓ סומן – כל הכבוד":"הסימון הוסר");refreshSoft();return}
   const l=e.target.closest("[data-lchk]");
   if(l){e.preventDefault();const k="L:"+l.dataset.lchk;Store.set(k,!Store.done(k));toast(Store.done(k)?"✓ נמצא":"הסימון הוסר");refreshSoft();return}
+  const rv=e.target.closest("[data-rev]");if(rv){e.preventDefault();e.stopPropagation();REV.add(rv.dataset.rev);saveRev();MEMO.clear();refreshSoft();return}
   const sh=e.target.closest("[data-share]");if(sh){e.preventDefault();const x=BYS[sh.dataset.share];share(x.n+" · Leo",`${x.n} ב־GTA 6 – איך עושים, מה מקבלים ואיפה בדיוק 👇`,SITE+"#/i/"+x.s);return}
   const v=e.target.closest(".vid .ph");if(v){v.outerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${v.dataset.id}?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;}
 });
@@ -396,7 +399,9 @@ function pageSettings(){
   let h=`<div class="sec" style="margin-top:4px"><h2>⚙ הגדרות</h2></div>`;
   h+=`<div class="card cardlist">${accountBlock()}</div>`;
   h+=`<div class="sec"><h2>תצוגה</h2></div><div class="card cardlist">`+
-    sw("spoil","בלי ספוילרים","מסתיר רק את השמות של משימות ודברים שעוד לא הגעת אליהם. התיאור, השלבים והמיקום נשארים.")+
+    sw("spoil","בלי ספוילרים","מסתיר רק שמות. התיאור, השלבים והמיקום נשארים. 👁 ליד שורה מגלה את השם שלה.")+
+    `<div class="set"><div class="t"><b>מה להסתיר</b><small>"פרקים הבאים" – רואים את כל השמות בפרק שלך (נוח אם עושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>`+
+    `<div class="set"><div class="t"><b>שמות שגילית</b><small>${REV.size} שמות גלויים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
     sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;
   h+=`<div class="sec"><h2>מפה</h2></div><div class="card cardlist">`+
     sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו במפה.")+
@@ -417,6 +422,8 @@ function accountBlock(){
 }
 function bindSettings(){
   $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר")});
+  $$("[data-sl]").forEach(b=>b.onclick=()=>{Store.setS("spoilLvl",b.dataset.sl);$$("[data-sl]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)drawPins();toast("נשמר")});
+  const rc=$("#revclr");if(rc)rc.onclick=()=>{REV.clear();saveRev();MEMO.clear();route(true);toast("השמות הוסתרו שוב")};
   $$("[data-ms]").forEach(b=>b.onclick=()=>{Store.setS("mapStyle",b.dataset.ms);$$("[data-ms]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)setBase();toast("נשמר")});
   $("#cpy").onclick=async()=>{const c=Store.code();try{await navigator.clipboard.writeText(c);toast("הקוד הועתק")}catch(e){$("#code").value=c;$("#code").select()}};
   $("#imp").onclick=()=>{try{const n=Store.fromCode($("#code").value);toast(`יובאו ${n} סימונים ✓`);$("#code").value=""}catch(e){toast("הקוד לא תקין")}};
@@ -663,7 +670,7 @@ function route(soft){
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="guides"){const hb=document.querySelector('a[href="#hb"]');if(hb)hb.onclick=e=>{e.preventDefault();const t=$("#hbx");t&&t.scrollIntoView({behavior:"smooth"})}}
   if(page==="settings")bindSettings();
-  const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);MEMO.clear()}route(true)};
+  const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
   if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null)setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
