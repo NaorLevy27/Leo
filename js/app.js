@@ -438,6 +438,71 @@ function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm
   if(r==="all"){LF.ch=0;LF.stat="";LF.avail="";LF.miss=0;LF.ex={};LF.kt={};LF.q=""}
   else if(r==="stat")LF.stat="";else if(r==="miss")LF.miss=0;else if(r.startsWith("ex:"))LF.ex[r.slice(3)]=false;else if(r.startsWith("kt:"))delete LF.kt[r.slice(3)];
   Store.setS("lists2",LF);if($("#sheet").classList.contains("on"))filterSheet();route(true)})}
+/* ---------- ask a question in the guides hub: finds the guide section that answers it ---------- */
+const QSTOP=new Set(["איך","מה","למה","איפה","מתי","כמה","האם","אפשר","אני","צריך","לעשות","עושים","יכול","יכולים","רוצה","שלי","שלו","לי","לו","אם","כדי","דרך","משהו","יותר","בכלל","נכון","מישהו","זה","זו","זאת","הזה","הזאת","ככה","הכי","מתי","בבקשה","כדאי","למצוא","מוצאים","מוצא","להגיע","מגיעים","לקבל","מקבלים","עובד","עובדים","צריכים","שווה","בעצם","find","how","what","where","why","when","can","i","do","does","to","get","is","are","my"].map(norm));
+const ASKSYN=[["לברוח","בורחים","בורח","בריחה","להתחמק","להיפטר","להיעלמ","להעלמ","לאבד","escape","lose","evade"],["משטרה","שוטרים","שוטר","מבוקש","מבוקשים","כוכבים","כוכב","police","cops","wanted","stars","heat"],["לגנוב","גונבים","גונב","גניבה","לגנוב רכב","steal","stealing","theft"],["לשמור","שומרים","שומר","שמירה","לשמירה","save","saving","keep"],["לרשום","רושמים","רישום","להירשמ","register","registration"],["להרויח","מרויחים","להשיג","להרוויח","earn","make","farm"],["טרקר","טראקר","מעקב","tracker"],["סמל","סמלים","אייקון","אייקונים","סימנ","סימנים","icon","icons","marker"],["פוקוס","focus"],["טלפונ","phone","אפליקציה","אפליקציות","app","apps"],["להפקיד","הפקדה","מפקידים","deposit"],["כספומט","כספומטים","atm","atms"],["לפספס","פספוס","מפספסים","פוספס","missable","miss","missed"],["אל חזור","נקודת אל חזור","ponr","point of no return"],["רכב","רכבים","מכונית","מכוניות","אוטו","car","cars","vehicle"],["מוסכ","חניה","garage","parking"],["בגדים","בגד","להחליפ בגדים","clothes","outfit"],["נשק","נשקים","רובה","אקדח","weapon","gun"],["כפתור","כפתורים","לחיצה","ללחוצ","שליטה","button","buttons","controls"],["ציט","ציטים","קוד","קודים","cheat","cheats","code"],["כסף","מזומן","money","cash","buckme"]].map(a=>a.map(norm));
+ASKSYN.forEach(g=>g.forEach(w=>{(SYN[w]=SYN[w]||new Set());g.forEach(v=>v!==w&&SYN[w].add(v))}));
+let GSEC=null,GSEC_K="";
+function guideSections(){
+  const k=curCh()+"|"+S.spoil;if(GSEC&&GSEC_K===k)return GSEC;GSEC_K=k;GSEC=[];
+  (window.GUIDES||[]).forEach(g=>{
+    const t=document.createElement("template");t.innerHTML=g.h;
+    if(S.spoil)t.content.querySelectorAll("[data-ch]").forEach(e=>{if(+e.dataset.ch>curCh())e.remove()});
+    let cur={g,i:-1,title:g.t,html:"",txt:""};const push=()=>{if(cur.html.trim())GSEC.push(cur)};
+    let n=0;[...t.content.childNodes].forEach(nd=>{
+      if(nd.nodeName==="H2"){push();cur={g,i:n++,title:nd.textContent.trim(),html:"",txt:""};return}
+      cur.html+=nd.outerHTML||nd.textContent||"";cur.txt+=" "+(nd.textContent||"")});
+    push();
+  });
+  GSEC.forEach(s=>{s.f=[[norm(s.g.t+" "+s.g.d),6],[norm(s.title),8],[norm(s.txt),2]]});
+  return GSEC;
+}
+function askTerms(q){const n=norm(q).split(" ").filter(w=>w&&!QSTOP.has(w)&&!(w.length>3&&QSTOP.has(w.slice(1))));return n.length?qTerms(n.join(" ")):qTerms(q)}
+let AQ="";
+function askHtml(){
+  const q=AQ.trim();
+  if(norm(q).length<3)return `<div class="chips wrap askex">`+["איך בורחים מהמשטרה?","איך שומרים רכב לתמיד?","מה ההבדל בין טרקר צהוב לאדום?","איפה כדאי לשמור כסף?","מה נסגר לתמיד?"].map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")+`</div>`;
+  const terms=askTerms(q);
+  const how=/^(איך|how)\b/i.test(norm(q))||/איכ /.test(norm(q)+" ");
+  const secs=guideSections().map(s=>{let v=scoreF(s.f,terms,1);if(v&&how&&/class="steps"/.test(s.html))v+=v>=1000?60:0;if(v&&s.i<0&&how)v-=5;return [v,s]}).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);
+  const tipS=tipList(999).map(t=>[scoreF([[norm(t.t+" "+(t.x||"")),4]],terms,1),t]).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);let tips=tipS.map(a=>a[1]);
+  const R=searchAll(terms.map(a=>a[0]).join(" "));
+  let h="";
+  const gFull=secs.length&&secs[0][0]>=1000,isCheatQ=terms.some(a=>a.includes("ציט")||a.includes("cheat"));
+  const top=R.items[0];let itemFirst=false;
+  if(!gFull&&isCheatQ&&R.cheats.length){const c=R.cheats.shift(),AR={Up:"↑",Down:"↓",Left:"←",Right:"→"};
+    h+=`<div class="answer"><div class="ah">${ic("joystick")}<span><b>${bdi(c.n)}</b><small>צ'יט${c.cat?", "+esc(c.cat):""}</small></span></div><div class="gbody">${c.code&&c.code.length?`<p class="ltr code">${c.code.map(k=>AR[k]||k).join(" ")}</p>`:`<p>הקוד עוד לא ידוע – נעדכן ברגע שיתגלה.</p>`}${c.u?`<p><b>איך פותחים:</b> ${esc(c.u)}</p>`:""}</div><a class="btn sm" href="#/cheats">לכל הצ'יטים ${ic("chevron-left")}</a></div>`;itemFirst=true}
+  else if(!gFull&&tipS.length&&tipS[0][0]>=1000&&!(top&&R.full>0&&/\d|[A-Z]/.test(""))){const t=tips.shift();
+    h+=`<div class="answer"><div class="ah">${ic(t.k==="btn"?"gamepad-2":"lightbulb")}<span><b>${esc(t.t.split(/[:–]/)[0].slice(0,60))}</b><small>${t.k==="btn"?"כפתור סודי":"טיפ"}</small></span></div><div class="gbody"><p>${esc(t.t)}</p>${t.x?`<p>${esc(t.x)}</p>`:""}</div><a class="btn sm" href="#/${t.k==="btn"?"buttons":"tips"}">לכל ה${t.k==="btn"?"כפתורים":"טיפים"} ${ic("chevron-left")}</a></div>`;itemFirst=true}
+  else itemFirst=top&&R.full>0&&!gFull;
+  if(h);else if(itemFirst){const x=top,hd=hid(x);
+    h+=`<div class="answer"><div class="ah">${ic(CI[mainCat(x)]||"sparkles")}<span><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></span></div><div class="gbody">${hd?`<p>${ic("lock")} התוכן מוסתר כי זה מפרק שעוד לא הגעת אליו.</p>`:`${x.why||x.d?`<p>${esc(x.why||x.d)}</p>`:""}${x.sp?`<p><b>איפה:</b> ${esc(x.sp)}</p>`:""}${(x.steps||[]).length?`<ol class="steps">${x.steps.slice(0,5).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`:""}`}</div><a class="btn sm" href="#/i/${x.s}">לדף המלא ${ic("chevron-left")}</a></div>`;
+    R.items.shift()}
+  else if(secs.length){const s=secs[0][1];
+    h+=`<div class="answer"><div class="ah">${ic(GI[s.g.id]||"book-open")}<span><b>${esc(s.i<0?s.g.t:s.title)}</b><small>מתוך המדריך "${esc(s.g.t)}"</small></span></div><div class="gbody">${s.html}</div><a class="btn sm" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}">למדריך המלא ${ic("chevron-left")}</a></div>`}
+  if(tips.length)h+=`<div class="grp">טיפים שקשורים לזה</div>`+tips.slice(0,3).map(tipHtml).join("");
+  const more=secs.slice(1).filter(a=>a[1].g!==(secs[0]&&secs[0][1].g)||a[0]>=1000).slice(0,4);
+  if(more.length)h+=`<div class="grp">עוד במדריכים</div>`+more.map(([,s])=>`<a class="row" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}"><span class="gl coll" style="--c:var(--p-aqua)">${ic(GI[s.g.id]||"book-open")}</span><div class="t"><b>${esc(s.title)}</b><small>${esc(s.g.t)}</small></div></a>`).join("");
+  if(R.cheats.length)h+=`<div class="grp">צ'יטים</div>`+R.cheats.slice(0,3).map(c=>`<a class="row" href="#/cheats"><span class="gl coll" style="--c:var(--p-flamingo)">${ic("joystick")}</span><div class="t"><b>${bdi(c.n)}</b><small>${esc(c.cat||"")}</small></div></a>`).join("");
+  if(R.items.length)h+=`<div class="grp">משימות ודברים</div>`+R.items.slice(0,3).map(x=>row(x)).join("");
+  if(!secs.length&&!tips.length&&!R.items.length&&!itemFirst&&!R.cheats.length)h+=`<div class="empty">עוד אין לנו תשובה לזה.<br><small>שלח לנו את השאלה – נוסיף מדריך או טיפ בעדכון הקרוב.</small><br><button class="btn sm pri" id="asksend" style="margin-top:10px">שלח את השאלה</button></div>`;
+  else h+=`<button class="linkb askmiss" id="asksend">לא מצאת מה שחיפשת? שלח לנו את השאלה</button>`;
+  return h;
+}
+const GI={"map-icons":"map-pinned","steal-cars":"key-round","keep-cars":"square-parking",police:"siren",money:"banknote",saves:"save",focus:"scan-eye","how-site":"circle-help"};
+function bindAsk(){
+  const i=$("#aq");if(!i)return;
+  const draw=()=>{$("#ares").innerHTML=deco(askHtml());$(".tiles").classList.toggle("dimmed",norm(AQ).length>=3);bindAres()};
+  i.oninput=()=>{AQ=i.value;clearTimeout(i._t);i._t=setTimeout(draw,220)};
+  i.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();i.blur()}};
+  bindAres();
+}
+function bindAres(){
+  $$("[data-ask]").forEach(b=>b.onclick=()=>{AQ=b.dataset.ask;$("#aq").value=AQ;$("#ares").innerHTML=deco(askHtml());$(".tiles").classList.add("dimmed");bindAres()});
+  const s=$("#asksend");if(s)s.onclick=()=>{const q=AQ.trim();if(!q)return;
+    window.open(`https://github.com/NaorLevy27/Leo/issues/new?labels=question&title=${encodeURIComponent("שאלה: "+q.slice(0,80))}&body=${encodeURIComponent("שאלה מהמרכז באפליקציה:\n\n"+q+"\n\nפרק: "+curCh())}`,"_blank");toast("תודה! נענה בעדכון הקרוב")};
+}
+
 function bindList(){
   const save=()=>{Store.setS("lists2",LF);route(true)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
@@ -606,7 +671,7 @@ const HUB=[
  ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","--p-peach"],
  ["#/g/how-site","circle-help","איך משתמשים","3 דברים","--p-flamingo"]];
 const tileHtml=(href,t)=>t[5]?`<a class="tile big" href="${href}" style="--f:var(${t[4]})"><span class="ti">${ic(t[1])}</span><span class="tt"><b>${t[2]}</b><small>${t[3]}</small></span></a>`:`<a class="tile" href="${href}" style="--f:var(${t[4]})"><span class="ti">${ic(t[1])}</span><b>${t[2]}</b><small>${t[3]}</small></a>`;
-const pageGuides=()=>`<div class="ihead"><h1>מה בא לך לדעת?</h1></div><div class="tiles">`+HUB.map(t=>tileHtml(t[0],t)).join("")+`</div>`;
+const pageGuides=()=>`<div class="ihead"><h1>מה בא לך לדעת?</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="tiles${norm(AQ).length>=3?" dimmed":""}">`+HUB.map(t=>tileHtml(t[0],t)).join("")+`</div>`;
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
@@ -978,7 +1043,8 @@ function route(soft){
   if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="search")bindSearch();
-  if(page==="guide")gateGuide();
+  if(page==="guide"){gateGuide();if(q.s!=null){const hs=$$("#gbody h2");const t=hs[+q.s];if(t)setTimeout(()=>{t.scrollIntoView({block:"start"});$("#main").scrollTop-=70;t.classList.add("flash")},60)}}
+  if(page==="guides")bindAsk();
   if(page==="welcome")bindWelcome(parts[1]);document.body.classList.toggle("welcomemode",page==="welcome");
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="settings")bindSettings();

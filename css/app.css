@@ -717,3 +717,21 @@ a{color:var(--aqua)}
 .bigic{display:grid;place-items:center;color:var(--sunny)}.bigic .ic{width:44px;height:44px;stroke-width:1.6}
 .now::before{width:220px;height:220px;inset-inline-end:-46px;bottom:-24px}
 .msearch button .ic{width:19px;height:19px}
+/* ask a question (guides hub) */
+.search.ask{background:var(--bg2);border-color:color-mix(in srgb,var(--p-sun) 45%,var(--line));margin:10px 0 8px}
+.search.ask .ic{color:var(--sunny)}
+.askex{margin:0 0 6px}.askex .chip{font-weight:500;color:var(--tx2)}
+.answer{background:var(--p-sun);color:var(--ink);border-radius:22px;padding:16px 16px 14px;margin:4px 0 6px}
+.answer .ah{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.answer .ah .ic{width:26px;height:26px;margin-top:2px}
+.answer .ah b{display:block;font-family:var(--deco);font-size:32px;line-height:.9;font-weight:700}
+.answer .ah small{display:block;font-size:12px;opacity:.7;margin-top:4px}
+.answer .gbody{color:var(--ink);font-size:14.5px;background:none;padding:0;border:0}
+.answer .gbody *{color:inherit}
+.answer .gbody .tbl td{border-color:rgba(34,17,59,.15)}
+.answer .gbody .steps li::marker,.answer .gbody .steps .n{color:var(--ink)}
+.answer .btn{background:var(--ink);color:var(--p-sun);border:0;margin-top:10px}
+.askmiss{display:block;margin:12px 4px 4px;font-size:13px}
+.tiles.dimmed{opacity:.45}
+#gbody h2.flash{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:color-mix(in srgb,var(--sunny) 35%,transparent)}100%{background:transparent}}
