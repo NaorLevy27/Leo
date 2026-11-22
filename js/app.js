@@ -25,39 +25,62 @@ const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side"
 
 /* ---------- derived state ---------- */
 const done=x=>Store.done(x.id);
+const BYNE={};IT.forEach(x=>{if(!BYNE[x.ne]||x.story)BYNE[x.ne]=x});
+const STORYN=STORY.map(x=>x.ne).sort((a,b)=>b.length-a.length);
+function ref(str){if(!str)return null;if(BYNE[str])return BYNE[str];const n=STORYN.find(n=>str.includes(n));return n?BYNE[n]:null}
 function nextStory(){return STORY.find(x=>!done(x))}
 function curCh(){const n=nextStory();return n?n.c:5}
-function locked(x){return S.spoil&&x.c>curCh()&&(x.story||x.g.includes("side"))}
-function title(x){return locked(x)?`🔒 משימה מפרק ${x.c}`:x.n}
+/* availability: now | later (unlocks after a mission you haven't done) | missed (its window closed) */
+function avail(x){
+  if(done(x))return "done";
+  for(const f of ["bf","dl","lim"]){const r=ref(x[f]);if(r&&r!==x&&done(r))return "missed"}
+  const a=ref(x.af);if(a&&a!==x&&!done(a))return "later";
+  if(x.story){const n=nextStory();if(n&&x.ord>n.ord)return "later"}
+  return "now";
+}
+function locked(x){
+  if(!S.spoil||done(x))return false;
+  if(x.c>curCh())return true;
+  const n=nextStory();
+  if(x.story&&n&&x.ord>n.ord)return true;
+  const a=ref(x.af);if(a&&a.story&&!done(a)&&n&&a.ord>n.ord)return true;
+  return false;
+}
+function title(x){return locked(x)?(x.story?`🔒 משימת סיפור בהמשך`:`🔒 נפתח בהמשך (פרק ${x.c})`):x.n}
 function missable(x){return !!x.m}
+function timed(x){return !!x.soon}
+function untilName(x){const r=ref(x.bf)||ref(x.dl)||ref(x.lim);return r&&!locked(r)?r.n:null}
 function forever(x){return !!x.pers&&!x.m}
 function nextPonr(){const n=nextStory();if(!n)return null;return STORY.find(x=>x.ord>=n.ord&&x.ponr)}
 
 function glyph(x,extra=""){
-  const c=mainCat(x),d=done(x)?" done":"",t=missable(x)?" time":"";
-  if(c==="story")return `<span class="gl ${x.opt?"opt":"story"}${t}${d}${extra}">${esc(x.w&&x.w.length===1?x.w:"")}</span>`;
-  if(c==="side")return `<span class="gl side${t}${d}${extra}">${esc(x.w&&x.w.length===1?x.w:"")}</span>`;
-  const e=x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•";
-  return `<span class="gl coll${t}${d}${extra}">${e}</span>`;
+  const c=mainCat(x),d=done(x)?" done":"",t=timed(x)?" time":missable(x)?" miss":"",ms=avail(x)==="missed"?" missed":"";
+  const lt=locked(x)?"":(x.w&&x.w.length===1?x.w:"");
+  if(c==="story")return `<span class="gl ${x.opt?"opt":"story"}${t}${d}${ms}${extra}">${esc(lt)}</span>`;
+  if(c==="side")return `<span class="gl side${t}${d}${ms}${extra}">${esc(lt)}</span>`;
+  const e=locked(x)?"🔒":(x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•");
+  return `<span class="gl coll${t}${d}${ms}${extra}">${e}</span>`;
 }
 function tags(x,max=3){
-  const a=[];
+  const a=[],av=avail(x);
+  if(av==="missed")a.push(`<span class="tag gone">❌ פוספס</span>`);
+  if(av==="later"&&!x.story){const r=ref(x.af);a.push(`<span class="tag">🔒 אחרי ${locked(x)?"משימה בהמשך":bdi(r?r.n:x.af)}</span>`)}
   if(x.isNew)a.push(`<span class="tag ex">🆕 חדש</span>`);
   if(x.ponr)a.push(`<span class="tag ponr">⚠ אל־חזור</span>`);
-  if(missable(x))a.push(`<span class="tag miss">⏳ אפשר לפספס</span>`);
-  else if(forever(x))a.push(`<span class="tag ok">♾ אפשר גם בהמשך</span>`);
+  if(av!=="missed"&&av!=="done"){if(timed(x))a.push(`<span class="tag soon">⏳ עלול להיגמר בקרוב</span>`);else if(missable(x)){const u=untilName(x);a.push(`<span class="tag miss">❗ אפשר לפספס${u?` · עד ${bdi(u)}`:""}</span>`)}else if(forever(x))a.push(`<span class="tag ok">♾ אפשר גם בהמשך</span>`)}
   if(x.veh)a.push(`<span class="tag">🚗 רכב</span>`);
   return a.slice(0,max).join("");
 }
 function sub(x){
   const parts=[`פרק ${x.c}`];
   const c=mainCat(x);if(c!=="story")parts.push(CAT[c]?CAT[c][0]:c);
-  if(x.w&&WHO[x.w])parts.push(WHO[x.w]);
+  if(x.w&&WHO[x.w]&&!locked(x))parts.push(WHO[x.w]);
   if(!locked(x)&&x.loc)parts.push(x.loc[x.loc.length-1].split(" – ")[0]);
   return parts.join(" · ");
 }
-function row(x){
-  return `<a class="row${done(x)?" done":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual||locked(x)?"":`<div class="tg">${tags(x,2)}</div>`}</div>${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+function row(x,cls=""){
+  const av=avail(x);
+  return `<a class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
@@ -78,15 +101,15 @@ function refreshSoft(){const y=scrollY;route(true);scrollTo(0,y);if(mapReady)dra
 
 /* ---------- pages ---------- */
 function pct(a,b){return b?Math.round(a/b*100):0}
-function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="${r}" fill="none" stroke="#0a1322" stroke-width="9"/><circle cx="48" cy="48" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 48 48)"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#5fe0d2"/><stop offset="1" stop-color="#f08fb0"/></linearGradient></defs><text x="48" y="52" text-anchor="middle">${p}%</text><text class="s" x="48" y="68" text-anchor="middle">${esc(label)}</text></svg>`}
+function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="${r}" fill="none" stroke="#1a1020" stroke-width="9"/><circle cx="48" cy="48" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 48 48)"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#ff9a3c"/><stop offset="1" stop-color="#ff3d8b"/></linearGradient></defs><text x="48" y="52" text-anchor="middle">${p}%</text><text class="s" x="48" y="68" text-anchor="middle">${esc(label)}</text></svg>`}
 
 function pageHome(){
   const n=nextStory(),ch=curCh();
   const all=IT.filter(x=>!x.tip),dn=all.filter(done).length;
   const st=STORY.filter(done).length;
   const pr=nextPonr();
-  const soon=IT.filter(x=>!done(x)&&missable(x)&&x.c===ch&&(!pr||x.ord<=pr.ord+0.5)).slice(0,5);
-  const near=n?IT.filter(x=>!done(x)&&!x.story&&x.p===n.p&&!x.tip).slice(0,4):[];
+  const soon=IT.filter(x=>avail(x)==='now'&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&(!pr||x.ord<=pr.ord+0.5)).sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord)).slice(0,6);
+  const near=n?IT.filter(x=>avail(x)==='now'&&!locked(x)&&!x.story&&x.p===n.p&&!x.tip).slice(0,4):[];
   let h=`<section class="hero"><div class="kick">Leo · פרק ${ch}</div><h1>${S.casual?"מה יש לגלות היום?":(n?"ממשיכים מאיפה שעצרת":"סיימת את הסיפור! 🎉")}</h1>`;
   if(!S.casual){
     h+=`<div class="ringrow">${ring(pct(dn,all.length),"מכל המשחק")}<div class="stat3"><div><b>${st}/${STORY.length}</b><span>סיפור</span></div><div><b>${dn}</b><span>סומנו</span></div><div><b>${soon.length}</b><span>ייסגרו בקרוב</span></div></div></div>`;
@@ -94,10 +117,10 @@ function pageHome(){
   if(n){h+=`<a class="cont" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`}
   h+=`</section>`;
   if(pr&&!S.casual)h+=`<div class="blk warn" style="margin-top:12px"><h3><span class="e">⚠</span>לפני <bdi>${esc(pr.n)}</bdi></h3><p class="muted" style="margin:0">זו נקודת אל־חזור. כדאי לסיים קודם את מה שמסומן ⏳ למטה.</p></div>`;
-  if(soon.length&&!S.casual)h+=`<div class="sec"><h2>⏳ ייסגר בקרוב</h2><a href="#/list?miss=1">הכל</a></div>`+soon.map(row).join("");
+  if(soon.length&&!S.casual)h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2><a href="#/list?miss=1">הכל</a></div>`+soon.map(row).join("");
   if(near.length&&!S.casual)h+=`<div class="sec"><h2>📍 באותו אזור</h2></div>`+near.map(row).join("");
   if(S.casual){
-    const pick=IT.filter(x=>x.g.includes("egg")||x.g.includes("event")).sort(()=>Math.random()-.5).slice(0,5);
+    const pick=IT.filter(x=>!locked(x)&&(x.g.includes("egg")||x.g.includes("event"))).sort(()=>Math.random()-.5).slice(0,5);
     h+=`<div class="sec"><h2>🥚 דברים מגניבים לגלות</h2></div>`+pick.map(row).join("");
   }
   if(NEWS.length)h+=`<div class="sec"><h2>🆕 מה חדש</h2><span class="dim" style="font-size:12px">מתעדכן כל יום</span></div><div class="card">${NEWS.slice(0,4).map(n=>`<div style="display:flex;gap:10px;padding:6px 0"><span class="dim ltr" style="font-size:12px;flex:none">${esc(n.d.slice(5).split("-").reverse().join("/"))}</span><span>${n.s?`<a href="#/i/${esc(n.s)}">${esc(n.t)}</a>`:esc(n.t)}</span></div>`).join("")}</div>`;
@@ -111,43 +134,101 @@ function pageHome(){
   return h;
 }
 
-/* list with tri-state filters: 1 = only, 2 = all except, 0 = off */
-const LF=Object.assign({cat:{},ch:0,q:"",stat:"",miss:0,kt:{}},S.lists||{});
-function triCls(v){return v===1?" on":v===2?" not":""}
-function pageList(q){
-  if(q.cat){LF.cat={[q.cat]:1}}if(q.ch)LF.ch=+q.ch;if(q.miss)LF.miss=1;
-  const catOn=Object.keys(LF.cat).filter(k=>LF.cat[k]===1),catNot=Object.keys(LF.cat).filter(k=>LF.cat[k]===2);
-  const ktOn=Object.keys(LF.kt).filter(k=>LF.kt[k]===1),ktNot=Object.keys(LF.kt).filter(k=>LF.kt[k]===2);
+/* ---------- missions list: tabs + organized filter sheet + chapter timeline ---------- */
+const TABS=[["all","הכל","✨"],["story","סיפור","📖"],["side","משימות צד","🎭"],["op","כנופיות","💼"],["collect","אספנות","🃏"],["event","אירועים","🎲"],["more","עוד","⭐"]];
+const MORE=["money","vehicle","weapon","egg","tip"];
+const LF=Object.assign({tab:"all",ch:0,q:"",stat:"",avail:"",miss:0,kt:{},ex:{},open:{}},S.lists2||{});
+function inTab(x){const c=mainCat(x);if(LF.tab==="all")return !x.tip;if(LF.tab==="more")return MORE.includes(c)||x.g.some(g=>MORE.includes(g));return c===LF.tab||x.g.includes(LF.tab)}
+function passes(x){
+  if(!inTab(x))return false;
+  const c=mainCat(x);
+  for(const k in LF.ex)if(LF.ex[k]&&(c===k||x.g.includes(k)))return false;
+  const ktOn=Object.keys(LF.kt).filter(k=>LF.kt[k]===1);if(ktOn.length&&!ktOn.includes(x.t))return false;if(LF.kt[x.t]===2)return false;
+  if(LF.ch&&x.c!==LF.ch)return false;
+  const av=avail(x);
+  if(LF.stat==="open"&&(av==="done"||av==="missed"))return false;
+  if(LF.stat==="done"&&av!=="done")return false;
+  if(LF.stat==="missed"&&av!=="missed")return false;
+  if(LF.avail==="now"&&av!=="now")return false;
+  if(LF.miss&&!((missable(x)||timed(x))&&av==="now"))return false;
   const qq=LF.q.trim().toLowerCase();
-  const list=IT.filter(x=>{
-    const c=mainCat(x);
-    if(catOn.length&&!catOn.some(k=>x.g.includes(k)||c===k))return false;
-    if(catNot.some(k=>x.g.includes(k)||c===k))return false;
-    if(ktOn.length&&!ktOn.includes(x.t))return false;if(ktNot.includes(x.t))return false;
-    if(LF.ch&&x.c!==LF.ch)return false;
-    if(LF.stat==="open"&&done(x))return false;if(LF.stat==="done"&&!done(x))return false;
-    if(LF.miss&&!missable(x))return false;
-    if(qq&&!((x.n+" "+x.ne+" "+(x.sp||"")+" "+(x.loc||[]).join(" ")).toLowerCase().includes(qq)))return false;
-    return true;});
-  let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}"></div>`;
-  h+=`<div class="chips">`+Object.keys(CAT).map(k=>`<button class="chip${triCls(LF.cat[k])}" data-cat="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("")+`</div>`;
-  if(LF.cat.collect===1)h+=`<div class="chips">`+Object.keys(D.KT).map(k=>`<button class="chip${triCls(LF.kt[k])}" data-kt="${k}">${KTE[k]||""} ${esc(D.KT[k][0])}</button>`).join("")+`</div>`;
-  h+=`<div class="chips"><button class="chip${LF.ch?"":" on"}" data-ch="0">כל הפרקים</button>`+[1,2,3,4,5].map(c=>`<button class="chip${LF.ch===c?" on":""}" data-ch="${c}">פרק ${c}</button>`).join("")+`</div>`;
-  if(!S.casual)h+=`<div class="chips"><button class="chip${LF.stat===""?" on":""}" data-st="">הכל</button><button class="chip${LF.stat==="open"?" on":""}" data-st="open">עוד לא עשיתי</button><button class="chip${LF.stat==="done"?" on":""}" data-st="done">עשיתי</button><button class="chip${LF.miss?" on":""}" data-miss="1">⏳ רק מה שאפשר לפספס</button></div>`;
-  h+=`<div class="dim" style="font-size:12px;margin:2px 4px">${list.length} תוצאות · לחיצה על פילטר = רק זה, פעמיים = הכל חוץ מזה</div>`;
-  let lastC=0;
-  for(const x of list){if(x.c!==lastC){lastC=x.c;const a=list.filter(y=>y.c===x.c);h+=`<div class="grp">פרק ${x.c} · ${a.filter(done).length}/${a.length}</div>`}h+=row(x)}
-  if(!list.length)h+=`<div class="empty">אין תוצאות. נסה לנקות פילטרים.</div>`;
+  if(qq&&(locked(x)||!((x.n+" "+x.ne+" "+(x.sp||"")+" "+(x.loc||[]).join(" ")).toLowerCase().includes(qq))))return false;
+  return true;
+}
+function nFilters(){return (LF.ch?1:0)+(LF.stat?1:0)+(LF.avail?1:0)+(LF.miss?1:0)+Object.values(LF.ex).filter(Boolean).length+Object.values(LF.kt).filter(Boolean).length}
+const STL={"":"הכל",open:"עוד לא עשיתי",done:"עשיתי",missed:"פוספס"};
+function pageList(q){
+  if(q.cat){const t=TABS.find(t=>t[0]===q.cat);LF.tab=t?q.cat:(MORE.includes(q.cat)?"more":"all")}if(q.ch)LF.ch=+q.ch;if(q.miss){LF.miss=1;LF.tab="all"}
+  const list=IT.filter(passes);
+  let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
+  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
+  const nf=nFilters();
+  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn${LF.ch?" on":""}" id="fch">📚 ${LF.ch?"פרק "+LF.ch:"כל הפרקים"} ▾</button>${S.casual?"":`<button class="fbtn${LF.avail==="now"?" on":""}" id="fnow">✅ זמין עכשיו</button>`}</div>`;
+  const act=[];
+  if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["⏳❗ רק מה שעלול להיעלם","miss"]);
+  for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
+  for(const k in LF.kt)if(LF.kt[k])act.push([`${LF.kt[k]===2?"בלי ":""}${D.KT[k][0]}`,"kt:"+k]);
+  if(act.length)h+=`<div class="chips act">`+act.map(a=>`<button class="chip on" data-rm="${a[1]}">${esc(a[0])} ✕</button>`).join("")+`<button class="chip" data-rm="all">נקה הכל</button></div>`;
+  h+=`<div class="dim cnt">${list.length} תוצאות</div>`;
+  if(!list.length)return h+`<div class="empty">אין תוצאות.<br><button class="btn sm" data-rm="all" style="margin-top:10px">נקה פילטרים</button></div>`;
+  const cur=curCh();
+  const timeline=LF.tab==="all"||LF.tab==="story"||LF.tab==="side";
+  for(let c=1;c<=5;c++){
+    const inC=list.filter(x=>x.c===c);if(!inC.length)continue;
+    const allC=IT.filter(x=>x.c===c&&inTab(x)),dn=allC.filter(done).length;
+    const open=LF.open[c]!=null?LF.open[c]:(c===cur||!!LF.ch||!!LF.q);
+    h+=`<section class="chap${open?" open":""}"><button class="chead" data-tog="${c}"><span class="cn">פרק ${c}</span><span class="bar"><i style="width:${pct(dn,allC.length)}%"></i></span><span class="cp">${dn}/${allC.length}</span><span class="cv">${open?"▴":"▾"}</span></button>`;
+    if(open){
+      if(timeline){
+        const used=new Set();const stories=inC.filter(x=>x.story);
+        const kidsOf=m=>inC.filter(x=>!x.story&&!used.has(x.id)&&ref(x.af)===m);
+        const free=inC.filter(x=>!x.story&&(!x.af||!ref(x.af)||ref(x.af).c!==c||!stories.includes(ref(x.af))&&!IT.includes(ref(x.af))));
+        const orphan=inC.filter(x=>!x.story&&x.af&&ref(x.af)&&!stories.includes(ref(x.af)));
+        const pre=[...new Set([...free,...orphan])];
+        if(pre.length&&LF.tab!=="story"){h+=`<div class="tl-h">בכל זמן בפרק</div>`;pre.forEach(x=>{used.add(x.id);h+=row(x,"kid")})}
+        stories.forEach(m=>{h+=row(m,"tl");const k=kidsOf(m);if(k.length){h+=`<div class="kids"><div class="kl">נפתח אחרי המשימה הזאת · ${k.length}</div>`;k.forEach(x=>{used.add(x.id);h+=row(x,"kid")});h+=`</div>`}});
+        inC.filter(x=>!x.story&&!used.has(x.id)).forEach(x=>h+=row(x,"kid"));
+      }else inC.forEach(x=>h+=row(x));
+    }
+    h+=`</section>`;
+  }
   return h;
 }
+function filterSheet(){
+  const tri=v=>v===1?" on":v===2?" not":"";
+  let h=`<h3 style="font-size:19px;margin:0 0 4px">סינון</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">בחר מה לראות. הכל נשמר אוטומטית.</p>`;
+  h+=`<div class="fsec"><b>פרק</b><div class="seg wide">`+[0,1,2,3,4,5].map(c=>`<button data-fc="${c}" class="${LF.ch===c?"on":""}">${c?c:"הכל"}</button>`).join("")+`</div></div>`;
+  h+=`<div class="fsec"><b>מצב</b><div class="seg wide">`+Object.keys(STL).map(k=>`<button data-fs="${k}" class="${LF.stat===k?"on":""}">${STL[k]}</button>`).join("")+`</div></div>`;
+  h+=`<div class="fsec"><div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שזמין עכשיו</b><small>מסתיר מה שעוד לא נפתח ומה שפוספס</small></div><button class="sw${LF.avail==="now"?" on":""}" data-fa></button></div>
+  <div class="set" style="padding:6px 0;border:0"><div class="t"><b>⏳❗ רק מה שעלול להיעלם</b><small>זמן מוגבל + דברים שנעלמים בנקודה מסוימת</small></div><button class="sw${LF.miss?" on":""}" data-fm></button></div></div>`;
+  h+=`<div class="fsec"><b>להסתיר סוגים</b><div class="chips wrap">`+Object.keys(CAT).filter(k=>k!=="tip").map(k=>`<button class="chip${LF.ex[k]?" not":""}" data-fx="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("")+`</div></div>`;
+  if(LF.tab==="collect"||LF.tab==="all")h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">לחיצה = רק זה · פעמיים = הכל חוץ מזה</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip${tri(LF.kt[k])}" data-fk="${k}">${KTE[k]||""} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`;
+  h+=`<div class="fact"><button class="btn" data-rm="all">נקה</button><button class="btn pri" id="fdone">הצג ${IT.filter(passes).length} תוצאות</button></div>`;
+  openSheet(h);
+  const re=()=>{Store.setS("lists2",LF);filterSheet();route(true)};
+  $$("[data-fc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.fc;re()});
+  $$("[data-fs]").forEach(b=>b.onclick=()=>{LF.stat=b.dataset.fs;re()});
+  $$("[data-fa]").forEach(b=>b.onclick=()=>{LF.avail=LF.avail?"":"now";re()});
+  $$("[data-fm]").forEach(b=>b.onclick=()=>{LF.miss=LF.miss?0:1;re()});
+  $$("[data-fx]").forEach(b=>b.onclick=()=>{LF.ex[b.dataset.fx]=!LF.ex[b.dataset.fx];re()});
+  $$("[data-fk]").forEach(b=>b.onclick=()=>{const k=b.dataset.fk;LF.kt[k]=((LF.kt[k]||0)+1)%3;if(!LF.kt[k])delete LF.kt[k];re()});
+  $("#fdone").onclick=closeSheet;
+  bindRm();
+}
+function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm;
+  if(r==="all"){LF.ch=0;LF.stat="";LF.avail="";LF.miss=0;LF.ex={};LF.kt={};LF.q=""}
+  else if(r==="stat")LF.stat="";else if(r==="miss")LF.miss=0;else if(r.startsWith("ex:"))LF.ex[r.slice(3)]=false;else if(r.startsWith("kt:"))delete LF.kt[r.slice(3)];
+  Store.setS("lists2",LF);if($("#sheet").classList.contains("on"))filterSheet();route(true)})}
 function bindList(){
-  const save=()=>{Store.setS("lists",LF);route(true)};
-  $$("[data-cat]").forEach(b=>b.onclick=()=>{const k=b.dataset.cat;LF.cat[k]=((LF.cat[k]||0)+1)%3;if(!LF.cat[k])delete LF.cat[k];if(k==="collect"&&LF.cat[k]!==1)LF.kt={};save()});
-  $$("[data-kt]").forEach(b=>b.onclick=()=>{const k=b.dataset.kt;LF.kt[k]=((LF.kt[k]||0)+1)%3;if(!LF.kt[k])delete LF.kt[k];save()});
-  $$("[data-ch]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.ch;save()});
-  $$("[data-st]").forEach(b=>b.onclick=()=>{LF.stat=b.dataset.st;save()});
-  $$("[data-miss]").forEach(b=>b.onclick=()=>{LF.miss=LF.miss?0:1;save()});
-  const q=$("#q");if(q){q.oninput=()=>{LF.q=q.value;clearTimeout(q._t);q._t=setTimeout(()=>{Store.setS("lists",LF);const p=q.selectionStart;route(true);const n=$("#q");n.focus();n.setSelectionRange(p,p)},250)}}
+  const save=()=>{Store.setS("lists2",LF);route(true)};
+  $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
+  $("#fopen").onclick=filterSheet;
+  $("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
+  const fn=$("#fnow");if(fn)fn.onclick=()=>{LF.avail=LF.avail?"":"now";save()};
+  $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
+  bindRm();
+  const qx=$("#qx");if(qx)qx.onclick=()=>{LF.q="";save()};
+  const q=$("#q");if(q){q.oninput=()=>{LF.q=q.value;clearTimeout(q._t);q._t=setTimeout(()=>{Store.setS("lists2",LF);const p=q.selectionStart;route(true);const n=$("#q");n.focus();n.setSelectionRange(p,p)},250)}}
 }
 
 /* item page */
@@ -188,7 +269,11 @@ function pageItem(slug){
   const linkM=n=>{const y=IT.find(z=>z.ne===n);return y?`<a href="#/i/${y.s}">${bdi(y.n)}</a>`:bdi(n)};
   h+=`<div class="blk"><h3><span class="e">🕒</span>מתי לעשות</h3>`;
   if(x.ponr)h+=`<p class="tag ponr" style="display:block;padding:8px 10px;margin-bottom:8px">⚠ נקודת אל־חזור – שמור לפני ותסיים קודם את מה שמסומן ⏳ בפרק</p>`;
-  if(missable(x))h+=`<p><b style="color:#ff9a9a">⏳ אפשר לפספס</b> – אם לא עושים בזמן, זה נעלם.</p>`;
+  const av=avail(x);
+  if(av==="missed")h+=`<p class="tag gone" style="display:block;padding:8px 10px;margin-bottom:8px">❌ פוספס – החלון של זה נסגר כשסיימת את <bdi>${esc((ref(x.bf)||ref(x.dl)||ref(x.lim)||{}).n||"")}</bdi>. אם עשית בכל זאת – סמן ✓.</p>`;
+  else if(av==="later"&&!x.story)h+=`<p class="tag" style="display:block;padding:8px 10px;margin-bottom:8px">🔒 עוד לא זמין – נפתח אחרי <bdi>${esc((ref(x.af)||{}).n||x.af)}</bdi></p>`;
+  if(timed(x)&&av!=="missed")h+=`<p><b style="color:var(--gold)">⏳ עלול להיגמר בקרוב</b> – הצעה עם זמן מוגבל (שעון חול / שיחת טלפון). כדאי לעשות עכשיו, לפני שממשיכים בסיפור.</p>`;
+  else if(missable(x)&&av!=="missed"){const u=untilName(x);h+=`<p><b style="color:#ff9a9a">❗ אפשר לפספס</b> – ${u?`נעלם אחרי <bdi>${esc(u)}</bdi>. יש לך זמן עד אז, אבל לא אחרי.`:"אם לא עושים בזמן, זה נעלם לתמיד."}</p>`}
   else if(forever(x))h+=`<p><b style="color:var(--green)">♾ אפשר גם בהמשך</b> – לא צריך למהר.</p>`;
   h+=wh.length?`<dl class="kv">${wh.map(([a,b])=>`<dt>${a}</dt><dd>${linkM(b)}</dd>`).join("")}</dl>`:(x.story?`<p class="muted" style="margin:0">חלק מהסיפור – נפתח לבד כשמגיעים.</p>`:"");
   if(x.wn)h+=`<p class="muted" style="margin-top:6px">${esc(Array.isArray(x.wn)?x.wn[0]:x.wn)}</p>`;
@@ -249,7 +334,20 @@ async function loadComments(){
 /* guides */
 const gcard=g=>`<a class="gcard" href="#/g/${g.id}"><span class="e">${g.e}</span><div><b>${esc(g.t)}</b><small>${esc(g.d)}</small></div></a>`;
 const pageGuides=()=>`<div class="sec" style="margin-top:4px"><h2>מדריכים</h2></div><p class="muted" style="margin-top:0">הכל בפשטות – בלי מונחים מסובכים.</p>`+GUIDES.map(gcard).join("");
-function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return `<div class="ihead"><div class="kick">מדריך</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
+function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return `<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
+/* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
+function gateGuide(){
+  const b=$("#gbody");if(!b)return;const cur=curCh();let first=true;
+  b.querySelectorAll("[data-ch]").forEach(el=>{
+    const c=+el.dataset.ch;el.classList.remove("gated");el.querySelectorAll(":scope > .gate").forEach(x=>x.remove());
+    if(!S.spoil||c<=cur)return;
+    el.classList.add("gated");
+    if(el.tagName==="TR"){el.dataset.lock=`🔒 נפתח בפרק ${c}`;return}
+    if(first){const m=document.createElement("div");m.className="gatebar";m.innerHTML=`<b>✋ כרגע אתה יכול עד כאן</b><span>מה שמתחת נפתח בהמשך המשחק.</span><button class="btn sm pri" id="gshow">רוצה לראות מה יהיה בהמשך?</button>`;el.before(m);first=false}
+  });
+  b.querySelectorAll("tr[data-ch]").forEach(tr=>{if(tr.classList.contains("gated")&&first){const t=tr.closest("table");if(t&&!t.previousElementSibling?.classList.contains("gatebar")){const m=document.createElement("div");m.className="gatebar";m.innerHTML=`<b>✋ כרגע אתה יכול עד כאן</b><span>השורות הנעולות נפתחות בהמשך.</span><button class="btn sm pri" data-gshow>רוצה לראות מה יהיה בהמשך?</button>`;t.after(m)}}});
+  b.querySelectorAll("#gshow,[data-gshow]").forEach(x=>x.onclick=()=>{b.querySelectorAll(".gated").forEach(e=>e.classList.remove("gated"));b.querySelectorAll(".gatebar").forEach(e=>e.remove())});
+}
 
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
@@ -359,6 +457,8 @@ function itemShown(x){
   if(x.x==null||x.tip)return false;
   if(S.hideDone&&done(x))return false;
   if(S.upTo&&x.c>curCh())return false;
+  if(locked(x))return false;
+  if(S.hideDone&&avail(x)==="missed")return false;
   if(S.exactOnly&&!x.ex)return false;
   const on=Object.keys(ML.cats).filter(k=>ML.cats[k]);
   if(on.length&&!on.includes(mainCat(x)))return false;
@@ -366,8 +466,9 @@ function itemShown(x){
 }
 function pinHtml(arr){
   const x=arr[0];const cnt=arr.length>1?`<span class="cnt">${arr.length}</span>`:"";
-  if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}</div>`}
-  return `<div class="mpin${x.ex?"":" ap"}" style="position:relative">${glyph(x)}${cnt}</div>`;
+  if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}<span class="pl">${esc(x.n)}</span></div>`}
+  const nm=arr.length>1?`${title(x)} +${arr.length-1}`:title(x);
+  return `<div class="mpin${x.ex?"":" ap"}" style="position:relative">${glyph(x)}${cnt}<span class="pl">${esc(nm)}</span></div>`;
 }
 function drawPins(){
   if(!map)return;
@@ -419,7 +520,7 @@ function ensureMap(){
   if(map)return;
   map=L.map("map",{crs:L.CRS.Simple,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
   map.attributionControl.setPrefix(false);loadVec().then(()=>addVector(map));
-  const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;setBase();mapChips();drawPins();mapReady=true;
+  const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=5.3);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
 function focusMap(q){
@@ -466,6 +567,7 @@ function route(soft){
   else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings();
   $("#main").innerHTML=h;
   if(page==="list")bindList();
+  if(page==="guide")gateGuide();
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{Store.setS("spoil",false);route(true)};
   if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null&&!locked(x))setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x&&!locked(x)?x.n+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
