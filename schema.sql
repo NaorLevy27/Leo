@@ -42,6 +42,18 @@ create table if not exists reports(
   created_at timestamptz not null default now()
 );
 
+-- community finds reported from the map
+create table if not exists finds(
+  id bigserial primary key,
+  user_id uuid references auth.users on delete cascade default auth.uid(),
+  x real not null, y real not null,
+  title text not null check (char_length(title) between 3 and 80),
+  body text check (char_length(body) <= 800),
+  video text check (char_length(video) <= 300),
+  status text not null default 'new',
+  created_at timestamptz not null default now()
+);
+
 -- read model used by the site
 create or replace view comments_view with (security_invoker = on) as
   select c.id,c.item_key,c.user_id,c.parent_id,c.body,c.created_at,
@@ -64,6 +76,7 @@ alter table progress enable row level security;
 alter table comments enable row level security;
 alter table comment_votes enable row level security;
 alter table reports enable row level security;
+alter table finds enable row level security;
 
 create or replace function is_admin() returns boolean language sql stable security definer set search_path=public as
 $$ select coalesce((select is_admin from profiles where id=auth.uid()),false) $$;
@@ -84,6 +97,10 @@ drop policy if exists "votes own" on comment_votes;     create policy "votes own
 
 drop policy if exists "reports insert" on reports;      create policy "reports insert" on reports for insert with check (user_id=auth.uid());
 drop policy if exists "reports admin" on reports;       create policy "reports admin" on reports for select using (is_admin());
+
+drop policy if exists "finds insert" on finds;     create policy "finds insert" on finds for insert with check (user_id=auth.uid());
+drop policy if exists "finds read" on finds;       create policy "finds read" on finds for select using (user_id=auth.uid() or is_admin());
+drop policy if exists "finds admin" on finds;      create policy "finds admin" on finds for update using (is_admin());
 
 -- simple flood guard: max 20 comments per user per hour
 create or replace function comments_rate() returns trigger language plpgsql as $$

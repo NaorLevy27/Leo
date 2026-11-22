@@ -62,6 +62,7 @@
     async del(id){return sb.from("comments").delete().eq("id",id)},
     async report(id,reason){return sb.from("reports").insert({comment_id:id,user_id:user.id,reason})},
     async counts(){const {data}=await sb.from("comment_counts").select("*");const r={};(data||[]).forEach(x=>r[x.item_key]=x.n);return r},
+    async find(f){return sb.from("finds").insert(Object.assign({user_id:user.id},f))},
     async board(){const {data}=await sb.from("leaderboard").select("*").limit(20);return data||[]}
   };
 })();

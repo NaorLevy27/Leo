@@ -92,14 +92,15 @@ function sub(x){
   if(x.loc)parts.push(x.loc[x.loc.length-1].split(" – ")[0]);
   return parts.join(" · ");
 }
+function dot(x){const av=avail(x);if(av==='done'||locked(x))return '';if(av==='missed')return '<span class="sdot gone" title="פוספס"></span>';if(timed(x))return '<span class="sdot soon" title="עלול להיגמר"></span>';if(missable(x))return '<span class="sdot miss" title="אפשר לפספס"></span>';if(av==='later')return '<span class="sdot later" title="עוד לא נפתח"></span>';if(x.isNew)return '<span class="sdot new" title="חדש"></span>';return ''}
 function row(x,cls=""){
   const av=avail(x);
-  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small>${S.casual?"":`<div class="tg">${tags(x,2)}</div>`}</div>${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">👁</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div>${S.casual?"":dot(x)}${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">👁</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
 let toastT;function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove("on"),1800)}
-function openSheet(html){document.body.classList.add("sheeton");$("#sheet").innerHTML=`<div class="grab"></div>`+html;$("#sheet").classList.add("on");$("#scrim").classList.add("on");$("#sheet").scrollTop=0}
+function openSheet(html){document.body.classList.add("sheeton");$("#toast").classList.remove("on");$("#sheet").innerHTML=`<div class="grab"></div>`+html;$("#sheet").classList.add("on");$("#scrim").classList.add("on");$("#sheet").scrollTop=0}
 function closeSheet(){document.body.classList.remove("sheeton");$("#sheet").classList.remove("on");$("#scrim").classList.remove("on")}
 $("#scrim").onclick=closeSheet;
 let touchY=null;$("#sheet").addEventListener("touchstart",e=>{touchY=$("#sheet").scrollTop<=0?e.touches[0].clientY:null},{passive:true});
@@ -155,24 +156,18 @@ function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBo
 
 function pageHome(){
   const n=nextStory(),ch=curCh();
-  const chS=STORY.filter(x=>x.c===ch),chD=chS.filter(done).length;
-  const last=[...STORY].reverse().find(done);
   const pr=nextPonr();
   const toPonr=pr&&n?STORY.filter(x=>x.ord>=n.ord&&x.ord<pr.ord).length:0;
   const soon=IT.filter(x=>avail(x)==="now"&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&!x.story&&(!pr||x.ord<=pr.ord+0.5))
     .sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord));
-  let h=`<section class="hero slim">
-    <div class="where"><div><div class="kick">אתה כאן · <button class="linkb" id="wh">לא נכון? עדכן</button></div><h1>פרק ${ch}</h1>${last?`<span class="muted">סיימת לאחרונה: ${bdi(last.n)}</span>`:`<span class="muted">עוד לא התחלת – בהצלחה!</span>`}</div>
-    ${S.casual?"":`<div class="mini-ring">${ring(pct(chD,chS.length),`${chD}/${chS.length}`)}</div>`}</div>`;
-  if(n)h+=`<a class="cont big" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`;
-  else h+=`<div class="cont big"><div class="t"><b>סיימת את הסיפור! 🎉</b><span class="muted">נשאר לך לאסוף דברים במפה</span></div></div>`;
-  h+=`</section>`;
-  if(pr&&!S.casual&&toPonr<=4)h+=`<div class="blk warn"><h3><span class="e">⚠</span>${toPonr===0?"המשימה הבאה":"עוד "+toPonr+" משימות עד"} נקודת אל־חזור</h3><p class="muted" style="margin:0">${bdi(title(pr))} סוגרת דברים לתמיד. סיים קודם את מה שלמטה.</p></div>`;
+  let h=`<div class="hwhere"><span>פרק ${ch}</span><button class="linkb" id="wh">📍 לא נכון? עדכן</button></div>`;
+  if(n)h+=`<a class="now" href="#/i/${n.s}"><div class="nk">מה עושים עכשיו</div><div class="nt">${glyph(n)}<b>${bdi(title(n))}</b></div><div class="ns">${esc(sub(n))}</div><span class="nb">יאללה ›</span></a>`;
+  else h+=`<div class="now"><div class="nk">סיימת את הסיפור 🎉</div><div class="ns">נשאר לך לאסוף דברים במפה</div></div>`;
   if(!S.casual){
-    if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2>${soon.length>4?`<a href="#/list?miss=1">עוד ${soon.length-4}</a>`:""}</div>`+soon.slice(0,4).map(row).join("")}
-    else h+=`<div class="blk okb"><h3><span class="e">✅</span>אין כרגע משהו שעומד להיסגר</h3><p class="muted" style="margin:0">אפשר להמשיך בסיפור בראש שקט.</p></div>`;
+    if(pr&&toPonr<=3)h+=`<div class="hint warn">⚠ ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
+    if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2></div>`+soon.slice(0,2).map(x=>row(x)).join("");if(soon.length>2)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-2} דברים שעלולים להיעלם ›</a>`}
   }
-  if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span>🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים מאז הביקור הקודם</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
+  if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span>🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   return h;
 }
 
@@ -318,57 +313,62 @@ function related(x){
   add("באותו מקום",IT.filter(y=>y.p&&y.p===x.p));
   return r.join("");
 }
+function statusPill(x){const av=avail(x);
+  if(av==="missed")return `<span class="tag gone">❌ פוספס</span>`;if(av==="done")return `<span class="tag ok">✓ עשיתי</span>`;
+  if(x.ponr)return `<span class="tag ponr">⚠ אל־חזור</span>`;if(timed(x))return `<span class="tag soon">⏳ עלול להיגמר בקרוב</span>`;
+  if(missable(x)){const u=untilName(x);return `<span class="tag miss">❗ אפשר לפספס${u?` · עד ${bdi(u)}`:""}</span>`}
+  if(av==="later"&&!x.story){const r=ref(x.af);return `<span class="tag">🔒 אחרי ${r?bdi(title(r)):bdi(x.af)}</span>`}
+  return forever(x)?`<span class="tag ok">♾ אפשר גם בהמשך</span>`:"";}
+const fold=(e,t,inner,id)=>`<details class="fold"${id?` id="${id}"`:""}><summary><span class="e">${e}</span>${t}<span class="chev">⌄</span></summary><div class="fin">${inner}</div></details>`;
 function pageItem(slug){
   const x=BYS[slug];if(!x)return `<div class="empty">לא נמצא</div>`;
   const c=mainCat(x);
-  let h=`<div class="ihead"><div class="meta">${glyph(x)}<span class="tag">${CAT[c]?CAT[c][1]+" "+CAT[c][0]:""}</span><span class="tag">פרק ${x.c}</span>${x.w&&WHO[x.w]?`<span class="tag">👤 ${WHO[x.w]}</span>`:""}${tags(x,4)}</div>
-  ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1>${hid(x)?"":`<button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`}`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
-  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div>${x.story&&!done(x)&&!S.casual?`<button class="linkb" data-upto="${esc(x.id)}" style="margin:6px 4px 0">סיימתי גם את כל מה שלפני</button>`:""}</div>`;
+  let h=`<div class="ihead">${glyph(x)}<div class="imeta">${CAT[c]?CAT[c][0]:""} · פרק ${x.c}${x.w&&WHO[x.w]?` · ${WHO[x.w]}`:""}</div>
+  ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1>`:`<h1>${bdi(x.n)}</h1>`}<div class="ipill">${statusPill(x)}</div>
+  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
   if(hid(x)){
     h+=`<div class="blk lockbox"><div style="font-size:38px">🙈</div><h3 style="justify-content:center">התוכן מוסתר כדי לא לספיילר</h3><p class="muted">זה מפרק ${x.c}${x.c>curCh()?` – ואתה עכשיו בפרק ${curCh()}`:""}. אתה מחליט מה לראות:</p>
     <div class="lockbtns">${!REV.has(x.id)?`<button class="btn" id="unspoil">👁 הצג רק את השם</button>`:""}<button class="btn pri" id="uncontent">📖 הצג מה עושים</button></div></div>`;
-    h+=commentsBlock("i:"+x.id);return h;
+    return h;
   }
-  /* what you get */
+  /* layer 1: what to do + what you get + navigate */
   const rw=x.rw||x.why;
-  if(rw||x.nt)h+=`<div class="blk reward"><h3><span class="e">🎁</span>מה מקבלים</h3>${rw?`<p>${esc(rw)}</p>`:""}${x.nt&&x.nt!==rw?`<p class="muted" style="font-weight:500">${esc(x.nt)}</p>`:""}</div>`;
-  if(x.d&&!x.steps)h+=`<div class="blk"><h3><span class="e">🎯</span>מה עושים</h3><p>${esc(x.d)}</p></div>`;
-  /* when */
+  let main="";
+  if(x.steps&&x.steps.length)main+=`<ol class="steps">${x.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join("")}</ol>`;
+  else if(x.d)main+=`<p style="font-size:15.5px">${esc(x.d)}</p>`;
+  else if(x.sp)main+=`<p style="font-size:15.5px">${esc(x.sp)}</p>`;
+  if(rw)main+=`<div class="getline"><span>🎁</span><b>${esc(rw)}</b></div>`;
+  h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?`<a class="btn pri wide" style="margin-top:12px" href="#/map?i=${x.s}">🗺️ נווט במפה</a>`:""}</div>`;
+  /* layer 2: details on demand */
+  if(x.loc||x.sp||x.x!=null){let w="";
+    if(x.x!=null)w+=`<p style="margin:0 0 6px">${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור משוער</span>`}</p>`;
+    if(x.loc)w+=`<div class="path">${x.loc.map(p=>`<span>${bdi(p)}</span>`).join("")}${x.st?`<span>${bdi(x.st)}</span>`:""}</div>`;
+    if(x.sp&&(x.steps||x.d))w+=`<p>${esc(x.sp)}</p>`;if(x.lk)w+=`<p class="muted">👀 איך זה נראה: ${esc(x.lk)}</p>`;
+    if(x.x!=null)w+=`<div class="minimap" id="mini"></div>`;
+    h+=fold("📍","איפה בדיוק",w,"fwhere");}
   const wh=[];
   if(x.af)wh.push(["נפתח אחרי",x.af]);if(x.in)wh.push(["במהלך",x.in]);if(x.prev)wh.push(["משימה קודמת",x.prev]);
   if(x.bf)wh.push(["נעלם אחרי",x.bf]);if(x.dl&&x.dl!==x.bf)wh.push(["תעשה לפני",x.dl]);if(x.lim)wh.push(["אחרון אפשרי",x.lim]);
   const linkM=n=>{const y=IT.find(z=>z.ne===n);return y?`<a href="#/i/${y.s}">${bdi(title(y))}</a>`:bdi(n)};
-  h+=`<div class="blk"><h3><span class="e">🕒</span>מתי לעשות</h3>`;
-  if(x.ponr)h+=`<p class="tag ponr" style="display:block;padding:8px 10px;margin-bottom:8px">⚠ נקודת אל־חזור – שמור לפני ותסיים קודם את מה שמסומן ⏳ בפרק</p>`;
-  const av=avail(x);
-  if(av==="missed")h+=`<p class="tag gone" style="display:block;padding:8px 10px;margin-bottom:8px">❌ פוספס – החלון של זה נסגר כשסיימת את <bdi>${esc((ref(x.bf)||ref(x.dl)||ref(x.lim)||{}).n||"")}</bdi>. אם עשית בכל זאת – סמן ✓.</p>`;
-  else if(av==="later"&&!x.story)h+=`<p class="tag" style="display:block;padding:8px 10px;margin-bottom:8px">🔒 עוד לא זמין – נפתח אחרי <bdi>${esc((ref(x.af)||{}).n||x.af)}</bdi></p>`;
-  if(timed(x)&&av!=="missed")h+=`<p><b style="color:var(--gold)">⏳ עלול להיגמר בקרוב</b> – הצעה עם זמן מוגבל (שעון חול / שיחת טלפון). כדאי לעשות עכשיו, לפני שממשיכים בסיפור.</p>`;
-  else if(missable(x)&&av!=="missed"){const u=untilName(x);h+=`<p><b style="color:#ff9a9a">❗ אפשר לפספס</b> – ${u?`נעלם אחרי <bdi>${esc(u)}</bdi>. יש לך זמן עד אז, אבל לא אחרי.`:"אם לא עושים בזמן, זה נעלם לתמיד."}</p>`}
-  else if(forever(x))h+=`<p><b style="color:var(--green)">♾ אפשר גם בהמשך</b> – לא צריך למהר.</p>`;
-  h+=wh.length?`<dl class="kv">${wh.map(([a,b])=>`<dt>${a}</dt><dd>${linkM(b)}</dd>`).join("")}</dl>`:(x.story?`<p class="muted" style="margin:0">חלק מהסיפור – נפתח לבד כשמגיעים.</p>`:"");
-  if(x.wn)h+=`<p class="muted" style="margin-top:6px">${esc(Array.isArray(x.wn)?x.wn[0]:x.wn)}</p>`;
-  h+=`</div>`;
-  /* steps */
-  if(x.steps&&x.steps.length)h+=`<div class="blk"><h3><span class="e">🧭</span>${x.story?"שלב אחרי שלב":"איך עושים"}</h3><ol class="steps">${x.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join("")}</ol>${x.src==="kg"?`<p class="dim" style="font-size:12px;margin:8px 0 0">תקציר כללי. יש לך טיפ? כתוב בתגובות למטה.</p>`:""}</div>`;
-  if(x.tips&&x.tips.length)h+=`<div class="blk"><h3><span class="e">💡</span>טיפים</h3><ul class="tips">${x.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`;
-  if(x.ch)h+=`<div class="blk"><h3><span class="e">🔀</span>בחירות</h3><p>${esc(x.ch)}</p></div>`;
-  if(x.veh)h+=`<div class="blk vehbox"><h3><span class="e">🅿️</span>איך שומרים את הרכב</h3>${vehText(x)}</div>`;
-  /* where */
-  if(x.loc||x.sp||x.x!=null){
-    h+=`<div class="blk"><h3><span class="e">📍</span>איפה בדיוק ${x.x!=null?(x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור</span>`):""}</h3>`;
-    if(x.loc)h+=`<div class="path">${x.loc.map(p=>`<span>${bdi(p)}</span>`).join("")}${x.st?`<span>${bdi(x.st)}</span>`:""}</div>`;
-    if(x.sp)h+=`<p>${esc(x.sp)}</p>`;
-    if(x.lk)h+=`<p class="muted">👀 איך זה נראה: ${esc(x.lk)}</p>`;
-    if(x.x!=null)h+=`<div class="minimap" id="mini"></div><a class="btn sm" style="margin-top:8px" href="#/map?i=${x.s}">פתח במפה הגדולה ›</a>`;
-    h+=`</div>`;
-  }
-  /* videos */
+  let wn="";const av=avail(x);
+  if(x.ponr)wn+=`<p>⚠ <b>נקודת אל־חזור</b> – שמור לפני, ותסיים קודם את מה שמסומן ⏳ בפרק.</p>`;
+  if(av==="missed")wn+=`<p>❌ החלון נסגר כשסיימת את <bdi>${esc((ref(x.bf)||ref(x.dl)||ref(x.lim)||{}).n||"")}</bdi>. עשית בכל זאת? סמן ✓.</p>`;
+  if(timed(x)&&av!=="missed")wn+=`<p>⏳ <b>הצעה עם זמן מוגבל</b> – כדאי לעשות עכשיו.</p>`;
+  else if(missable(x)&&av!=="missed"){const u=untilName(x);wn+=`<p>❗ ${u?`נעלם אחרי <bdi>${esc(u)}</bdi> – יש זמן עד אז.`:"אם לא עושים בזמן – נעלם לתמיד."}</p>`}
+  else if(forever(x))wn+=`<p>♾ לא צריך למהר – אפשר גם בהמשך.</p>`;
+  if(wh.length)wn+=`<dl class="kv">${wh.map(([a,b])=>`<dt>${a}</dt><dd>${linkM(b)}</dd>`).join("")}</dl>`;
+  if(x.wn)wn+=`<p class="muted" style="margin-top:6px">${esc(Array.isArray(x.wn)?x.wn[0]:x.wn)}</p>`;
+  if(x.story&&!done(x)&&!S.casual)wn+=`<button class="linkb" data-upto="${esc(x.id)}" style="margin-top:6px">סיימתי גם את כל מה שלפני</button>`;
+  if(wn)h+=fold("🕒","מתי לעשות",wn);
+  let tp="";if(x.tips&&x.tips.length)tp+=`<ul class="tips">${x.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`;if(x.ch)tp+=`<p>🔀 ${esc(x.ch)}</p>`;
+  if(x.nt&&x.nt!==rw)tp+=`<p class="muted">${esc(x.nt)}</p>`;
+  if(tp)h+=fold("💡","טיפים ובחירות",tp);
+  if(x.veh)h+=fold("🅿️","איך שומרים את הרכב",vehText(x));
   const vids=(x.v||[]).map(ytId).filter(Boolean);
-  if(vids.length||x.q){h+=`<div class="blk"><h3><span class="e">▶</span>סרטון</h3>`+vids.map(id=>`<div class="vid"><div class="ph" data-id="${id}" style="background-image:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)">▶</div></div>`).join("");
-    if(x.q)h+=`<a class="btn sm" style="margin-top:8px" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent("GTA 6 "+x.q)}">חפש עוד סרטונים ב־YouTube</a>`;h+=`</div>`}
-  const rel=related(x);if(rel)h+=`<div class="blk"><h3><span class="e">🔗</span>קשור</h3><div class="rel">${rel}</div></div>`;
-  h+=commentsBlock("i:"+x.id);
+  if(vids.length||x.q){let v=vids.map(id=>`<div class="vid"><div class="ph" data-id="${id}" style="background-image:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)">▶</div></div>`).join("");
+    if(x.q)v+=`<a class="btn sm" style="margin-top:8px" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent("GTA 6 "+x.q)}">חפש עוד סרטונים ב־YouTube</a>`;h+=fold("▶","סרטון",v)}
+  const rel=related(x);if(rel)h+=fold("🔗","קשור",`<div class="rel">${rel}</div>`);
+  h+=fold("💬","תגובות וטיפים מהקהילה",commentsBlock("i:"+x.id).replace('<div class="blk" id="cmts"','<div id="cmts"').replace(/<h3>.*?<\/h3>/,""));
   return h;
 }
 function pageLoc(id){
@@ -707,11 +707,30 @@ function mapSearch(q){
   openSheet(`<h3 style="font-size:17px;margin:0 0 8px">${res.length?res.length+" תוצאות":"לא נמצא"}</h3>`+res.slice(0,40).map((r,i)=>`<a class="row" href="#" data-sr="${i}">${r.g}<div class="t"><b>${bdi(r.t)}</b><small>${esc(r.s)}</small></div></a>`).join(""));
   $$("[data-sr]").forEach(a=>a.onclick=e=>{e.preventDefault();res[+a.dataset.sr].go()});
 }
+/* community: report a find on the map (long-press, or the 📍 button) */
+let pickMode=false;
+function reportSheet(x,y){
+  openSheet(`<h3 style="font-size:19px;margin:0 0 4px">📍 מצאת משהו כאן?</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">ספר לנו – אנחנו בודקים ומוסיפים לאתר לכולם.</p>
+   <input class="in" id="rf_t" maxlength="80" placeholder="מה זה? (למשל: כספת סודית, רכב נדיר)">
+   <textarea class="in" id="rf_b" style="margin-top:8px" maxlength="800" placeholder="איך מגיעים / מה עושים / מה מקבלים"></textarea>
+   <input class="in" id="rf_v" style="margin-top:8px" dir="ltr" placeholder="קישור לסרטון (לא חובה)">
+   <div class="fact"><button class="btn" id="rf_x">ביטול</button><button class="btn pri" id="rf_s">שלח</button></div>`);
+  $("#rf_x").onclick=closeSheet;
+  $("#rf_s").onclick=async()=>{
+    const t=$("#rf_t").value.trim(),b=$("#rf_b").value.trim(),v=$("#rf_v").value.trim();if(t.length<3)return toast("כתוב מה מצאת");
+    const pos=`x=${x.toFixed(1)}, y=${y.toFixed(1)}`;
+    if(Cloud.on&&Cloud.user){const r=await Cloud.find({x,y,title:t,body:b,video:v});closeSheet();toast(r.error?"שגיאה בשליחה":"תודה! קיבלנו ✓");return}
+    const body=`**מה מצאתי:** ${t}\n\n${b}\n\n${v?`**סרטון:** ${v}\n\n`:""}**מיקום במפה:** ${pos}\n${SITE}#/map?at=${x.toFixed(1)},${y.toFixed(1)}`;
+    window.open(`https://github.com/NaorLevy27/Leo/issues/new?labels=find&title=${encodeURIComponent("תגלית: "+t)}&body=${encodeURIComponent(body)}`,"_blank");closeSheet();toast("תודה! 🙏");
+  };
+}
 function ensureMap(){
   if(map)return;
   map=L.map("map",{crs:L.CRS.Simple,preferCanvas:true,fadeAnimation:false,tap:false,bounceAtZoomLimits:false,inertiaDeceleration:2600,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
   map.attributionControl.setPrefix(false);L.imageOverlay("data/overview.webp",[[-820,150],[-150,850]],{interactive:false,pane:"tilePane"}).addTo(map);setTimeout(()=>loadVec().then(()=>addVector(map)),60);
   const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;const zc=()=>{const z=map.getZoom();$("#map").classList.toggle("lbl",z>=4.8);$("#map").classList.toggle("lbl2",z>=4.3)};map.on("zoomend",zc);zc();setBase();mapChips();drawPins();mapReady=true;
+  map.on("contextmenu",e=>reportSheet(e.latlng.lng,-e.latlng.lat));map.on("click",e=>{if(pickMode){pickMode=false;$("#map").classList.remove("picking");reportSheet(e.latlng.lng,-e.latlng.lat)}});
+  $("#zrep").onclick=()=>{pickMode=true;$("#map").classList.add("picking");toast("לחץ על המקום במפה 📍")};
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
 let RLAYER=null;
@@ -725,6 +744,7 @@ function showRoute(){
 }
 function focusMap(q){
   if(q.route){setTimeout(showRoute,300);return}
+  if(q.at){const [ax,ay]=q.at.split(",").map(Number);map.setView([-ay,ax],7);L.marker([-ay,ax]).addTo(map);return}
   if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],7);setTimeout(()=>preview(x),250)}}
   if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],7.5);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
 }
@@ -766,14 +786,14 @@ function route(soft){
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
   else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
   $("#main").innerHTML=`<div class="wrap">${h}</div>`;
-  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
+  if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="guide")gateGuide();
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
   const uc=$("#uncontent");if(uc)uc.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REVC.add(x.id);saveRev()}route(true)};
-  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null)setTimeout(()=>drawMini(x.x,x.y,x),0);document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
+  if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null){const f=$("#fwhere");if(f)f.addEventListener("toggle",()=>{if(f.open&&!f._m){f._m=1;drawMini(x.x,x.y,x)}})}document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
   if(!soft||page==="item"||page==="loc"||page==="guide")loadComments();
   if(!soft)$("#main").scrollTop=0;
