@@ -5,6 +5,9 @@ const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const bdi=s=>`<bdi>${esc(s)}</bdi>`;
 const S=Store.S;
+const MQD=window.matchMedia?matchMedia("(prefers-color-scheme: dark)"):null;
+function applyTheme(){const t=S.theme||"auto";const d=t==="dark"||(t==="auto"&&MQD&&MQD.matches);document.documentElement.dataset.theme=d?"dark":"light";const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=d?"#1d1b4a":"#8f93d6"}
+applyTheme();if(MQD&&MQD.addEventListener)MQD.addEventListener("change",applyTheme);
 
 /* ---------- data ---------- */
 const [D,LD,EX]=await Promise.all([fetch("data/items.json").then(r=>r.json()),fetch("data/locs.json").then(r=>r.json()),fetch("data/extra.json").then(r=>r.ok?r.json():{}).catch(()=>({}))]);
@@ -700,7 +703,7 @@ function gateGuide(){
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
  ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#5a5bc0",1],
- ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#8a6cc0",1],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר, בהיר או כהה","#8a6cc0",1],
  ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#b076bf",1],
  ["map","map","המפה","מה מופיע עליה","#d06aa0"],
  ["share","share-2","שתף עם חברים","שלח את Leo","#e7849a"],
@@ -719,7 +722,8 @@ function pageSettings(sec){
     <p class="muted" style="font-size:13px;margin:8px 4px">במשימה מוסתרת יש שני כפתורים: <b>👁 הצג שם</b> ו־<b>📖 הצג מה עושים</b> – אתה מחליט מה לראות.</p>
     <div class="card cardlist" style="margin-top:12px"><div class="set stack"><div class="t"><b>מה נחשב "עוד לא הגעת"</b><small>"פרקים הבאים" – כל מה שבפרק שלך גלוי (נוח כשעושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>
     <div class="set"><div class="t"><b>מה שכבר גילית</b><small>${REV.size} שמות · ${REVC.size} תיאורים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
-    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;}
+    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`+
+    `<div class="sec"><h2>מראה</h2></div><div class="card cardlist" style="padding:12px 14px"><div class="seg wide">`+[["auto","לפי הטלפון"],["light","בהיר"],["dark","כהה"]].map(m=>`<button data-thm="${m[0]}" class="${(S.theme||"auto")===m[0]?"on":""}">${m[1]}</button>`).join("")+`</div><small class="dim" style="display:block;margin-top:8px;font-size:12.5px">"לפי הטלפון" עובר לכהה לבד כשהטלפון במצב כהה.</small></div>`;}
   if(sec==="progress")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>בחר את המשימה האחרונה שסיימת – נסמן הכל עד אליה</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>
    <div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>💾 קוד התקדמות</b><small>גיבוי, או העברה ממכשיר אחר / מהגרסה הקודמת. ייבוא רק מוסיף – לא מוחק.</small></div></div>
    <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm pri" id="bkl">🔗 קישור גיבוי</button><button class="btn sm" id="cpy">📋 קוד</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
@@ -739,6 +743,7 @@ function accountBlock(){
   return `<div class="set"><div class="t"><b>👤 ${bdi(Cloud.profile&&Cloud.profile.name||Cloud.user.email)}</b><small>${esc(Cloud.user.email||"")} · ${st}</small></div><button class="btn sm" id="ren">שנה שם</button><button class="btn sm" id="out">יציאה</button></div>`;
 }
 function bindSettings(){
+  $$("[data-thm]").forEach(b=>b.onclick=()=>{Store.setS("theme",b.dataset.thm);S.theme=b.dataset.thm;applyTheme();$$("[data-thm]").forEach(x=>x.classList.toggle("on",x===b))});
   const on=(sel,f)=>{const e=$(sel);if(e)e.onclick=f};
   $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר");if(k==="spoil")route(true)});
   on("#swh",()=>whereSheet());

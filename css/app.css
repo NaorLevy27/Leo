@@ -1260,3 +1260,64 @@ body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.7),rgba(25
 .ctl .rep{background:var(--acc)!important;color:#fff}
 .pcard h3{color:var(--ink)}
 .glist .gi,.glist .gi[style]{color:#fff}
+
+/* =====================================================================
+   v7 dark · "Vice dusk, after sunset" — same palette, night sky.
+   ===================================================================== */
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --ink:#1a1033;--tx:#fbeef5;--tx2:#d3bfdf;--tx3:#9483ad;
+  --bg:#1d1b4a;--bg2:#241a45;--card:rgba(36,24,66,.82);--card2:rgba(52,36,88,.72);
+  --sep:rgba(251,238,245,.08);--line:rgba(251,238,245,.1);
+  --acc:#ff5fa0;--sun:#f6b483;--warn:#f6b483;--lettering:#fbeef5;
+}
+:root[data-theme="dark"] html,html[data-theme="dark"]{background:#3a1f45}
+html[data-theme="dark"] body{background:linear-gradient(180deg,#1d1b4a 0%,#2a1f5a 26%,#3a2257 52%,#4a2550 78%,#5a2d4c 100%) fixed;color:var(--tx)}
+html[data-theme="dark"] a,html[data-theme="dark"] .linkb,html[data-theme="dark"] .morel,html[data-theme="dark"] .sall{color:#ff9ccb}
+html[data-theme="dark"] #top{background:rgba(29,27,74,.7)}
+html[data-theme="dark"] #top .brand span{color:#fbeef5}
+html[data-theme="dark"] .iconbtn{background:rgba(251,238,245,.08);color:#fbeef5}
+html[data-theme="dark"] .ihead h1,html[data-theme="dark"] .sec h2,html[data-theme="dark"] .chead .cn,html[data-theme="dark"] .pcard h3,html[data-theme="dark"] .answer .ah b,html[data-theme="dark"] .hwhere .chn b,
+html[data-theme="dark"] .row .t b,html[data-theme="dark"] .glist .t b,html[data-theme="dark"] .primary h3,html[data-theme="dark"] .blk h3,html[data-theme="dark"] .fold summary,html[data-theme="dark"] .set .t b,html[data-theme="dark"] .now .nt b{color:#fbeef5}
+html[data-theme="dark"] .group,html[data-theme="dark"] .chap.open,html[data-theme="dark"] .glist,html[data-theme="dark"] .row,html[data-theme="dark"] .primary,html[data-theme="dark"] .blk,html[data-theme="dark"] .fold,html[data-theme="dark"] .card,html[data-theme="dark"] .gcard,html[data-theme="dark"] .tip,html[data-theme="dark"] .answer,html[data-theme="dark"] .newsline,html[data-theme="dark"] .search,html[data-theme="dark"] .chap:not(.open) .chead,html[data-theme="dark"] .now,html[data-theme="dark"] .fbtn{
+  background:var(--card);border:1px solid rgba(251,238,245,.08);box-shadow:0 10px 26px -16px rgba(0,0,0,.6)}
+html[data-theme="dark"] .group>.row,html[data-theme="dark"] .chap .row{background:transparent;border:0;box-shadow:none}
+html[data-theme="dark"] .row:active,html[data-theme="dark"] .glist a:active{background:rgba(251,238,245,.05)}
+html[data-theme="dark"] .kids{background:rgba(251,238,245,.025)}
+html[data-theme="dark"] .chk{border-color:rgba(251,238,245,.28)}
+html[data-theme="dark"] .chead .bar,html[data-theme="dark"] .hwhere .chb{background:rgba(251,238,245,.1)}
+html[data-theme="dark"] .btn{background:rgba(251,238,245,.09);color:#fbeef5}
+html[data-theme="dark"] .btn.pri,html[data-theme="dark"] .bigchk,html[data-theme="dark"] .now .ngo{background:var(--acc);color:#fff}
+html[data-theme="dark"] .bigchk.on{background:rgba(251,238,245,.09);color:var(--tx2)}
+html[data-theme="dark"] .ishare{color:#fbeef5}
+html[data-theme="dark"] .tag{background:rgba(251,238,245,.08);color:var(--tx2)}
+html[data-theme="dark"] .tag.soon,html[data-theme="dark"] .tag.ponr{background:rgba(246,180,131,.16);color:#ffc89e}
+html[data-theme="dark"] .tag.miss,html[data-theme="dark"] .tag.gone,html[data-theme="dark"] .tag.ex{background:rgba(255,95,160,.16);color:#ff9ccb}
+html[data-theme="dark"] .tag.ok{background:rgba(160,170,255,.14);color:#b9c0ff}
+html[data-theme="dark"] .tab.on{color:#fbeef5}
+html[data-theme="dark"] .fbtn{color:#fbeef5}
+html[data-theme="dark"] .chip{background:rgba(251,238,245,.08);color:var(--tx2)}
+html[data-theme="dark"] .chip.on{background:var(--acc);color:#fff}
+html[data-theme="dark"] .chip.pick.on{background:var(--c);color:var(--ink)}
+html[data-theme="dark"] .seg{background:rgba(251,238,245,.08)}html[data-theme="dark"] .seg button.on{background:#4a3878;color:#fff;box-shadow:none}
+html[data-theme="dark"] .sw{background:rgba(251,238,245,.2)}
+html[data-theme="dark"] textarea.in,html[data-theme="dark"] input.in,html[data-theme="dark"] select.in{background:rgba(251,238,245,.06);color:#fbeef5}
+html[data-theme="dark"] .search input,html[data-theme="dark"] .msearch input{color:#fbeef5}
+html[data-theme="dark"] .now .nmap::after{background:linear-gradient(180deg,transparent 0%,rgba(36,24,66,.25) 50%,rgba(36,24,66,.96) 100%)}
+html[data-theme="dark"] .now .nk{color:#ffc89e}
+html[data-theme="dark"] .hint.warn{background:rgba(246,180,131,.14);color:#ffc89e}
+html[data-theme="dark"] .getline{background:rgba(246,180,131,.14)}html[data-theme="dark"] .getline>span .ic{color:#ffc89e}
+html[data-theme="dark"] .tipline{background:rgba(160,170,255,.1)}html[data-theme="dark"] .tipline>span .ic,html[data-theme="dark"] .pline>span .ic{color:#b9c0ff}
+html[data-theme="dark"] .feat .palm{color:#1d1b4a}
+html[data-theme="dark"] #sheet,html[data-theme="dark"] .fact{background:#2a1f55;color:#fbeef5}
+html[data-theme="dark"] #scrim{background:rgba(10,6,24,.5)}
+html[data-theme="dark"] .toast{background:#3a2a6a;color:#fbeef5}
+html[data-theme="dark"] .answer .gbody b{color:#fbeef5}
+html[data-theme="dark"] .answer .btn{background:rgba(251,238,245,.09);color:#fbeef5}
+html[data-theme="dark"] #nav{background:linear-gradient(180deg,rgba(255,255,255,.14),rgba(255,255,255,.04)),rgba(36,24,66,.55)!important;box-shadow:0 12px 34px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.3)!important}
+html[data-theme="dark"] #nav a{color:rgba(251,238,245,.7)}html[data-theme="dark"] #nav a.on{color:#fff}
+html[data-theme="dark"] #nav .lens{background:linear-gradient(180deg,rgba(255,95,160,.55),rgba(160,90,200,.4))!important;box-shadow:0 4px 16px rgba(255,95,160,.35),inset 0 1px 0 rgba(255,255,255,.35)!important}
+html[data-theme="dark"] #nav a.on b{color:#fff}
+html[data-theme="dark"] .msearch,html[data-theme="dark"] #mapbar .chip,html[data-theme="dark"] .ctl button{background:rgba(36,24,66,.88)!important;color:#fbeef5;border-color:rgba(251,238,245,.1)!important}
+html[data-theme="dark"] #mapbar .chip.on,html[data-theme="dark"] .ctl .rep{background:var(--acc)!important;color:#fff}
+html[data-theme="dark"] .anyw{background:rgba(160,170,255,.08)}
