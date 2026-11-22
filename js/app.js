@@ -163,7 +163,7 @@ function whereSheet(ch){
 function pageWelcome(step){
   step=+step||1;
   const dots=`<div class="wdots">${[1,2,3].map(i=>`<i class="${i===step?"on":""}"></i>`).join("")}</div>`;
-  if(step===1)return `<div class="welcome"><img src="icons/logo.png" class="wlogo" alt="Leo"><h1>ברוך הבא ל־Leo</h1><p class="muted">המדריך ל־GTA VI – משימות, מפה, טיפים. שלוש שאלות קצרות ומתחילים.</p>
+  if(step===1)return `<div class="welcome"><img src="icons/leo2-logo.png" class="wlogo" alt="Leo"><h1>ברוך הבא ל־Leo</h1><p class="muted">המדריך ל־GTA VI – משימות, מפה, טיפים. שלוש שאלות קצרות ומתחילים.</p>
     <div class="wopts"><button class="wopt" data-wl="he"><b>עברית</b></button><button class="wopt" data-wl="en"><b>English</b></button></div>${dots}</div>`;
   if(step===2){const n=STORY.find(x=>x.c===2)||STORY[3];
     const o=[["strict","🙈","בלי ספוילרים בכלל","רואים רק את המשימה הבאה. כל השאר – מוסתר עד שתחליט לגלות."],["ch","🙂","רק מה שבפרק שלי","שמות של משימות בפרק שלך גלויים. פרקים הבאים – מוסתרים."],["off","😎","תראה לי הכל","בלי הסתרות בכלל."]];
