@@ -25,7 +25,7 @@ const STORY=IT.filter(x=>x.story);
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
-const CATC={story:"#f42385",side:"#c8158d",op:"#fc5072",collect:"#ffab7a",event:"#d79bff",money:"#ffcf7a",vehicle:"#ff8fb8",weapon:"#ff6a6a",egg:"#e9a6f5",tip:"#ffcf7a"};
+const CATC={story:"#ff3d8f",side:"#bf7bff",op:"#ff9f0a",collect:"#ffd60a",event:"#64d2ff",money:"#30d158",vehicle:"#0a84ff",weapon:"#ff453a",egg:"#a2e05a",tip:"#ffd60a"};
 const CI={story:"book-open",side:"drama",op:"briefcase",collect:"layers",event:"dice-5",money:"banknote",vehicle:"car",weapon:"crosshair",egg:"egg",tip:"lightbulb"};
 const KTI={card:"layers",mag:"book-marked",book:"book-open",med:"sun",dive:"waves",flam:"bird",drone:"plane",wink:"camera",other:"sparkles"};
 const EI={"📲":"smartphone","🧭":"route","🎯":"target","🎁":"gift","💡":"lightbulb","📍":"map-pin","🕒":"clock","🅿️":"square-parking","▶":"play","🔗":"layers","💬":"message-circle","📝":"book-open","⌨️":"gamepad-2","⚠":"triangle-alert","🎮":"gamepad-2","🗺️":"map","🔑":"key-round","🚨":"siren","💵":"banknote","💾":"save","👁️":"scan-eye","✨":"sparkles","🌍":"navigation","🆕":"sparkles","⏳":"hourglass","🙈":"eye-off","👤":"user-round","🤝":"share-2","🌐":"languages","🕹️":"joystick","📖":"book-open","🎭":"drama","💼":"briefcase","🃏":"layers","🎲":"dice-5","🚗":"car","🔫":"crosshair","🥚":"egg","⭐":"star","🏘️":"house","🛣️":"route","💀":"skull","🔐":"lock"};
@@ -197,7 +197,7 @@ function pageHome(){
   else h+=`<div class="now"><div class="nk">סיימת את הסיפור 🎉</div><div class="ns">נשאר לך לאסוף דברים במפה</div></div>`;
   if(!S.casual){
     if(pr&&toPonr<=3)h+=`<div class="hint warn">${ic("triangle-alert")} ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
-    if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div>`+soon.slice(0,2).map(x=>row(x)).join("");if(soon.length>2)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-2} דברים שעלולים להיעלם ›</a>`}
+    if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div><div class="group">`+soon.slice(0,3).map(x=>row(x)).join("")+`</div>`;if(soon.length>3)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-3} דברים שעלולים להיעלם ›</a>`}
   }
   if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span class="e">🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   return h;
@@ -322,7 +322,7 @@ function searchHtml(){
   const R=searchAll(q,{all:SALL});
   const n=R.items.length+R.locs.length+R.places.length+R.guides.length+R.tips.length+R.cheats.length;
   let h="";
-  const sec=(t,arr,f,max)=>{if(!arr.length)return;h+=`<div class="grp">${t} · ${arr.length}</div>`;h+=arr.slice(0,max).map(f).join("");if(arr.length>max)h+=`<div class="dim" style="font-size:12px;margin:4px 4px 0">ועוד ${arr.length-max} – נסה לדייק את החיפוש</div>`};
+  const sec=(t,arr,f,max)=>{if(!arr.length)return;h+=`<div class="grp">${t} (${arr.length})</div>`;h+=`<div class="group">`+arr.slice(0,max).map(f).join("")+`</div>`;if(arr.length>max)h+=`<div class="dim" style="font-size:12px;margin:4px 4px 0">ועוד ${arr.length-max} – נסה לדייק את החיפוש</div>`};
   const hb=R.hidden.length&&!SALL?`<button class="blk hidres" id="sall"><b>🔒 עוד ${R.hidden.length} תוצאות מחלקים שעוד לא הגעת אליהם</b><small>לחץ כדי לראות אותן ברשימה (השמות יישארו מוסתרים עד שתבחר לחשוף)</small></button>`:"";
   if(hb&&R.hfull&&!R.full)h+=hb;
   if(R.items.length&&R.full===0&&R.terms.length>2)h+=`<div class="dim" style="font-size:12px;margin:2px 4px 6px">לא מצאתי משהו עם כל המילים – אלה הכי קרובים:</div>`;
@@ -376,7 +376,7 @@ function pageList(q){
     if(!r.length)h+=`<div class="empty">אין כרגע דברים עם מיקום שזמינים עכשיו.</div>`;
     return h;
   }
-  if(mode==="soon"){
+  if(mode==="soon"){/*g*/
     const u=list.filter(x=>(timed(x)||missable(x))&&avail(x)==="now").sort((a,b)=>(timed(b)-timed(a))||(((ref(a.bf)||{}).ord||9e9)-((ref(b.bf)||{}).ord||9e9)));
     h+=`<div class="grp">⏳ עלול להיגמר בכל רגע · ❗ נעלם בנקודה ידועה</div>`+(u.map(x=>row(x)).join("")||`<div class="empty">אין כרגע משהו שעומד להיגמר 🎉</div>`);
     return h;
@@ -482,9 +482,9 @@ function askHtml(){
     h+=`<div class="answer"><div class="ah">${ic(GI[s.g.id]||"book-open")}<span><b>${esc(s.i<0?s.g.t:s.title)}</b><small>מתוך המדריך "${esc(s.g.t)}"</small></span></div><div class="gbody">${s.html}</div><a class="btn sm" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}">למדריך המלא ${ic("chevron-left")}</a></div>`}
   if(tips.length)h+=`<div class="grp">טיפים שקשורים לזה</div>`+tips.slice(0,3).map(tipHtml).join("");
   const more=secs.slice(1).filter(a=>a[1].g!==(secs[0]&&secs[0][1].g)||a[0]>=1000).slice(0,4);
-  if(more.length)h+=`<div class="grp">עוד במדריכים</div>`+more.map(([,s])=>`<a class="row" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}"><span class="gl coll" style="--c:var(--p-aqua)">${ic(GI[s.g.id]||"book-open")}</span><div class="t"><b>${esc(s.title)}</b><small>${esc(s.g.t)}</small></div></a>`).join("");
-  if(R.cheats.length)h+=`<div class="grp">צ'יטים</div>`+R.cheats.slice(0,3).map(c=>`<a class="row" href="#/cheats"><span class="gl coll" style="--c:var(--p-flamingo)">${ic("joystick")}</span><div class="t"><b>${bdi(c.n)}</b><small>${esc(c.cat||"")}</small></div></a>`).join("");
-  if(R.items.length)h+=`<div class="grp">משימות ודברים</div>`+R.items.slice(0,3).map(x=>row(x)).join("");
+  if(more.length)h+=`<div class="grp">עוד במדריכים</div>`+`<div class="group">`+more.map(([,s])=>`<a class="row" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}"><span class="gl coll" style="--c:var(--p-aqua)">${ic(GI[s.g.id]||"book-open")}</span><div class="t"><b>${esc(s.title)}</b><small>${esc(s.g.t)}</small></div></a>`).join("")+`</div>`;
+  if(R.cheats.length)h+=`<div class="grp">צ'יטים</div>`+`<div class="group">`+R.cheats.slice(0,3).map(c=>`<a class="row" href="#/cheats"><span class="gl coll" style="--c:var(--p-flamingo)">${ic("joystick")}</span><div class="t"><b>${bdi(c.n)}</b><small>${esc(c.cat||"")}</small></div></a>`).join("")+`</div>`;
+  if(R.items.length)h+=`<div class="grp">משימות ודברים</div>`+`<div class="group">`+R.items.slice(0,3).map(x=>row(x)).join("")+`</div>`;
   if(!secs.length&&!tips.length&&!R.items.length&&!itemFirst&&!R.cheats.length)h+=`<div class="empty">עוד אין לנו תשובה לזה.<br><small>שלח לנו את השאלה – נוסיף מדריך או טיפ בעדכון הקרוב.</small><br><button class="btn sm pri" id="asksend" style="margin-top:10px">שלח את השאלה</button></div>`;
   else h+=`<button class="linkb askmiss" id="asksend">לא מצאת מה שחיפשת? שלח לנו את השאלה</button>`;
   return h;
@@ -492,13 +492,13 @@ function askHtml(){
 const GI={"map-icons":"map-pinned","steal-cars":"key-round","keep-cars":"square-parking",police:"siren",money:"banknote",saves:"save",focus:"scan-eye","how-site":"circle-help"};
 function bindAsk(){
   const i=$("#aq");if(!i)return;
-  const draw=()=>{$("#ares").innerHTML=deco(askHtml());$(".tiles").classList.toggle("dimmed",norm(AQ).length>=3);bindAres()};
+  const draw=()=>{$("#ares").innerHTML=deco(askHtml());$(".glists").classList.toggle("dimmed",norm(AQ).length>=3);bindAres()};
   i.oninput=()=>{AQ=i.value;clearTimeout(i._t);i._t=setTimeout(draw,220)};
   i.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();i.blur()}};
   bindAres();
 }
 function bindAres(){
-  $$("[data-ask]").forEach(b=>b.onclick=()=>{AQ=b.dataset.ask;$("#aq").value=AQ;$("#ares").innerHTML=deco(askHtml());$(".tiles").classList.add("dimmed");bindAres()});
+  $$("[data-ask]").forEach(b=>b.onclick=()=>{AQ=b.dataset.ask;$("#aq").value=AQ;$("#ares").innerHTML=deco(askHtml());$(".glists").classList.add("dimmed");bindAres()});
   const s=$("#asksend");if(s)s.onclick=()=>{const q=AQ.trim();if(!q)return;
     window.open(`https://github.com/NaorLevy27/Leo/issues/new?labels=question&title=${encodeURIComponent("שאלה: "+q.slice(0,80))}&body=${encodeURIComponent("שאלה מהמרכז באפליקציה:\n\n"+q+"\n\nפרק: "+curCh())}`,"_blank");toast("תודה! נענה בעדכון הקרוב")};
 }
@@ -658,23 +658,24 @@ function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)
 const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k==="btn"?"🎮":"💡"}</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(t.d>"2026-11-22"&&Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
 /* hub: one colorful tile per small topic */
 const HUB=[
- ["#/news","sparkles","מה חדש","התגליות האחרונות","--p-sun",1],
- ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","--p-sky"],
- ["#/cheats","joystick","צ'יטים","כל הקודים","--p-flamingo"],
- ["#/tips","lightbulb","טיפים","מתעדכן כל יום","--p-peach"],
- ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","--p-coral"],
- ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","--p-aqua"],
- ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","--p-lilac"],
- ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","--p-mint"],
- ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","--p-sun"],
- ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","--p-sky"],
- ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","--p-peach"],
- ["#/g/how-site","circle-help","איך משתמשים","3 דברים","--p-flamingo"]];
+ ["#/news","sparkles","מה חדש","התגליות האחרונות","#ff3d8f","t"],
+ ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#5e5ce6","t"],
+ ["#/cheats","joystick","צ'יטים","כל הקודים","#ff9f0a","t"],
+ ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#e6b800","t"],
+ ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#ff453a"],
+ ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#0a84ff"],
+ ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#5856d6"],
+ ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#30b158"],
+ ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#ff9f0a"],
+ ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#32ade6"],
+ ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#bf5af2"],
+ ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#8e8e93"]];
+const glist=(arr,hf)=>`<div class="glist">`+arr.map(t=>`<a href="${hf(t)}"><span class="gi" style="--c:${t[4]}">${ic(t[1])}</span><span class="t"><b>${t[2]}</b><small>${t[3]}</small></span><span class="chv">${ic("chevron-left")}</span></a>`).join("")+`</div>`;
 const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72","#ff9b78","#ffb37f","#ffc58a"];
 const skyAt=(i,n)=>SKY[Math.round(i/(Math.max(1,n-1))*(SKY.length-1))];
 const tileSky=list=>list.map((t,i)=>{const c=skyAt(i,list.length);return [...t.slice(0,4),c,t[5],i/(list.length-1)<.42]});
 const tileHtml=(href,t)=>(t=[...t],t[4]=t[4].startsWith("--")?`var(${t[4]})`:t[4],t)[5]?`<a class="tile big${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><span class="tt"><b>${t[2]}</b><small>${t[3]}</small></span></a>`:`<a class="tile${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><b>${t[2]}</b><small>${t[3]}</small></a>`;
-const pageGuides=()=>`<div class="ihead"><h1>מה בא לך לדעת?</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="tiles${norm(AQ).length>=3?" dimmed":""}">`+tileSky(HUB).map(t=>tileHtml(t[0],t)).join("")+`</div>`;
+const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="glists${norm(AQ).length>=3?" dimmed":""}"><div class="grp">כלים</div>${glist(HUB.filter(t=>t[5]),t=>t[0])}<div class="grp">מדריכים</div>${glist(HUB.filter(t=>!t[5]),t=>t[0])}</div>`;
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
@@ -696,15 +697,15 @@ function gateGuide(){
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
- ["account","user-round","החשבון שלי","שמירה בכל מכשיר","--p-sky"],
- ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","--p-flamingo"],
- ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","--p-mint"],
- ["map","map","המפה","מה מופיע עליה","--p-aqua"],
- ["share","share-2","שתף עם חברים","שלח את Leo","--p-sun"],
- ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","--p-lilac"],
- ["lang","languages","English / עברית","Language","--p-peach"]];
+ ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#0a84ff",1],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#ff3d8f",1],
+ ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#30b158",1],
+ ["map","map","המפה","מה מופיע עליה","#32ade6"],
+ ["share","share-2","שתף עם חברים","שלח את Leo","#ff9f0a"],
+ ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#8e8e93"],
+ ["lang","languages","English / עברית","Language","#5e5ce6"]];
 function pageSettings(sec){
-  if(!sec)return `<div class="ihead"><h1>ההגדרות שלך</h1></div><div class="tiles">`+tileSky(ME).map(t=>tileHtml("#/settings/"+t[0],t)).join("")+`</div>`;
+  if(!sec)return `<div class="ihead"><h1>אני</h1></div>${glist(ME.filter(t=>t[5]),t=>"#/settings/"+t[0])}<div style="height:14px"></div>${glist(ME.filter(t=>!t[5]),t=>"#/settings/"+t[0])}`;
   const T=ME.find(t=>t[0]===sec)||ME[0];
   let h=`<div class="ihead"><h1>${T[2]}</h1></div>`;
   if(sec==="account")h+=`<div class="card cardlist">${accountBlock()}</div><p class="muted" style="font-size:13px;margin:10px 4px">בלי חשבון – ההתקדמות נשמרת רק בטלפון הזה. עם חשבון – בכל מכשיר, ואפשר גם להגיב ולתת טיפים.</p>`;
