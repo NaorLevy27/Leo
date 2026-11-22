@@ -379,7 +379,7 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .rev{width:34px;height:34px;border-radius:50%;background:var(--card2);border:1px solid var(--line);flex:none;font-size:15px}
 
 /* map mode: lock the page so touches go to the map (iOS rubber-band / pull-to-refresh) */
-html:has(body.mapmode),body.mapmode{overflow:hidden;overscroll-behavior:none;height:100%}
+body.mapmode{overscroll-behavior:none}
 #map{touch-action:none;-webkit-user-select:none;user-select:none}
 #map .leaflet-tile{will-change:transform}
 /* perf: no live blur over the moving map */
@@ -434,9 +434,17 @@ body.mapmode .leaflet-bottom{bottom:calc(80px + var(--safe-b))}
 .demo .dl{position:absolute;top:-10px;inset-inline-start:14px;background:var(--sun);color:#1c0710;font-size:11px;font-weight:900;padding:2px 8px;border-radius:8px}
 
 /* ===== app shell: the page itself never scrolls/bounces, so the nav never moves ===== */
-html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+html,body{height:100%;overscroll-behavior:none}
 #top{position:fixed;top:0;left:0;right:0;background:linear-gradient(var(--bg) 75%,rgba(11,7,16,0))}
 main{position:fixed;inset:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;max-width:none;margin:0;
   padding:calc(60px + env(safe-area-inset-top)) 14px calc(112px + var(--safe-b))}
 main>.wrap{max-width:760px;margin:0 auto}
 .set.stack{flex-direction:column;align-items:stretch}.set.stack .seg{width:100%}.set.stack .seg button{flex:1}
+
+/* nav: always hugging the bottom edge, same on every screen (iOS home-indicator aware) */
+#nav{bottom:max(6px,calc(env(safe-area-inset-bottom) - 14px))!important;top:auto!important}
+#sheet{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 74px)}
+.toast,.upd{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 82px)}
+body.mapmode .ctl{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 86px)}
+body.mapmode .leaflet-bottom{bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 68px)}
+main{padding-bottom:calc(max(6px,calc(env(safe-area-inset-bottom) - 14px)) + 96px)}
