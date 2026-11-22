@@ -3,6 +3,10 @@
  "news": [
   {
    "d": "2026-11-22",
+   "t": "🕹️ נוסף: כל 61 הצ'יטים – קודים, איך פותחים ואיך מקלידים"
+  },
+  {
+   "d": "2026-11-22",
    "t": "🎮 נוספו 18 כפתורים סודיים שהמשחק לא מספר עליהם"
   },
   {
@@ -248,5 +252,631 @@
    "x": "",
    "src": "https://www.pcgamer.com/games/grand-theft-auto/15-hidden-gta-6-controls-and-features-you-should-know-about/"
   }
- ]
+ ],
+ "cheats": {
+  "updated": "2026-11-22",
+  "src": [
+   "https://rarethief.com/all-gta-vi-cheat-codes/",
+   "https://www.theclick.gg/gta-6-cheat-codes/",
+   "https://gamerant.com/all-grand-theft-auto-vi-gta-6-cheat-codes-list/"
+  ],
+  "list": [
+   {
+    "cat": "שחקן",
+    "n": "$250,000 כסף",
+    "ne": "$250,000",
+    "u": "לסיים את הסיפור",
+    "code": [
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Up",
+     "Left",
+     "Down",
+     "Right"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "פוקוס בלי הגבלה",
+    "ne": "Unlimited Focus",
+    "u": "לסיים את הסיפור",
+    "code": [
+     "Down",
+     "Up",
+     "Up",
+     "Down",
+     "Up",
+     "Down",
+     "Up",
+     "Down",
+     "Up",
+     "Right"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "שריון גוף",
+    "ne": "Body Armor",
+    "u": "100 אימונים",
+    "code": [
+     "Down",
+     "Up",
+     "Left",
+     "Up",
+     "Up",
+     "Up",
+     "Up",
+     "Up",
+     "Down",
+     "Down"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "להעלות 'חום' במפה",
+    "ne": "Raise Heat Level",
+    "u": "לברוח מ־3 כוכבים 25 פעמים",
+    "code": [
+     "Left",
+     "Down",
+     "Right",
+     "Down",
+     "Up",
+     "Down",
+     "Up"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "להעלות רמת מבוקש",
+    "ne": "Raise Wanted Level",
+    "u": "לברוח מ־3 כוכבים 50 פעמים",
+    "code": [
+     "Left",
+     "Down",
+     "Right",
+     "Down",
+     "Up",
+     "Right",
+     "Up"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "שיכור",
+    "ne": "Drunk",
+    "u": "לבזבז $2,500 על אלכוהול",
+    "code": [
+     "Up",
+     "Left",
+     "Right",
+     "Up",
+     "Up",
+     "Left",
+     "Right",
+     "Up",
+     "Left",
+     "Right"
+    ]
+   },
+   {
+    "cat": "שחקן",
+    "n": "בלי נזק מנפילה",
+    "ne": "No Fall Damage",
+    "u": "Survive a 40-foot freefall 20 times",
+    "code": []
+   },
+   {
+    "cat": "שחקן",
+    "n": "מצנח",
+    "ne": "Parachute",
+    "u": "Complete 50 skydives or base jumps from 300+ feet",
+    "code": []
+   },
+   {
+    "cat": "שחקן",
+    "n": "תיקון רכב",
+    "ne": "Repair Vehicle",
+    "u": "1st place in 10 races (Gellhorn Raceway / Thrillbilly Mud Club / Boone Speedway)",
+    "code": []
+   },
+   {
+    "cat": "שחקן",
+    "n": "ניטרו בלי הגבלה",
+    "ne": "Unlimited Nitrous",
+    "u": "Complete 50 stunt jumps",
+    "code": []
+   },
+   {
+    "cat": "קרב",
+    "n": "תחמושת מלאה",
+    "ne": "Max Ammo",
+    "u": "25 bronze medals or better at shooting ranges",
+    "code": [
+     "Down",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Left",
+     "Up",
+     "Up",
+     "Down",
+     "Left"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "תחמושת אינסופית",
+    "ne": "Infinite Ammo",
+    "u": "25 silver medals or better at shooting ranges",
+    "code": [
+     "Down",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Left",
+     "Up",
+     "Down",
+     "Down",
+     "Down"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "בלי טעינה מחדש",
+    "ne": "No Reload",
+    "u": "25 gold medals at shooting ranges",
+    "code": [
+     "Down",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Left",
+     "Up",
+     "Down",
+     "Down",
+     "Up"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "כדורים ומכות שמעיפים",
+    "ne": "Attack Force",
+    "u": "לסיים את הסיפור",
+    "code": [
+     "Down",
+     "Up",
+     "Left",
+     "Left",
+     "Right",
+     "Down",
+     "Down",
+     "Up",
+     "Down"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "כדורים מתפוצצים",
+    "ne": "Exploding Balls",
+    "u": "Deal explosive damage to 20 enemies",
+    "code": [
+     "Down",
+     "Up",
+     "Left",
+     "Left",
+     "Right",
+     "Down",
+     "Down",
+     "Up",
+     "Right"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "רכבים עפים בפגיעה",
+    "ne": "Vehicle Force",
+    "u": "Kill 25 enemies using a vehicle",
+    "code": [
+     "Down",
+     "Up",
+     "Left",
+     "Left",
+     "Right",
+     "Down",
+     "Left",
+     "Up",
+     "Down"
+    ]
+   },
+   {
+    "cat": "קרב",
+    "n": "כל הנשקים הנפיצים",
+    "ne": "All Explosive Weapons",
+    "u": "Throw 100 grenades",
+    "code": []
+   },
+   {
+    "cat": "קרב",
+    "n": "תחמושת מציתה",
+    "ne": "Incendiary Ammo",
+    "u": "Burn 100 enemies with fire damage",
+    "code": []
+   },
+   {
+    "cat": "קרב",
+    "n": "בקבוקים מתפוצצים",
+    "ne": "Exploding Bottles",
+    "u": "Throw 100 molotovs",
+    "code": []
+   },
+   {
+    "cat": "קרב",
+    "n": "שוטגאן נפיץ",
+    "ne": "Explosive Shotgun",
+    "u": "Hit 100 enemies with explosive damage",
+    "code": []
+   },
+   {
+    "cat": "קרב",
+    "n": "Hauners H-AT",
+    "ne": "Hauners H-AT",
+    "u": "Blow up 100 vehicles",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Maibatsu Boomazoom",
+    "ne": "Maibatsu Boomazoom",
+    "u": "Complete 5 shopping challenges",
+    "code": [
+     "Left",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Left",
+     "Up",
+     "Left"
+    ]
+   },
+   {
+    "cat": "רכבים",
+    "n": "MTL Pumper",
+    "ne": "MTL Pumper",
+    "u": "לגלות אותו בתפריט ההתקדמות",
+    "code": [
+     "Left",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Right",
+     "Right",
+     "Up"
+    ]
+   },
+   {
+    "cat": "רכבים",
+    "n": "HVY Bulldozer",
+    "ne": "HVY Bulldozer",
+    "u": "לגלות אותו בתפריט ההתקדמות",
+    "code": [
+     "Left",
+     "Up",
+     "Right",
+     "Down",
+     "Left",
+     "Right",
+     "Right",
+     "Down"
+    ]
+   },
+   {
+    "cat": "רכבים",
+    "n": "Interstate Ambulance",
+    "ne": "Interstate Ambulance",
+    "u": "לגלות אותו בתפריט ההתקדמות",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Airboat 09",
+    "ne": "Airboat 09",
+    "u": "Complete 5 survival challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Bravado Banshee",
+    "ne": "Bravado Banshee",
+    "u": "Complete all combat challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Tuff BMX",
+    "ne": "Tuff BMX",
+    "u": "Complete 5 fitness challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Nagasaki Carbon RS",
+    "ne": "Nagasaki Carbon RS",
+    "u": "Complete all exploration challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "'65 Vapid Dominator",
+    "ne": "'65 Vapid Dominator",
+    "u": "Complete all fitness challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Progen Emerus",
+    "ne": "Progen Emerus",
+    "u": "Complete all vehicle challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Inflatable Flamingo",
+    "ne": "Inflatable Flamingo",
+    "u": "Destroy 50 cocaine flamingos",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Vapid Stanier G2 Taxi",
+    "ne": "Vapid Stanier G2 Taxi",
+    "u": "Complete 5 sports challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Hauners P-996 Lazer",
+    "ne": "Hauners P-996 Lazer",
+    "u": "Complete all challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Lapwing Mallard",
+    "ne": "Lapwing Mallard",
+    "u": "Complete 5 vehicle challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Brimstone Golfer",
+    "ne": "Brimstone Golfer",
+    "u": "Complete all sports challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Hauners Rhino Tank",
+    "ne": "Hauners Rhino Tank",
+    "u": "Complete all survival challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Maibatsu Sanchez",
+    "ne": "Maibatsu Sanchez",
+    "u": "Complete 5 criminal challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Nagasaki Sea Sparrow",
+    "ne": "Nagasaki Sea Sparrow",
+    "u": "Complete 5 exploration challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Speeder 700 GT",
+    "ne": "Speeder 700 GT",
+    "u": "Complete 5 combat challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Truffade Thrax",
+    "ne": "Truffade Thrax",
+    "u": "Complete all shopping challenges",
+    "code": []
+   },
+   {
+    "cat": "רכבים",
+    "n": "Western Zombie Bobber",
+    "ne": "Western Zombie Bobber",
+    "u": "Complete all criminal challenges",
+    "code": []
+   },
+   {
+    "cat": "עולם וזמן",
+    "n": "להחליף מזג אוויר",
+    "ne": "Cycle Weather",
+    "u": "לסיים את הסיפור",
+    "code": [
+     "Down",
+     "Right",
+     "Up",
+     "Down",
+     "Right",
+     "Up",
+     "Right"
+    ]
+   },
+   {
+    "cat": "עולם וזמן",
+    "n": "להריץ זמן קדימה",
+    "ne": "Move Time Forward",
+    "u": "Find 10 collectible watches",
+    "code": []
+   },
+   {
+    "cat": "עולם וזמן",
+    "n": "לעצור את השעה",
+    "ne": "Pause Time of Day",
+    "u": "Find 20 collectible watches",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Cataclysm",
+    "ne": "Cataclysm",
+    "u": "Discover Martha's Vamos in the Progress menu",
+    "code": [
+     "Down",
+     "Down",
+     "Up",
+     "Right",
+     "Right",
+     "Up",
+     "Left",
+     "Left",
+     "Right",
+     "Right"
+    ]
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Dollhouse",
+    "ne": "Dollhouse",
+    "u": "Spend 8 hours with your partner",
+    "code": [
+     "Down",
+     "Down",
+     "Up",
+     "Right",
+     "Right",
+     "Up",
+     "Left",
+     "Left",
+     "Down",
+     "Right"
+    ]
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Faded Glory",
+    "ne": "Faded Glory",
+    "u": "Rob 50 stores with your partner",
+    "code": [
+     "Down",
+     "Down",
+     "Up",
+     "Right",
+     "Right",
+     "Up",
+     "Left",
+     "Left",
+     "Left",
+     "Right"
+    ]
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Golden Hour",
+    "ne": "Golden Hour",
+    "u": "Spend 4 hours holding hands",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Powdered Sugar",
+    "ne": "Powdered Sugar",
+    "u": "Scan all space debris with WAiNK",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Pinhole",
+    "ne": "Pinhole",
+    "u": "Clear 25 gang operations with your partner",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Neon Jungle",
+    "ne": "Neon Jungle",
+    "u": "Discover all 16 Girlypop Vehicles",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Yesteryear",
+    "ne": "Yesteryear",
+    "u": "Discover the Ridgeway",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Videotape",
+    "ne": "Videotape",
+    "u": "Complete 50 activities with your partner",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Dark Mirror",
+    "ne": "Dark Mirror",
+    "u": "Make $500,000 selling vehicles",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Migraine",
+    "ne": "Migraine",
+    "u": "Survive 6 minutes with a 6-star wanted level",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Bubblegum",
+    "ne": "Bubblegum",
+    "u": "Find all 24 collectible cards for the Vice City Flamingos",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Fast Forward",
+    "ne": "Fast Forward",
+    "u": "Complete 50 meditations",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Fisheye",
+    "ne": "Fisheye",
+    "u": "Catch 100 fish",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Pixel Art",
+    "ne": "Pixel Art",
+    "u": "Make $250,000 selling collectibles",
+    "code": []
+   },
+   {
+    "cat": "פילטרים למסך",
+    "n": "Hellscape",
+    "ne": "Hellscape",
+    "u": "Steal 100 cop vehicles",
+    "code": []
+   }
+  ]
+ }
 }

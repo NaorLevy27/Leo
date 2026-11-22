@@ -359,3 +359,20 @@ body{background:radial-gradient(120% 60% at 100% -10%,rgba(255,61,139,.13),trans
 .tip .e{font-size:20px}.tip b{display:block;font-weight:800;line-height:1.4}.tip small{display:block;color:var(--tx2);margin-top:3px;line-height:1.45}.tip>div{flex:1}
 #map.loading::after{content:"טוען מפה…";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:800 15px var(--head);z-index:500;pointer-events:none}
 .tip.btn{background:linear-gradient(135deg,rgba(74,141,255,.12),rgba(197,140,255,.06)),var(--card);border-color:rgba(74,141,255,.3)}
+
+.newsline{width:100%;text-align:start;font:inherit}
+.inst,.sharebig{width:100%;text-align:start;font:inherit;color:var(--tx);display:flex;gap:12px;align-items:center;margin-top:10px;padding:13px 14px;border-radius:16px;background:var(--card);border:1px solid var(--line)}
+.inst .e,.sharebig>span:first-child{font-size:24px}.inst>div,.sharebig>div{flex:1}.inst b,.sharebig b{display:block}.inst small,.sharebig small{display:block;color:var(--tx2);font-size:12.5px}
+.inst .x{color:var(--tx3);font-size:14px;padding:4px}
+.sharebig{background:linear-gradient(135deg,rgba(255,61,139,.16),rgba(255,138,61,.10)),var(--card);border-color:rgba(255,61,139,.35)}
+.sharebig .go{padding:8px 14px;border-radius:12px;background:var(--sun);color:#1c0710;font-weight:900}
+.irow{display:flex;gap:8px;align-items:stretch;margin:12px 0 4px}.irow .bigchk{margin:0;flex:1}.ishare{width:56px;font-size:20px;border-radius:16px}
+#nav a{position:relative}.newdot{position:absolute;top:2px;left:calc(50% + 8px);min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--sun);color:#1c0710;font:900 10.5px var(--head);display:grid;place-items:center}
+
+.hub{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:4px 0 6px}
+.hub a{display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 4px;border-radius:16px;background:var(--card);border:1px solid var(--line);color:var(--tx);font-size:12px;font-weight:800;text-align:center}
+.hub a span{width:42px;height:42px;border-radius:14px;background:var(--sun);display:grid;place-items:center;font-size:22px}
+.cheat{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;padding:12px;margin-bottom:7px;border-radius:14px;background:var(--card);border:1px solid var(--line)}
+.cheat .ct{flex:1 1 100%}.cheat .ct b{font-weight:900}.cheat .ct span{margin-inline-start:6px;font-size:12px}.cheat .ct small{display:block;color:var(--tx2);font-size:12.5px;margin-top:2px}
+.code{flex:1;display:flex;flex-wrap:wrap;gap:4px}.code i{font-style:normal;width:28px;height:28px;border-radius:8px;background:var(--card2);border:1px solid #4a3554;display:grid;place-items:center;font-size:14px}
+.code.none{color:var(--tx3);font-size:13px}
