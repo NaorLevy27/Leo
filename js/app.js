@@ -25,7 +25,12 @@ const STORY=IT.filter(x=>x.story);
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
-const CATC={story:"#ff4f9a",side:"#a77bff",op:"#ff8a3d",collect:"#ffc23c",event:"#2fc6d8",money:"#3fd08a",vehicle:"#4a8dff",weapon:"#ff5a5a",egg:"#b4e04a",tip:"#ffc23c"};
+const CATC={story:"#ff9cc6",side:"#cdbcff",op:"#ffc196",collect:"#ffdc82",event:"#86eadf",money:"#a6f0bd",vehicle:"#9ccfff",weapon:"#ffa898",egg:"#d9f28c",tip:"#ffdc82"};
+const CI={story:"book-open",side:"drama",op:"briefcase",collect:"layers",event:"dice-5",money:"banknote",vehicle:"car",weapon:"crosshair",egg:"egg",tip:"lightbulb"};
+const KTI={card:"layers",mag:"book-marked",book:"book-open",med:"sun",dive:"waves",flam:"bird",drone:"plane",wink:"camera",other:"sparkles"};
+const EI={"📲":"smartphone","🧭":"route","🎯":"target","🎁":"gift","💡":"lightbulb","📍":"map-pin","🕒":"clock","🅿️":"square-parking","▶":"play","🔗":"layers","💬":"message-circle","📝":"book-open","⌨️":"gamepad-2","⚠":"triangle-alert","🎮":"gamepad-2","🗺️":"map","🔑":"key-round","🚨":"siren","💵":"banknote","💾":"save","👁️":"scan-eye","✨":"sparkles","🌍":"navigation","🆕":"sparkles","⏳":"hourglass","🙈":"eye-off","👤":"user-round","🤝":"share-2","🌐":"languages","🕹️":"joystick","📖":"book-open","🎭":"drama","💼":"briefcase","🃏":"layers","🎲":"dice-5","🚗":"car","🔫":"crosshair","🥚":"egg","⭐":"star","🏘️":"house","🛣️":"route","💀":"skull","🔐":"lock"};
+const EIC=e=>EI[e.trim()]||EI[e.trim().replace(/\uFE0F/g,"")];
+function deco(h){return h.replace(/(<h1[^>]*>)\s*(?:\p{Extended_Pictographic}\uFE0F?\s*)+/gu,"$1").replace(/(<span class="(?:e|ti)">)([^<]{1,4})(<\/span>)/g,(m,a,e,b)=>EIC(e)?a+ic(EIC(e))+b:m).replace(/(<div class="(?:getline|tipline|pline)"><span>)([^<]{1,4})(<\/span>)/g,(m,a,e,b)=>EIC(e)?a+ic(EIC(e))+b:m).replace(/<span class="chev">⌄<\/span>/g,'<span class="chev">'+ic("chevron-down")+'</span>')}
 const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side");
 
 /* ---------- derived state ---------- */
@@ -72,17 +77,17 @@ function glyph(x,extra=""){
   const lt=x.w&&x.w.length===1?x.w:"";
   if(c==="story")return `<span class="gl ${x.opt?"opt":"story"}${t}${d}${ms}${extra}">${esc(lt)}</span>`;
   if(c==="side")return `<span class="gl side${t}${d}${ms}${extra}">${esc(lt)}</span>`;
-  const e=x.t&&KTE[x.t]||CAT[c]&&CAT[c][1]||"•";
-  return `<span class="gl coll${t}${d}${ms}${extra}" style="--c:${CATC[c]||"#ffc23c"}">${e}</span>`;
+  const e=ic(x.t&&KTI[x.t]||CI[c]||"sparkles");
+  return `<span class="gl coll${t}${d}${ms}${extra}" style="--c:${CATC[c]||"#ffdc82"}">${e}</span>`;
 }
 function tags(x,max=3){
   const a=[],av=avail(x);
-  if(av==="missed")a.push(`<span class="tag gone">❌ פוספס</span>`);
-  if(av==="later"&&!x.story){const r=ref(x.af);a.push(`<span class="tag">🔒 אחרי ${r?bdi(title(r)):bdi(x.af)}</span>`)}
-  if(x.isNew)a.push(`<span class="tag ex">🆕 חדש</span>`);
-  if(x.ponr)a.push(`<span class="tag ponr">⚠ אל־חזור</span>`);
-  if(av!=="missed"&&av!=="done"){if(timed(x))a.push(`<span class="tag soon">⏳ עלול להיגמר בקרוב</span>`);else if(missable(x)){const u=untilName(x);a.push(`<span class="tag miss">❗ אפשר לפספס${u?` · עד ${bdi(u)}`:""}</span>`)}else if(forever(x))a.push(`<span class="tag ok">♾ אפשר גם בהמשך</span>`)}
-  if(x.veh)a.push(`<span class="tag">🚗 רכב</span>`);
+  if(av==="missed")a.push(`<span class="tag gone">${ic("x")} פוספס</span>`);
+  if(av==="later"&&!x.story){const r=ref(x.af);a.push(`<span class="tag">${ic("lock")} אחרי ${r?bdi(title(r)):bdi(x.af)}</span>`)}
+  if(x.isNew)a.push(`<span class="tag ex">${ic("sparkles")} חדש</span>`);
+  if(x.ponr)a.push(`<span class="tag ponr">${ic("triangle-alert")} אל־חזור</span>`);
+  if(av!=="missed"&&av!=="done"){if(timed(x))a.push(`<span class="tag soon">${ic("hourglass")} עלול להיגמר בקרוב</span>`);else if(missable(x)){const u=untilName(x);a.push(`<span class="tag miss">${ic("circle-alert")} אפשר לפספס${u?` עד ${bdi(u)}`:""}</span>`)}else if(forever(x))a.push(`<span class="tag ok">${ic("infinity")} אפשר גם בהמשך</span>`)}
+  if(x.veh)a.push(`<span class="tag">${ic("car")} רכב</span>`);
   return a.slice(0,max).join("");
 }
 function sub(x){
@@ -90,17 +95,17 @@ function sub(x){
   const c=mainCat(x);if(c!=="story")parts.push(CAT[c]?CAT[c][0]:c);
   if(x.w&&WHO[x.w])parts.push(WHO[x.w]);
   if(x.loc)parts.push(x.loc[x.loc.length-1].split(" – ")[0]);
-  return parts.join(" · ");
+  return parts.join(", ");
 }
 function dot(x){const av=avail(x);if(av==='done'||locked(x))return '';if(av==='missed')return '<span class="sdot gone" title="פוספס"></span>';if(timed(x))return '<span class="sdot soon" title="עלול להיגמר"></span>';if(missable(x))return '<span class="sdot miss" title="אפשר לפספס"></span>';if(av==='later')return '<span class="sdot later" title="עוד לא נפתח"></span>';if(x.isNew)return '<span class="sdot new" title="חדש"></span>';return ''}
 function row(x,cls=""){
   const av=avail(x);
-  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div>${S.casual?"":dot(x)}${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">👁</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div>${S.casual?"":dot(x)}${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">${ic("eye")}</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
 let toastT;function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("on");clearTimeout(toastT);toastT=setTimeout(()=>e.classList.remove("on"),1800)}
-function openSheet(html){document.body.classList.add("sheeton");$("#toast").classList.remove("on");$("#sheet").innerHTML=`<div class="grab"></div>`+html;$("#sheet").classList.add("on");$("#scrim").classList.add("on");$("#sheet").scrollTop=0}
+function openSheet(html){document.body.classList.add("sheeton");$("#toast").classList.remove("on");$("#sheet").innerHTML=`<div class="grab"></div>`+deco(html);$("#sheet").classList.add("on");$("#scrim").classList.add("on");$("#sheet").scrollTop=0}
 function closeSheet(){document.body.classList.remove("sheeton");$("#sheet").classList.remove("on");$("#scrim").classList.remove("on")}
 $("#scrim").onclick=closeSheet;
 let touchY=null;$("#sheet").addEventListener("touchstart",e=>{touchY=$("#sheet").scrollTop<=0?e.touches[0].clientY:null},{passive:true});
@@ -186,19 +191,20 @@ function pageHome(){
   const toPonr=pr&&n?STORY.filter(x=>x.ord>=n.ord&&x.ord<pr.ord).length:0;
   const soon=IT.filter(x=>avail(x)==="now"&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&!x.story&&(!pr||x.ord<=pr.ord+0.5))
     .sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord));
-  let h=`<div class="hwhere"><span>פרק ${ch}</span><button class="linkb" id="wh">📍 לא נכון? עדכן</button></div>`;
-  if(n)h+=`<a class="now" href="#/i/${n.s}"><div class="nk">מה עושים עכשיו</div><div class="nt">${glyph(n)}<b>${bdi(title(n))}</b></div><div class="ns">${esc(sub(n))}</div><span class="nb">יאללה ›</span></a>`;
+  const CHN=["","Just Like Paradise","Paradise Lost","Tits, Ass, Drug Money","Vice City, Baby","Top of the World, Ma"];
+  let h=`<div class="hwhere"><span class="chn">פרק ${ch} <i>${esc(CHN[ch]||"")}</i></span><button class="linkb" id="wh">לא נכון? עדכן</button></div>`;
+  if(n)h+=`<a class="now" href="#/i/${n.s}"><div class="nk">מה עושים עכשיו</div><div class="nt">${glyph(n)}<b>${bdi(title(n))}</b></div><div class="ns">${esc(sub(n))}</div><span class="nb">יאללה ${ic("chevron-left")}</span></a>`;
   else h+=`<div class="now"><div class="nk">סיימת את הסיפור 🎉</div><div class="ns">נשאר לך לאסוף דברים במפה</div></div>`;
   if(!S.casual){
-    if(pr&&toPonr<=3)h+=`<div class="hint warn">⚠ ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
-    if(soon.length){h+=`<div class="sec"><h2>⏳ לפני שזה נגמר</h2></div>`+soon.slice(0,2).map(x=>row(x)).join("");if(soon.length>2)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-2} דברים שעלולים להיעלם ›</a>`}
+    if(pr&&toPonr<=3)h+=`<div class="hint warn">${ic("triangle-alert")} ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
+    if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div>`+soon.slice(0,2).map(x=>row(x)).join("");if(soon.length>2)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-2} דברים שעלולים להיעלם ›</a>`}
   }
-  if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span>🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
+  if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span class="e">🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   return h;
 }
 
 /* ---------- missions list: tabs + organized filter sheet + chapter timeline ---------- */
-const TABS=[["all","הכל","✨"],["story","סיפור","📖"],["side","משימות צד","🎭"],["op","כנופיות","💼"],["collect","אספנות","🃏"],["event","אירועים","🎲"],["more","עוד","⭐"]];
+const TABS=[["all","הכל","sparkles"],["story","סיפור","book-open"],["side","משימות צד","drama"],["op","כנופיות","briefcase"],["collect","אספנות","layers"],["event","אירועים","dice-5"],["more","עוד","star"]];
 const MORE=["money","vehicle","weapon","egg","tip"];
 const LF=Object.assign({tab:"all",ch:0,q:"",stat:"",avail:"",miss:0,kt:{},ex:{},open:{}},S.lists2||{});for(const k in LF.kt)if(LF.kt[k]!==1)delete LF.kt[k];for(const k in LF.ex)if(!LF.ex[k])delete LF.ex[k];
 function inTab(x){const c=mainCat(x);if(LF.tab==="all")return !x.tip&&c!=="collect";if(LF.tab==="more")return MORE.includes(c)||x.g.some(g=>MORE.includes(g));return c===LF.tab||x.g.includes(LF.tab)}
@@ -307,7 +313,7 @@ let SQ="",SALL=0;
 const SUGG=["כספת","וילה","רכב נדיר","כסף","נשק ייחודי","צ'יטים","כפתורים סודיים","ביצת פסחא","Moses","Vice Beach"];
 function pageSearch(q){
   if(q&&q.q!=null)SQ=q.q;
-  return `<div class="search big"><span>🔎</span><input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="חפש הכל – משימה, מקום, רכב, טיפ…" value="${esc(SQ)}"><button id="sqx" class="dim"${SQ?"":" hidden"}>✕</button></div><div id="sres">${searchHtml()}</div>`;
+  return `<div class="search big">${ic("search")}<input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="חפש הכל – משימה, מקום, רכב, טיפ…" value="${esc(SQ)}"><button id="sqx" class="dim"${SQ?"":" hidden"}>✕</button></div><div id="sres">${searchHtml()}</div>`;
 }
 function searchHtml(){
   const q=SQ.trim();
@@ -348,11 +354,11 @@ function bindSres(){
 function pageList(q){
   if(q.cat){const t=TABS.find(t=>t[0]===q.cat);LF.tab=t?q.cat:(MORE.includes(q.cat)?"more":"all")}if(q.ch)LF.ch=+q.ch;if(q.miss){LF.miss=1;LF.tab="all"}
   const list=IT.filter(passes);
-  let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
-  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
+  let h=`<div class="search">${ic("search")}<input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
+  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${ic(t[2])}</span>${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
   const SORTN={chrono:"לפי הסדר",near:"הכי קרוב",soon:"מה נגמר קודם",type:"לפי סוג"};
-  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn on" id="fsort">↕ ${SORTN[LF.sort||"chrono"]} ▾</button></div>`;
+  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">${ic("sliders-horizontal")} סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn on" id="fsort">${ic("arrow-up-down")} ${SORTN[LF.sort||"chrono"]}</button></div>`;
   const act=[];
   if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["⏳❗ רק מה שעלול להיעלם","miss"]);
   for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
@@ -377,7 +383,7 @@ function pageList(q){
   }
   if(mode==="type"){
     for(const k in CAT){const a=list.filter(x=>mainCat(x)===k);if(!a.length)continue;const open=LF.open["t"+k]!=null?LF.open["t"+k]:false;
-      h+=`<section class="chap${open?" open":""}"><button class="chead" data-tog="t${k}"><span class="cn">${CAT[k][1]} ${CAT[k][0]}</span><span class="bar"><i style="width:${pct(a.filter(done).length,a.length)}%"></i></span><span class="cp">${a.filter(done).length}/${a.length}</span><span class="cv">${open?"▴":"▾"}</span></button>${open?a.map(x=>row(x)).join(""):""}</section>`}
+      h+=`<section class="chap${open?" open":""}"><button class="chead" data-tog="t${k}"><span class="cn">${ic(CI[k])} ${CAT[k][0]}</span><span class="bar"><i style="width:${pct(a.filter(done).length,a.length)}%"></i></span><span class="cp">${a.filter(done).length}/${a.length}</span><span class="cv">${open?"▴":"▾"}</span></button>${open?a.map(x=>row(x)).join(""):""}</section>`}
     return h;
   }
   const timeline=LF.tab==="all"||LF.tab==="story"||LF.tab==="side";
@@ -413,8 +419,8 @@ function filterSheet(){
   h+=`<div class="fsec"><b>מצב</b><div class="seg wide">`+Object.keys(STL).map(k=>`<button data-fs="${k}" class="${LF.stat===k?"on":""}">${STL[k]}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שזמין עכשיו</b><small>בלי מה שעוד לא נפתח ובלי מה שפוספס</small></div><button class="sw${LF.avail==="now"?" on":""}" data-fa></button></div>
   <div class="set" style="padding:6px 0;border:0"><div class="t"><b>⏳❗ רק מה שעלול להיעלם</b><small>זמן מוגבל + דברים שנעלמים בנקודה מסוימת</small></div><button class="sw${LF.miss?" on":""}" data-fm></button></div></div>`;
-  h+=`<div class="fsec"><b>אילו סוגים להציג</b><div class="chips wrap">`+Object.keys(CAT).filter(k=>k!=="tip").map(k=>`<button class="chip pick${LF.ex[k]?"":" on"}" style="--c:${CATC[k]}" data-fx="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("")+`</div></div>`;
-  if(LF.tab==="collect"){const anyK=Object.values(LF.kt).some(v=>v===1);h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">${anyK?"מוצגים רק הסוגים הצבועים":"מוצג הכל – בחר סוג כדי לראות רק אותו"}</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip pick${LF.kt[k]===1?" on":""}" style="--c:#ffc23c" data-fk="${k}">${KTE[k]||""} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`}
+  h+=`<div class="fsec"><b>אילו סוגים להציג</b><div class="chips wrap">`+Object.keys(CAT).filter(k=>k!=="tip").map(k=>`<button class="chip pick${LF.ex[k]?"":" on"}" style="--c:${CATC[k]}" data-fx="${k}">${ic(CI[k])} ${CAT[k][0]}</button>`).join("")+`</div></div>`;
+  if(LF.tab==="collect"){const anyK=Object.values(LF.kt).some(v=>v===1);h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">${anyK?"מוצגים רק הסוגים הצבועים":"מוצג הכל – בחר סוג כדי לראות רק אותו"}</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip pick${LF.kt[k]===1?" on":""}" style="--c:#ffc23c" data-fk="${k}">${ic(KTI[k]||"sparkles")} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`}
   h+=`<div class="fact"><button class="btn" data-rm="all">נקה הכל</button><button class="btn pri" id="fdone">הצג ${IT.filter(passes).length} תוצאות</button></div>`;
   const sc=$("#sheet").classList.contains("on")?$("#sheet").scrollTop:0;
   openSheet(h);$("#sheet").scrollTop=sc;
@@ -477,7 +483,7 @@ function pageItem(slug){
   const c=mainCat(x);
   let h=`<div class="ihead">${glyph(x)}<div class="imeta">${CAT[c]?CAT[c][0]:""} · פרק ${x.c}${x.w&&WHO[x.w]?` · ${WHO[x.w]}`:""}</div>
   ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1>`:`<h1>${bdi(x.n)}</h1>`}<div class="ipill">${statusPill(x)}</div>
-  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
+  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${ic(done(x)?"circle-check":"check")} ${done(x)?"עשיתי את זה":"סמן שעשיתי"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">${ic("share-2")}</button></div></div>`;
   if(hid(x)){
     h+=`<div class="blk lockbox"><div style="font-size:38px">🙈</div><h3 style="justify-content:center">התוכן מוסתר כדי לא לספיילר</h3><p class="muted">זה מפרק ${x.c}${x.c>curCh()?` – ואתה עכשיו בפרק ${curCh()}`:""}. אתה מחליט מה לראות:</p>
     <div class="lockbtns">${!REV.has(x.id)?`<button class="btn" id="unspoil">👁 הצג רק את השם</button>`:""}<button class="btn pri" id="uncontent">📖 הצג מה עושים</button></div></div>`;
@@ -587,19 +593,20 @@ function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)
 const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k==="btn"?"🎮":"💡"}</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(t.d>"2026-11-22"&&Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
 /* hub: one colorful tile per small topic */
 const HUB=[
- ["#/buttons","🎮","כפתורים סודיים","מה שהמשחק לא מספר","#4a8dff,#a77bff"],
- ["#/cheats","🕹️","צ'יטים","כל הקודים","#ff3d8b,#ff8a3d"],
- ["#/tips","💡","טיפים","מתעדכן כל יום","#ffc23c,#ff8a3d"],
- ["#/news","🆕","מה חדש","תגליות אחרונות","#3fd08a,#2fc6d8"],
- ["#/g/police","🚨","בריחה מהמשטרה","כוכבים ועקבות","#ff5a5a,#ff3d8b"],
- ["#/g/steal-cars","🔑","גניבת רכב","טרקר או בלי","#4a8dff,#2fc6d8"],
- ["#/g/keep-cars","🅿️","לשמור רכב","רישום ומוסך","#a77bff,#ff4f9a"],
- ["#/g/money","💵","כסף ו־BuckMe","איפה לשמור","#3fd08a,#b4e04a"],
- ["#/g/saves","💾","נקודות אל־חזור","מה נסגר לתמיד","#ffc23c,#ff5a5a"],
- ["#/g/map-icons","🗺️","סימני המפה","מה כל סמל אומר","#2fc6d8,#4a8dff"],
- ["#/g/focus","👁️","פוקוס וטלפון","האפליקציות","#ff8a3d,#ffc23c"],
- ["#/g/how-site","✨","איך משתמשים","3 דברים","#c58cff,#ff4f9a"]];
-const pageGuides=()=>`<div class="ihead"><div class="kick">המרכז</div><h1 style="margin-top:4px">מה בא לך לדעת?</h1></div><div class="tiles">`+HUB.map(t=>`<a class="tile" href="${t[0]}" style="--g:linear-gradient(135deg,${t[4]})"><span class="ti">${t[1]}</span><b>${t[2]}</b><small>${t[3]}</small></a>`).join("")+`</div>`;
+ ["#/news","sparkles","מה חדש","התגליות האחרונות","--p-sun",1],
+ ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","--p-sky"],
+ ["#/cheats","joystick","צ'יטים","כל הקודים","--p-flamingo"],
+ ["#/tips","lightbulb","טיפים","מתעדכן כל יום","--p-peach"],
+ ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","--p-coral"],
+ ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","--p-aqua"],
+ ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","--p-lilac"],
+ ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","--p-mint"],
+ ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","--p-sun"],
+ ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","--p-sky"],
+ ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","--p-peach"],
+ ["#/g/how-site","circle-help","איך משתמשים","3 דברים","--p-flamingo"]];
+const tileHtml=(href,t)=>t[5]?`<a class="tile big" href="${href}" style="--f:var(${t[4]})"><span class="ti">${ic(t[1])}</span><span class="tt"><b>${t[2]}</b><small>${t[3]}</small></span></a>`:`<a class="tile" href="${href}" style="--f:var(${t[4]})"><span class="ti">${ic(t[1])}</span><b>${t[2]}</b><small>${t[3]}</small></a>`;
+const pageGuides=()=>`<div class="ihead"><h1>מה בא לך לדעת?</h1></div><div class="tiles">`+HUB.map(t=>tileHtml(t[0],t)).join("")+`</div>`;
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
@@ -621,17 +628,17 @@ function gateGuide(){
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
- ["account","👤","החשבון שלי","שמירה בכל מכשיר","#4a8dff,#a77bff"],
- ["view","🙈","ספוילרים ותצוגה","מה מוסתר ואיך","#ff3d8b,#ff8a3d"],
- ["progress","📍","ההתקדמות שלי","איפה אני · גיבוי","#3fd08a,#2fc6d8"],
- ["map","🗺️","המפה","מה מופיע עליה","#2fc6d8,#4a8dff"],
- ["share","🤝","שתף עם חברים","שלח את Leo","#ffc23c,#ff3d8b"],
- ["app","📲","האפליקציה","רענון · התקנה · קרדיטים","#c58cff,#ff4f9a"],
- ["lang","🌐","English / עברית","Language · שפה","#2fc6d8,#3fd08a"]];
+ ["account","user-round","החשבון שלי","שמירה בכל מכשיר","--p-sky"],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","--p-flamingo"],
+ ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","--p-mint"],
+ ["map","map","המפה","מה מופיע עליה","--p-aqua"],
+ ["share","share-2","שתף עם חברים","שלח את Leo","--p-sun"],
+ ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","--p-lilac"],
+ ["lang","languages","English / עברית","Language","--p-peach"]];
 function pageSettings(sec){
-  if(!sec)return `<div class="ihead"><div class="kick">אני</div><h1 style="margin-top:4px">ההגדרות שלך</h1></div><div class="tiles">`+ME.map(t=>`<a class="tile" href="#/settings/${t[0]}" style="--g:linear-gradient(135deg,${t[4]})"><span class="ti">${t[1]}</span><b>${t[2]}</b><small>${t[3]}</small></a>`).join("")+`</div>`;
+  if(!sec)return `<div class="ihead"><h1>ההגדרות שלך</h1></div><div class="tiles">`+ME.map(t=>tileHtml("#/settings/"+t[0],t)).join("")+`</div>`;
   const T=ME.find(t=>t[0]===sec)||ME[0];
-  let h=`<div class="ihead"><div class="kick">אני</div><h1 style="margin-top:4px">${T[1]} ${T[2]}</h1></div>`;
+  let h=`<div class="ihead"><h1>${T[2]}</h1></div>`;
   if(sec==="account")h+=`<div class="card cardlist">${accountBlock()}</div><p class="muted" style="font-size:13px;margin:10px 4px">בלי חשבון – ההתקדמות נשמרת רק בטלפון הזה. עם חשבון – בכל מכשיר, ואפשר גם להגיב ולתת טיפים.</p>`;
   if(sec==="view"){
     const demo=STORY.find(x=>x.c===2)||STORY[5];
@@ -647,7 +654,7 @@ function pageSettings(sec){
    <div style="padding:0 14px 14px"><textarea class="in" id="code" placeholder="הדבק כאן קוד…"></textarea><div style="display:flex;gap:8px;margin-top:8px"><button class="btn sm pri" id="bkl">🔗 קישור גיבוי</button><button class="btn sm" id="cpy">📋 קוד</button><button class="btn sm pri" id="imp">ייבא</button></div></div></div>`;
   if(sec==="map")h+=`<div class="card cardlist">`+sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו.")+sw("upTo","רק עד הפרק שלי","בלי דברים מפרקים הבאים.")+sw("exactOnly","רק מיקומים מדויקים","בלי סיכות של 'אזור משוער'.")+`</div>
    <p class="muted" style="font-size:13px;margin:10px 4px">טיפ: הכפתור <b>🎮 כמו במשחק</b> במפה מראה רק מה שאפשר לעשות עכשיו.</p>`;
-  if(sec==="share")h+=`<div class="blk" style="text-align:center"><div style="font-size:44px">🤝</div><h3 style="justify-content:center;font-size:18px">יש לך חברים שמשחקים?</h3><p class="muted">כל אחד שומר את ההתקדמות שלו – בלי הרשמה.</p><button class="btn pri wide" id="shapp">📤 שתף את Leo</button><button class="btn wide" id="cplink" style="margin-top:8px">🔗 העתק קישור</button></div>`;
+  if(sec==="share")h+=`<div class="blk" style="text-align:center"><div class="bigic">${ic("share-2")}</div><h3 style="justify-content:center;font-size:18px">יש לך חברים שמשחקים?</h3><p class="muted">כל אחד שומר את ההתקדמות שלו – בלי הרשמה.</p><button class="btn pri wide" id="shapp">📤 שתף את Leo</button><button class="btn wide" id="cplink" style="margin-top:8px">🔗 העתק קישור</button></div>`;
   if(sec==="lang")h+=`<div class="blk" style="text-align:center"><div style="font-size:40px">🌐</div><div class="lockbtns"><button class="btn${window.LANG!=="en"?" pri":""}" onclick="setLang('he')">עברית</button><button class="btn${window.LANG==="en"?" pri":""}" onclick="setLang('en')">English</button></div><p class="dim" style="font-size:12.5px;margin-top:10px">English: missions, map and menus. Guides & tips are still in Hebrew – coming soon.</p></div>`;
   if(sec==="app")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>🔄 רענון</b><small>מוריד את הגרסה הכי חדשה. ההתקדמות נשארת.</small></div><button class="btn sm pri" onclick="hardRefresh()">רענן</button></div>
    <div class="set"><div class="t"><b>📲 על המסך הבית</b><small>${/iphone|ipad/i.test(navigator.userAgent)?"ב־Safari: שיתוף ⬆ › 'הוסף למסך הבית'":"בתפריט הדפדפן: 'התקן אפליקציה'"}</small></div></div></div>
@@ -801,8 +808,8 @@ function pinHtml(arr){
   const x=arr[0];const cnt=arr.length>1?`<span class="cnt">${arr.length}</span>`:"";
   if(x.L){const k=KINDS[x.k]||{};return `<div class="mpin" style="position:relative"><span class="edot${Store.done("L:"+x.id)?" done":""}" style="background:${k.c}"></span>${cnt}<span class="pl">${esc(x.n)}</span></div>`}
   const nm0=locked(x)?"🔒":title(x);const nm=arr.length>1?`${nm0} +${arr.length-1}`:nm0;const c=mainCat(x);
-  const ic=(c==="story"||c==="side")?(x.w&&x.w.length===1?x.w:"★"):(x.t&&KTE[x.t]||CAT[c][1]);
-  return `<div class="tpin${done(x)?" done":""}${avail(x)==="missed"?" gone":""}${x.ex?"":" ap"}${timed(x)?" soon":missable(x)?" miss":""}" style="--c:${CATC[c]||"#ffc23c"}"><i><b>${esc(ic)}</b></i>${cnt}<span class="pl">${esc(nm)}</span></div>`;
+  const g=(c==="story"||c==="side")?esc(x.w&&x.w.length===1?x.w:"★"):ic(x.t&&KTI[x.t]||CI[c]||"sparkles");
+  return `<div class="tpin${done(x)?" done":""}${avail(x)==="missed"?" gone":""}${x.ex?"":" ap"}${timed(x)?" soon":missable(x)?" miss":""}" style="--c:${CATC[c]||"#ffc23c"}"><i><b>${g}</b></i>${cnt}<span class="pl">${esc(nm)}</span></div>`;
 }
 function drawPins(){
   if(!map)return;
@@ -862,10 +869,10 @@ function layersSheet(){
 }
 function mapChips(){
   const on=k=>ML.cats[k]?" on":"";
-  $("#msearch").innerHTML=`<span>🔎</span><input id="mq" placeholder="חיפוש במפה – משימה, מקום, שכונה"><button id="mlay2" aria-label="שכבות">🗂</button>`;
+  $("#msearch").innerHTML=`${ic("search")}<input id="mq" placeholder="חיפוש במפה – משימה, מקום, שכונה"><button id="mlay2" aria-label="שכבות">${ic("layers-2")}</button>`;
   $("#mlay2").onclick=layersSheet;
   const mq=$("#mq");mq.onkeydown=e=>{if(e.key==="Enter")mq.blur()};mq.oninput=()=>{clearTimeout(mq._t);mq._t=setTimeout(()=>mapSearch(mq.value),250)};
-  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">🎮 ${ML.game?"כמו במשחק":"הכל"}</button><button class="chip" id="mlay">🗂 שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip pick${on(k)}" style="--c:${CATC[k]}" data-mc="${k}">${CAT[k][1]} ${CAT[k][0]}</button>`).join("");
+  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">${ic("gamepad-2")} ${ML.game?"כמו במשחק":"הכל"}</button><button class="chip" id="mlay">${ic("layers-2")} שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip pick${on(k)}" style="--c:${CATC[k]}" data-mc="${k}">${ic(CI[k])} ${CAT[k][0]}</button>`).join("");
   $("#mlay").onclick=layersSheet;
   $("#mgame").onclick=()=>{ML.game=!ML.game;Store.setS("mapLayers",ML);mapChips();drawPins();toast(ML.game?"🎮 רואים רק מה שאפשר לעשות עכשיו":"רואים הכל")};
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
@@ -967,7 +974,7 @@ function route(soft){
   let h="";
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
   else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings(parts[1]);else if(page==="cheats")h=pageCheats();else if(page==="welcome")h=pageWelcome(parts[1]);else if(page==="search")h=pageSearch(q);else if(page==="tips")h=pageTipsK(false);else if(page==="buttons")h=pageTipsK(true);else if(page==="news"){h=pageNews();localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove())}
-  $("#main").innerHTML=`<div class="wrap">${h}</div>`;
+  $("#main").innerHTML=`<div class="wrap">${deco(h)}</div>`;
   if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="search")bindSearch();

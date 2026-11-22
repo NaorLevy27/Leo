@@ -24,22 +24,22 @@
 </head>
 <body>
 <header id="top">
-  <button class="iconbtn" id="back" aria-label="חזרה">→</button>
+  <button class="iconbtn" id="back" aria-label="חזרה"><svg class="ic"><use href="#i-arrow-right"/></svg></button>
   <a class="brand" href="#/"><img src="icons/icon-64.png" alt="Leo" width="34" height="34"><span>Leo<small>המדריך ל־Leonida</small></span></a>
   <span class="sp"></span>
-  <a class="iconbtn" id="tsearch" href="#/search" aria-label="חיפוש">🔎</a>
+  <a class="iconbtn" id="tsearch" href="#/search" aria-label="חיפוש"><svg class="ic"><use href="#i-search"/></svg></a>
 </header>
 <main id="main"><div class="empty">טוען…</div></main>
 <div id="map" hidden></div>
 <div id="msearch" class="msearch" hidden></div>
 <div id="mapbar" class="mapbar" hidden></div>
-<div id="mctl" class="ctl" hidden><button id="zrep" aria-label="דווח על תגלית" class="rep">📍</button><button id="zin" aria-label="הגדל">+</button><button id="zout" aria-label="הקטן">−</button><button id="zfit" aria-label="כל המפה">⤢</button></div>
+<div id="mctl" class="ctl" hidden><button id="zrep" aria-label="דווח על תגלית" class="rep"><svg class="ic"><use href="#i-map-pin"/></svg></button><button id="zin" aria-label="הגדל"><svg class="ic"><use href="#i-plus"/></svg></button><button id="zout" aria-label="הקטן"><svg class="ic"><use href="#i-minus"/></svg></button><button id="zfit" aria-label="כל המפה"><svg class="ic"><use href="#i-maximize-2"/></svg></button></div>
 <nav id="nav">
-  <a href="#/" data-k="home"><b>🏠</b>בית</a>
-  <a href="#/map" data-k="map"><b>🗺️</b>מפה</a>
-  <a href="#/list" data-k="list"><b>📋</b>משימות</a>
-  <a href="#/guides" data-k="guides"><b>🧭</b>מרכז</a>
-  <a href="#/settings" data-k="settings"><b>👤</b>אני</a>
+  <a href="#/" data-k="home"><b><svg class="ic"><use href="#i-house"/></svg></b>בית</a>
+  <a href="#/map" data-k="map"><b><svg class="ic"><use href="#i-map"/></svg></b>מפה</a>
+  <a href="#/list" data-k="list"><b><svg class="ic"><use href="#i-list-checks"/></svg></b>משימות</a>
+  <a href="#/guides" data-k="guides"><b><svg class="ic"><use href="#i-compass"/></svg></b>מדריכים</a>
+  <a href="#/settings" data-k="settings"><b><svg class="ic"><use href="#i-user-round"/></svg></b>אני</a>
 </nav>
 <div id="scrim"></div>
 <div id="sheet" role="dialog"></div>
@@ -48,6 +48,7 @@
 <script src="vendor/leaflet.js"></script>
 <script src="vendor/leaflet.markercluster.js"></script>
 <script src="vendor/supabase.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/store.js"></script>
 <script src="js/cloud.js"></script>
