@@ -878,7 +878,7 @@ a{color:var(--acc)}
 /* glyph: tinted icon, no loud plates */
 .gl,.gl.coll,.gl.story,.gl.side{width:36px;height:36px;border-radius:10px;font-family:var(--head);font-size:15px;font-weight:700;border:0;
   background:color-mix(in srgb,var(--c,var(--acc)) 16%,transparent);color:var(--c,var(--acc))}
-.gl.story{--c:#ff3d8f}.gl.side{--c:#bf7bff}
+.gl.story{--c:#f42385}.gl.side{--c:#e879f9}
 .gl.opt{background:transparent;border:1.5px solid color-mix(in srgb,#ff3d8f 60%,transparent);color:#ff3d8f}
 .gl .ic{width:18px;height:18px;stroke-width:2}
 .row.kid .gl{width:30px;height:30px;border-radius:9px;font-size:13px}
@@ -972,3 +972,69 @@ a{color:var(--acc)}
 #nav a.on{color:#fff}#nav a.on b{color:var(--acc)}
 .newdot{background:var(--acc);color:#fff}
 .welcome .wlogo{box-shadow:0 20px 50px rgba(255,61,143,.25)}
+
+/* =====================================================================
+   v5 · the logo's colours, used like a person would.
+   Warm plum-black base (from the palm silhouette), hot pink as the one
+   action colour, sunset orange only for "time is running out".
+   Real imagery: the next mission is shown on the actual map.
+   ===================================================================== */
+:root{
+  --bg:#120a10;--bg2:#1a0f18;--card:#21131e;--card2:#2c1a28;--sep:rgba(255,214,227,.08);--line:rgba(255,214,227,.1);
+  --tx:#fff1f5;--tx2:#d2b3c2;--tx3:#8f7282;
+  --acc:#f42385;--acc-ink:#fff;--warn:#ff8a4c;--peach:#ffc59a;
+  --green:#f42385;
+}
+body,html{background:var(--bg)}
+#top{background:rgba(18,10,16,.84)}
+a,.linkb,.morel{color:#ff6fb0}
+.btn.pri{background:var(--acc)}
+.chk.on{background:var(--acc);border-color:var(--acc)}
+.sw.on{background:var(--acc)}
+.seg button.on{background:#3d2536}
+.tag.soon,.tag.ponr{color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,transparent)}
+
+/* home: chapter line doubles as the "where am I" button */
+.hwhere{all:unset;display:flex;flex-direction:column;gap:7px;width:100%;margin:2px 0 14px;cursor:pointer;box-sizing:border-box;padding:0 2px}
+.hwhere .chn{font-size:14px;color:var(--tx2);font-weight:400}.hwhere .chn b{color:var(--tx);font-weight:600}
+.hwhere .chb{height:3px;border-radius:2px;background:rgba(255,214,227,.1);overflow:hidden}
+.hwhere .chb i{display:block;height:100%;background:linear-gradient(90deg,var(--peach),var(--acc));border-radius:2px}
+
+/* the next-mission card: a crop of the real map, pin in the middle */
+.now{padding:0;min-height:0;display:block;background:var(--card);border-radius:20px;overflow:hidden}
+.now.hasmap::before,.now.hasmap .palm{display:none}
+.now .nmap{display:block;height:150px;background:url(../data/overview.webp) var(--mx) var(--my)/900% auto no-repeat,#24436b;position:relative}
+.now .nmap::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(18,10,16,0) 40%,var(--card) 100%)}
+.now .npin{position:absolute;top:58px;left:50%;width:18px;height:18px;margin-left:-9px;border-radius:50%;background:var(--acc);border:3px solid #fff;box-shadow:0 0 0 6px rgba(244,35,133,.25)}
+.now .nk,.now .nt,.now .ns{padding-inline:18px}
+.now .nk{display:block;margin-top:-10px;position:relative;color:var(--peach);font-size:13px;font-weight:500}
+.now .nt{margin:2px 0 2px;max-width:none}
+.now .nt b{font-size:24px;color:var(--tx)}
+.now .ns{display:block;padding-bottom:16px;color:var(--tx3);max-width:none}
+.now:not(.hasmap){padding:20px 18px 4px;background:linear-gradient(160deg,#3d1031,#21131e 65%)}
+.now .ngo{position:absolute;bottom:16px;inset-inline-end:16px;width:34px;height:34px;border-radius:50%;background:var(--acc);color:#fff;display:grid;place-items:center}
+.now .ngo .ic{width:18px;height:18px}
+.row .chv{color:var(--tx3);flex:none}.row .chv .ic{width:16px;height:16px}
+
+/* list: title, quiet segmented tabs, one filter button */
+.tabs{gap:4px;padding-bottom:2px}
+.tab,.tab:not(.on){padding:6px 12px;font-size:14px;background:transparent;color:var(--tx3);font-weight:500}
+.tab.on{background:var(--card2);color:var(--tx)}
+.fbar{display:flex;align-items:center;gap:8px;margin:2px 2px 12px}
+.fbar .cntl{flex:1;color:var(--tx3);font-size:13px}
+.fbtn,.fbtn.on{flex:none;width:auto;padding:8px 10px;border-radius:10px;background:var(--card)}
+.fbtn.on{color:var(--tx)}
+
+/* map chrome: two chips, two buttons */
+#mapbar .chip{background:rgba(18,10,16,.86);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:var(--tx2)}
+#mapbar .chip.on{background:var(--acc);color:#fff}
+#mapbar .chip .nb{background:var(--acc);color:#fff;border-radius:9px;padding:0 6px;font-size:11px;font-weight:600}
+#zin,#zout{display:none!important}
+.ctl button{background:rgba(18,10,16,.9)}
+.ctl .rep{background:var(--acc)!important;color:#fff}
+
+/* hub + me icon squares: the logo's sunset, not a rainbow */
+.glist .gi{background:var(--c)}
+.answer{border-color:color-mix(in srgb,var(--acc) 40%,transparent)}
+.answer .ah .ic{color:var(--acc)}
+#nav a.on b{color:var(--acc)}

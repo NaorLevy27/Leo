@@ -25,7 +25,7 @@ const STORY=IT.filter(x=>x.story);
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
 const KTE={card:"🃏",mag:"📚",book:"📖",med:"🧘",dive:"🤿",flam:"🦩",drone:"🛸",wink:"📷",other:"✨"};
 const WHO={J:"Jason",L:"Lucia",B:window.LANG==="en"?"Both":"שניהם"};
-const CATC={story:"#ff3d8f",side:"#bf7bff",op:"#ff9f0a",collect:"#ffd60a",event:"#64d2ff",money:"#30d158",vehicle:"#0a84ff",weapon:"#ff453a",egg:"#a2e05a",tip:"#ffd60a"};
+const CATC={story:"#f42385",side:"#e879f9",op:"#ff8a4c",collect:"#ffc14d",event:"#ff9ec4",money:"#ffd27a",vehicle:"#c792ff",weapon:"#fc5072",egg:"#ffb3a1",tip:"#ffc14d"};
 const CI={story:"book-open",side:"drama",op:"briefcase",collect:"layers",event:"dice-5",money:"banknote",vehicle:"car",weapon:"crosshair",egg:"egg",tip:"lightbulb"};
 const KTI={card:"layers",mag:"book-marked",book:"book-open",med:"sun",dive:"waves",flam:"bird",drone:"plane",wink:"camera",other:"sparkles"};
 const EI={"📲":"smartphone","🧭":"route","🎯":"target","🎁":"gift","💡":"lightbulb","📍":"map-pin","🕒":"clock","🅿️":"square-parking","▶":"play","🔗":"layers","💬":"message-circle","📝":"book-open","⌨️":"gamepad-2","⚠":"triangle-alert","🎮":"gamepad-2","🗺️":"map","🔑":"key-round","🚨":"siren","💵":"banknote","💾":"save","👁️":"scan-eye","✨":"sparkles","🌍":"navigation","🆕":"sparkles","⏳":"hourglass","🙈":"eye-off","👤":"user-round","🤝":"share-2","🌐":"languages","🕹️":"joystick","📖":"book-open","🎭":"drama","💼":"briefcase","🃏":"layers","🎲":"dice-5","🚗":"car","🔫":"crosshair","🥚":"egg","⭐":"star","🏘️":"house","🛣️":"route","💀":"skull","🔐":"lock"};
@@ -100,7 +100,7 @@ function sub(x){
 function dot(x){const av=avail(x);if(av==='done'||locked(x))return '';if(av==='missed')return '<span class="sdot gone" title="פוספס"></span>';if(timed(x))return '<span class="sdot soon" title="עלול להיגמר"></span>';if(missable(x))return '<span class="sdot miss" title="אפשר לפספס"></span>';if(av==='later')return '<span class="sdot later" title="עוד לא נפתח"></span>';if(x.isNew)return '<span class="sdot new" title="חדש"></span>';return ''}
 function row(x,cls=""){
   const av=avail(x);
-  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div>${S.casual?"":dot(x)}${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">${ic("eye")}</button>`:""}${S.casual?"":`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
+  return `<a style="--c:${CATC[mainCat(x)]||"#ffc23c"}" class="row ${cls}${done(x)?" done":""}${av==="missed"?" gone":""}${av==="later"?" later":""}${locked(x)?" locked":""}" href="#/i/${x.s}">${glyph(x)}<div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div>${S.casual||String(cls).includes("lite")?"":dot(x)}${locked(x)?`<button class="rev" data-rev="${esc(x.id)}" aria-label="הצג שם">${ic("eye")}</button>`:""}${S.casual||String(cls).includes("lite")?`<span class="chv">${ic("chevron-left")}</span>`:`<button class="chk${done(x)?" on":""}" data-chk="${esc(x.id)}" aria-label="סמן">✓</button>`}</a>`;
 }
 
 /* ---------- ui helpers ---------- */
@@ -192,19 +192,20 @@ function pageHome(){
   const soon=IT.filter(x=>avail(x)==="now"&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&!x.story&&(!pr||x.ord<=pr.ord+0.5))
     .sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord));
   const CHN=["","Just Like Paradise","Paradise Lost","Tits, Ass, Drug Money","Vice City, Baby","Top of the World, Ma"];
-  let h=`<div class="hwhere"><span class="chn">פרק ${ch} <i>${esc(CHN[ch]||"")}</i></span><button class="linkb" id="wh">לא נכון? עדכן</button></div>`;
-  if(n)h+=`<a class="now" href="#/i/${n.s}"><svg class="palm" viewBox="0 0 150 210" aria-hidden="true"><path fill="currentColor" d="M112 210C104 160 92 110 80 62l6-2c12 48 26 98 36 150zM82 58C60 40 30 38 4 52c26-8 52-4 78 10zM82 58C70 30 48 14 20 12c26 8 46 24 60 50zM82 58c8-30 26-46 54-50-24 12-40 28-52 54zM82 58c26-14 50-12 68 4-22-10-46-8-66 2zM82 60c-16 6-34 26-42 52 14-24 30-38 44-48zM84 60c20 6 36 24 44 48-14-20-28-34-44-44z"/></svg><div class="nk">מה עושים עכשיו</div><div class="nt">${glyph(n)}<b>${bdi(title(n))}</b></div><div class="ns">${esc(sub(n))}</div><span class="nb">יאללה ${ic("chevron-left")}</span></a>`;
+  const chp=(()=>{const a=STORY.filter(x=>x.c===ch);return a.length?Math.round(a.filter(done).length/a.length*100):0})();
+  let h=`<button class="hwhere" id="wh" aria-label="עדכן איפה אני"><span class="chn"><b>פרק ${ch}</b> ${esc(CHN[ch]||"")}</span><span class="chb"><i style="width:${chp}%"></i></span></button>`;
+  if(n)h+=`<a class="now${n.x!=null?" hasmap":""}" href="#/i/${n.s}"${n.x!=null?` style="--mx:${((n.x-150)/700*100).toFixed(1)}%;--my:${((n.y-150)/670*100).toFixed(1)}%"`:""}>${n.x!=null?`<span class="nmap"></span><span class="npin"></span>`:""}<svg class="palm" viewBox="0 0 150 210" aria-hidden="true"><path fill="currentColor" d="M112 210C104 160 92 110 80 62l6-2c12 48 26 98 36 150zM82 58C60 40 30 38 4 52c26-8 52-4 78 10zM82 58C70 30 48 14 20 12c26 8 46 24 60 50zM82 58c8-30 26-46 54-50-24 12-40 28-52 54zM82 58c26-14 50-12 68 4-22-10-46-8-66 2zM82 60c-16 6-34 26-42 52 14-24 30-38 44-48zM84 60c20 6 36 24 44 48-14-20-28-34-44-44z"/></svg><div class="nk">מה עושים עכשיו</div><div class="nt">${glyph(n)}<b>${bdi(title(n))}</b></div><div class="ns">${esc(sub(n))}</div><span class="ngo">${ic("chevron-left")}</span></a>`;
   else h+=`<div class="now"><div class="nk">סיימת את הסיפור 🎉</div><div class="ns">נשאר לך לאסוף דברים במפה</div></div>`;
   if(!S.casual){
     if(pr&&toPonr<=3)h+=`<div class="hint warn">${ic("triangle-alert")} ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
-    if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div><div class="group">`+soon.slice(0,3).map(x=>row(x)).join("")+`</div>`;if(soon.length>3)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-3} דברים שעלולים להיעלם ›</a>`}
+    if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div><div class="group">`+soon.slice(0,3).map(x=>row(x,"lite")).join("")+`</div>`;if(soon.length>3)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-3} דברים שעלולים להיעלם ›</a>`}
   }
   if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span class="e">🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   return h;
 }
 
 /* ---------- missions list: tabs + organized filter sheet + chapter timeline ---------- */
-const TABS=[["all","הכל","sparkles"],["story","סיפור","book-open"],["side","משימות צד","drama"],["op","כנופיות","briefcase"],["collect","אספנות","layers"],["event","אירועים","dice-5"],["more","עוד","star"]];
+const TABS=[["all","הכל"],["story","סיפור"],["side","צד"],["collect","אספנות"],["op","כנופיות"],["event","אירועים"],["more","עוד"]];
 const MORE=["money","vehicle","weapon","egg","tip"];
 const LF=Object.assign({tab:"all",ch:0,q:"",stat:"",avail:"",miss:0,kt:{},ex:{},open:{}},S.lists2||{});for(const k in LF.kt)if(LF.kt[k]!==1)delete LF.kt[k];for(const k in LF.ex)if(!LF.ex[k])delete LF.ex[k];
 function inTab(x){const c=mainCat(x);if(LF.tab==="all")return !x.tip&&c!=="collect";if(LF.tab==="more")return MORE.includes(c)||x.g.some(g=>MORE.includes(g));return c===LF.tab||x.g.includes(LF.tab)}
@@ -310,7 +311,7 @@ function searchAll(q,opts={}){
 }
 function itemMatches(x,q){const terms=qTerms(q);if(!terms.length)return true;const o=ixItem(x);return !!scoreF([...o.nm,...o.pub,...(hid(x)?[]:o.sec)].filter(f=>!(locked(x)&&!REV.has(x.id)&&f===o.nm[0])),terms)}
 let SQ="",SALL=0;
-const SUGG=["כספת","וילה","רכב נדיר","כסף","נשק ייחודי","צ'יטים","כפתורים סודיים","ביצת פסחא","Moses","Vice Beach"];
+const SUGG=["כספת","רכב נדיר","כסף","ביצת פסחא"];
 function pageSearch(q){
   if(q&&q.q!=null)SQ=q.q;
   return `<div class="search big">${ic("search")}<input id="sq" type="search" enterkeyhint="search" autocomplete="off" placeholder="חפש הכל – משימה, מקום, רכב, טיפ…" value="${esc(SQ)}"><button id="sqx" class="dim"${SQ?"":" hidden"}>✕</button></div><div id="sres">${searchHtml()}</div>`;
@@ -354,18 +355,17 @@ function bindSres(){
 function pageList(q){
   if(q.cat){const t=TABS.find(t=>t[0]===q.cat);LF.tab=t?q.cat:(MORE.includes(q.cat)?"more":"all")}if(q.ch)LF.ch=+q.ch;if(q.miss){LF.miss=1;LF.tab="all"}
   const list=IT.filter(passes);
-  let h=`<div class="search">${ic("search")}<input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
-  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${ic(t[2])}</span>${t[1]}</button>`).join("")+`</div>`;
+  if(!q.keepq)LF.q="";
+  let h=`<div class="ihead"><h1>משימות</h1></div>`;
+  h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}">${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
   const SORTN={chrono:"לפי הסדר",near:"הכי קרוב",soon:"מה נגמר קודם",type:"לפי סוג"};
-  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">${ic("sliders-horizontal")} סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn on" id="fsort">${ic("arrow-up-down")} ${SORTN[LF.sort||"chrono"]}</button></div>`;
+  h+=`<div class="fbar"><span class="cntl">${list.length} · ${SORTN[LF.sort||"chrono"]}</span><button class="fbtn${nf?" on":""}" id="fopen" aria-label="סינון ומיון">${ic("sliders-horizontal")}${nf?` <b>${nf}</b>`:""}</button></div>`;
   const act=[];
-  if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["⏳❗ רק מה שעלול להיעלם","miss"]);
+  if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["רק מה שעלול להיעלם","miss"]);
   for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
   for(const k in LF.kt)if(LF.kt[k]===1)act.push([`רק ${D.KT[k][0]}`,"kt:"+k]);
   if(act.length)h+=`<div class="chips act">`+act.map(a=>`<button class="chip on" data-rm="${a[1]}">${esc(a[0])} ✕</button>`).join("")+`<button class="chip" data-rm="all">נקה הכל</button></div>`;
-  h+=`<div class="dim cnt">${list.length} תוצאות</div>`;
-  if(LF.q.trim())h+=`<a class="sall" href="#/search?q=${encodeURIComponent(LF.q.trim())}">🔎 חפש "${esc(LF.q.trim())}" בכל האפליקציה – מפה, מדריכים, צ'יטים ›</a>`;
   if(!list.length)return h+`<div class="empty">אין תוצאות.<br><button class="btn sm" data-rm="all" style="margin-top:10px">נקה פילטרים</button></div>`;
   const cur=curCh();
   const mode=LF.sort||"chrono";
@@ -414,11 +414,12 @@ function routeFrom(arr){
   return out;
 }
 function filterSheet(){
-  let h=`<h3 style="font-size:19px;margin:0 0 4px">סינון</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">כל לחיצה מדליקה/מכבה. מה שצבוע = מוצג. · <button class="linkb" id="fwh2">📍 עדכן איפה אני</button></p>`;
+  let h=`<h3 style="font-size:19px;margin:0 0 10px">סינון ומיון</h3>`;
+  h+=`<div class="fsec"><b>סדר</b><div class="seg wide">`+[["chrono","לפי הסדר"],["near","הכי קרוב"],["soon","נגמר קודם"],["type","לפי סוג"]].map(m=>`<button data-fso="${m[0]}" class="${(LF.sort||"chrono")===m[0]?"on":""}">${m[1]}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><b>פרק</b><div class="seg wide">`+[0,1,2,3,4,5].map(c=>`<button data-fc="${c}" class="${LF.ch===c?"on":""}">${c?c:"הכל"}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><b>מצב</b><div class="seg wide">`+Object.keys(STL).map(k=>`<button data-fs="${k}" class="${LF.stat===k?"on":""}">${STL[k]}</button>`).join("")+`</div></div>`;
   h+=`<div class="fsec"><div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שזמין עכשיו</b><small>בלי מה שעוד לא נפתח ובלי מה שפוספס</small></div><button class="sw${LF.avail==="now"?" on":""}" data-fa></button></div>
-  <div class="set" style="padding:6px 0;border:0"><div class="t"><b>⏳❗ רק מה שעלול להיעלם</b><small>זמן מוגבל + דברים שנעלמים בנקודה מסוימת</small></div><button class="sw${LF.miss?" on":""}" data-fm></button></div></div>`;
+  <div class="set" style="padding:6px 0;border:0"><div class="t"><b>רק מה שעלול להיעלם</b><small>זמן מוגבל + דברים שנעלמים בנקודה מסוימת</small></div><button class="sw${LF.miss?" on":""}" data-fm></button></div></div>`;
   h+=`<div class="fsec"><b>אילו סוגים להציג</b><div class="chips wrap">`+Object.keys(CAT).filter(k=>k!=="tip").map(k=>`<button class="chip pick${LF.ex[k]?"":" on"}" style="--c:${CATC[k]}" data-fx="${k}">${ic(CI[k])} ${CAT[k][0]}</button>`).join("")+`</div></div>`;
   if(LF.tab==="collect"){const anyK=Object.values(LF.kt).some(v=>v===1);h+=`<div class="fsec"><b>סוגי אספנות</b><small class="dim" style="display:block;margin:-2px 0 6px">${anyK?"מוצגים רק הסוגים הצבועים":"מוצג הכל – בחר סוג כדי לראות רק אותו"}</small><div class="chips wrap">`+Object.keys(D.KT).map(k=>`<button class="chip pick${LF.kt[k]===1?" on":""}" style="--c:#ffc23c" data-fk="${k}">${ic(KTI[k]||"sparkles")} ${esc(D.KT[k][0])}</button>`).join("")+`</div></div>`}
   h+=`<div class="fact"><button class="btn" data-rm="all">נקה הכל</button><button class="btn pri" id="fdone">הצג ${IT.filter(passes).length} תוצאות</button></div>`;
@@ -426,6 +427,7 @@ function filterSheet(){
   openSheet(h);$("#sheet").scrollTop=sc;
   const re=()=>{Store.setS("lists2",LF);filterSheet();route(true)};
   $$("[data-fc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.fc;re()});
+  $$("[data-fso]").forEach(b=>b.onclick=()=>{LF.sort=b.dataset.fso;re()});
   $$("[data-fs]").forEach(b=>b.onclick=()=>{LF.stat=b.dataset.fs;re()});
   $$("[data-fa]").forEach(b=>b.onclick=()=>{LF.avail=LF.avail?"":"now";re()});
   $$("[data-fm]").forEach(b=>b.onclick=()=>{LF.miss=LF.miss?0:1;re()});
@@ -461,7 +463,7 @@ function askTerms(q){const n=norm(q).split(" ").filter(w=>w&&!QSTOP.has(w)&&!(w.
 let AQ="";
 function askHtml(){
   const q=AQ.trim();
-  if(norm(q).length<3)return `<div class="chips wrap askex">`+["איך בורחים מהמשטרה?","איך שומרים רכב לתמיד?","מה ההבדל בין טרקר צהוב לאדום?","איפה כדאי לשמור כסף?","מה נסגר לתמיד?"].map(s=>`<button class="chip" data-ask="${esc(s)}">${esc(s)}</button>`).join("")+`</div>`;
+  if(norm(q).length<3)return "";
   const terms=askTerms(q);
   const how=/^(איך|how)\b/i.test(norm(q))||/איכ /.test(norm(q)+" ");
   const secs=guideSections().map(s=>{let v=scoreF(s.f,terms,1);if(v&&how&&/class="steps"/.test(s.html))v+=v>=1000?60:0;if(v&&s.i<0&&how)v-=5;return [v,s]}).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);
@@ -507,7 +509,7 @@ function bindList(){
   const save=()=>{Store.setS("lists2",LF);route(true)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
   $("#fopen").onclick=filterSheet;
-  $("#fsort").onclick=()=>{const M=[["chrono","📖 לפי הסדר","כמו במשחק – פרק אחרי פרק, ומה שנפתח אחרי כל משימה"],["near","🧭 הכי קרוב","מסלול מהמשימה הבאה – כל תחנה הכי קרובה לקודמת"],["soon","⏳ מה נגמר קודם","מה שעלול להיעלם – למעלה"],["type","🗂 לפי סוג","קלפים, רכבים, נשקים…"]];openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איך לסדר?</h3>`+M.map(m=>`<button class="row" style="width:100%;text-align:start" data-so="${m[0]}"><div class="t"><b>${m[1]}</b><small>${m[2]}</small></div>${(LF.sort||"chrono")===m[0]?"✓":""}</button>`).join(""));$$("[data-so]").forEach(b=>b.onclick=()=>{LF.sort=b.dataset.so;closeSheet();save()})};
+  window.sortSheet=()=>{const M=[["chrono","📖 לפי הסדר","כמו במשחק – פרק אחרי פרק, ומה שנפתח אחרי כל משימה"],["near","🧭 הכי קרוב","מסלול מהמשימה הבאה – כל תחנה הכי קרובה לקודמת"],["soon","⏳ מה נגמר קודם","מה שעלול להיעלם – למעלה"],["type","🗂 לפי סוג","קלפים, רכבים, נשקים…"]];openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איך לסדר?</h3>`+M.map(m=>`<button class="row" style="width:100%;text-align:start" data-so="${m[0]}"><div class="t"><b>${m[1]}</b><small>${m[2]}</small></div>${(LF.sort||"chrono")===m[0]?"✓":""}</button>`).join(""));$$("[data-so]").forEach(b=>b.onclick=()=>{LF.sort=b.dataset.so;closeSheet();save()})};
   if(false)$("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
   $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=/^t/.test(b.dataset.tog)?b.dataset.tog:+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
   bindRm();
@@ -658,18 +660,18 @@ function tipList(n){const cur=curCh();return TIPS2.filter(t=>!(S.spoil&&(t.c||1)
 const tipHtml=t=>`<div class="tip${t.k==="btn"?" btn":""}"><span class="e">${t.k==="btn"?"🎮":"💡"}</span><div><b>${esc(t.t)}</b>${t.x?`<small>${esc(t.x)}</small>`:""}</div>${t.new||(t.d>"2026-11-22"&&Date.now()-Date.parse(t.d)<3*864e5)?`<span class="tag ex">חדש</span>`:""}</div>`;
 /* hub: one colorful tile per small topic */
 const HUB=[
- ["#/news","sparkles","מה חדש","התגליות האחרונות","#ff3d8f","t"],
- ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#5e5ce6","t"],
- ["#/cheats","joystick","צ'יטים","כל הקודים","#ff9f0a","t"],
- ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#e6b800","t"],
- ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#ff453a"],
- ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#0a84ff"],
- ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#5856d6"],
- ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#30b158"],
- ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#ff9f0a"],
- ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#32ade6"],
- ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#bf5af2"],
- ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#8e8e93"]];
+ ["#/news","sparkles","מה חדש","התגליות האחרונות","#f42385","t"],
+ ["#/buttons","gamepad-2","כפתורים סודיים","מה שהמשחק לא מספר","#a7098e","t"],
+ ["#/cheats","joystick","צ'יטים","כל הקודים","#ff8a4c","t"],
+ ["#/tips","lightbulb","טיפים","מתעדכן כל יום","#f2a03d","t"],
+ ["#/g/police","siren","בריחה מהמשטרה","כוכבים ועקבות","#fc5072"],
+ ["#/g/steal-cars","key-round","גניבת רכב","טרקר או בלי","#d0148b"],
+ ["#/g/keep-cars","square-parking","לשמור רכב","רישום ומוסך","#8e0b8c"],
+ ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#e8178e"],
+ ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#ff8a4c"],
+ ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#c44e6f"],
+ ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#9c1371"],
+ ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#6e5a68"]];
 const glist=(arr,hf)=>`<div class="glist">`+arr.map(t=>`<a href="${hf(t)}"><span class="gi" style="--c:${t[4]}">${ic(t[1])}</span><span class="t"><b>${t[2]}</b><small>${t[3]}</small></span><span class="chv">${ic("chevron-left")}</span></a>`).join("")+`</div>`;
 const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72","#ff9b78","#ffb37f","#ffc58a"];
 const skyAt=(i,n)=>SKY[Math.round(i/(Math.max(1,n-1))*(SKY.length-1))];
@@ -697,13 +699,13 @@ function gateGuide(){
 /* settings */
 function sw(k,t,d){return `<div class="set"><div class="t"><b>${t}</b><small>${d}</small></div><button class="sw${S[k]?" on":""}" data-sw="${k}" role="switch" aria-checked="${!!S[k]}"></button></div>`}
 const ME=[
- ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#0a84ff",1],
- ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#ff3d8f",1],
- ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#30b158",1],
- ["map","map","המפה","מה מופיע עליה","#32ade6"],
- ["share","share-2","שתף עם חברים","שלח את Leo","#ff9f0a"],
- ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#8e8e93"],
- ["lang","languages","English / עברית","Language","#5e5ce6"]];
+ ["account","user-round","החשבון שלי","שמירה בכל מכשיר","#d0148b",1],
+ ["view","eye-off","ספוילרים ותצוגה","מה מוסתר ואיך","#f42385",1],
+ ["progress","flag","ההתקדמות שלי","איפה אני, גיבוי","#e8178e",1],
+ ["map","map","המפה","מה מופיע עליה","#c44e6f"],
+ ["share","share-2","שתף עם חברים","שלח את Leo","#ff8a4c"],
+ ["app","smartphone","האפליקציה","רענון, התקנה, קרדיטים","#6e5a68"],
+ ["lang","languages","English / עברית","Language","#a7098e"]];
 function pageSettings(sec){
   if(!sec)return `<div class="ihead"><h1>אני</h1></div>${glist(ME.filter(t=>t[5]),t=>"#/settings/"+t[0])}<div style="height:14px"></div>${glist(ME.filter(t=>!t[5]),t=>"#/settings/"+t[0])}`;
   const T=ME.find(t=>t[0]===sec)||ME[0];
@@ -928,20 +930,21 @@ function layersSheet(){
   const kinds=Object.keys(KINDS).filter(k=>LOCS.some(l=>l.k===k));
   const grp={};kinds.forEach(k=>{const g=KINDS[k].g||"Other";(grp[g]=grp[g]||[]).push(k)});
   const GN={Collectibles:"אספנות",Activities:"פעילויות",Crime:"פשע",Places:"מקומות",Other:"אחר"};
-  let h=`<h3 style="font-size:18px;margin:0 0 10px">שכבות במפה</h3><div class="set" style="padding:10px 0"><div class="t"><b>המשימות והפריטים שלי</b><small>כל מה שברשימה – עם הסימונים שלך</small></div><button class="sw${ML.mine?" on":""}" data-ml="mine"></button></div>`;
+  let h=`<h3 style="font-size:18px;margin:0 0 10px">שכבות במפה</h3><div class="grp" style="margin-inline:0">מהרשימה שלי</div><div class="chips" style="flex-wrap:wrap">`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip pick${ML.cats[k]?" on":""}" style="--c:${CATC[k]}" data-mc="${k}">${ic(CI[k])} ${CAT[k][0]}</button>`).join("")+`</div>`+`<div class="set" style="padding:10px 0"><div class="t"><b>המשימות והפריטים שלי</b><small>כל מה שברשימה – עם הסימונים שלך</small></div><button class="sw${ML.mine?" on":""}" data-ml="mine"></button></div>`;
   for(const g in grp){h+=`<div class="grp">${GN[g]||g}</div><div class="chips" style="flex-wrap:wrap">`+grp[g].map(k=>{const n=LOCS.filter(l=>l.k===k).length;return `<button class="chip pick${ML.kinds[k]?" on":""}" style="--c:${KINDS[k].c}" data-mk="${k}">${esc(KINDS[k].i)} ${esc(KINDS[k].n)} <span class="dim">${n}</span></button>`}).join("")+`</div>`}
   h+=`<p class="dim" style="font-size:12px">השכבות הנוספות הן ${LOCS.length.toLocaleString()} מיקומים מדויקים מ־Open GTA 6 Map.</p>`;
   openSheet(h);
   const save=()=>{Store.setS("mapLayers",ML);drawPins()};
   $$("[data-ml]").forEach(b=>b.onclick=()=>{ML.mine=!ML.mine;b.classList.toggle("on",ML.mine);save()});
-  $$("[data-mk]").forEach(b=>b.onclick=()=>{const k=b.dataset.mk;ML.kinds[k]=!ML.kinds[k];b.classList.toggle("on",ML.kinds[k]);save()});
+  $$("[data-mk]").forEach(b=>b.onclick=()=>{const k=b.dataset.mk;ML.kinds[k]=!ML.kinds[k];b.classList.toggle("on",ML.kinds[k]);save();mapChips()});
+  $$("#sheet [data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);save();mapChips()});
 }
 function mapChips(){
   const on=k=>ML.cats[k]?" on":"";
-  $("#msearch").innerHTML=`${ic("search")}<input id="mq" placeholder="חיפוש במפה – משימה, מקום, שכונה"><button id="mlay2" aria-label="שכבות">${ic("layers-2")}</button>`;
-  $("#mlay2").onclick=layersSheet;
+  $("#msearch").innerHTML=`${ic("search")}<input id="mq" placeholder="חיפוש במפה">`;
   const mq=$("#mq");mq.onkeydown=e=>{if(e.key==="Enter")mq.blur()};mq.oninput=()=>{clearTimeout(mq._t);mq._t=setTimeout(()=>mapSearch(mq.value),250)};
-  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">${ic("gamepad-2")} ${ML.game?"כמו במשחק":"הכל"}</button><button class="chip" id="mlay">${ic("layers-2")} שכבות</button>`+["story","side","op","collect","money","vehicle","weapon","event","egg"].map(k=>`<button class="chip pick${on(k)}" style="--c:${CATC[k]}" data-mc="${k}">${ic(CI[k])} ${CAT[k][0]}</button>`).join("");
+  const nL=Object.values(ML.cats).filter(Boolean).length+Object.values(ML.kinds).filter(Boolean).length;
+  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">${ML.game?"מה פתוח עכשיו":"הכל"}</button><button class="chip" id="mlay">${ic("layers-2")} שכבות${nL?` <b class="nb">${nL}</b>`:""}</button>`;
   $("#mlay").onclick=layersSheet;
   $("#mgame").onclick=()=>{ML.game=!ML.game;Store.setS("mapLayers",ML);mapChips();drawPins();toast(ML.game?"🎮 רואים רק מה שאפשר לעשות עכשיו":"רואים הכל")};
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
