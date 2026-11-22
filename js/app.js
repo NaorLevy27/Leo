@@ -289,6 +289,60 @@ function bindSettings(){
 Cloud.sub(()=>{if(curPage==="settings")route(true)});
 
 /* ---------- map ---------- */
+/* ---------- crisp vector map (land, buildings, roads, labels) – sharp at any zoom ---------- */
+let VEC=null,vecP=null;
+const loadVec=()=>vecP||(vecP=fetch("data/vec.json").then(r=>r.json()).then(d=>VEC=d));
+const VSTY={urban:"#ebe4f4",park:"#92d692",sand:"#f3e2b3",shallow:"#6adede",paved:"#e6e0d6",building:"#d0c1e6"};
+const RSTY={highway:["#fee187","#d9ae3c",2.4],main:["#fee8a0","#dcc078",1.8],street:["#fffdf6","#d6cab0",1.3],minor:["#ffffff","#dcd0b8",.9]};
+function addVector(m,opts={}){
+  const ren=L.canvas({padding:.4,tolerance:0});
+  const pane=m.createPane("vec");pane.style.zIndex=250;
+  const g=L.layerGroup();const roads={};
+  const ll=pts=>pts.map(p=>[-p[1],p[0]]);
+  VEC.land.forEach(poly=>{const rings=Array.isArray(poly[0][0])?poly.map(ll):[ll(poly)];g.addLayer(L.polygon(rings,{renderer:ren,pane:"vec",stroke:false,fillColor:"#f8ecd0",fillOpacity:1,interactive:false,smoothFactor:.5}))});
+  ["shallow","sand","urban","park","paved","building"].forEach(k=>(VEC.surf[k]||[]).forEach(r=>g.addLayer(L.polygon(r.map(ll),{renderer:ren,pane:"vec",stroke:k==="building",color:"#bfaedb",weight:.6,fillColor:VSTY[k],fillOpacity:1,interactive:false,smoothFactor:.5}))));
+  VEC.rails.forEach(l=>g.addLayer(L.polyline(ll(l),{renderer:ren,pane:"vec",color:"#9aa0ad",weight:1.2,dashArray:"4 4",interactive:false})));
+  ["minor","street","main","highway"].forEach(k=>{roads[k]={c:[],f:[]};(VEC.roads[k]||[]).forEach(l=>{const a=ll(l);const c=L.polyline(a,{renderer:ren,pane:"vec",color:RSTY[k][1],lineCap:"round",lineJoin:"round",interactive:false,smoothFactor:.6});roads[k].c.push(c);g.addLayer(c)})});
+  ["minor","street","main","highway"].forEach(k=>(VEC.roads[k]||[]).forEach((l,i)=>{const f=L.polyline(ll(l),{renderer:ren,pane:"vec",color:RSTY[k][0],lineCap:"round",lineJoin:"round",interactive:false,smoothFactor:.6});roads[k].f.push(f);g.addLayer(f)}));
+  const from=opts.from==null?4.75:opts.from;
+  function style(){
+    const z=m.getZoom();const on=z>=from;
+    if(on&&!m.hasLayer(g))g.addTo(m);if(!on&&m.hasLayer(g))m.removeLayer(g);
+    if(!on)return;
+    const sc=Math.pow(2,z-4.6);
+    for(const k in roads){const w=Math.max(1.2,RSTY[k][2]*sc);roads[k].c.forEach(l=>l.setStyle({weight:w+Math.max(1.5,w*.3)}));roads[k].f.forEach(l=>l.setStyle({weight:w}))}
+  }
+  m.on("zoomend",style);style();
+  if(opts.labels!==false)addLabels(m);
+  return g;
+}
+function addLabels(m){
+  const pane=m.createPane("labels");pane.style.zIndex=450;pane.style.pointerEvents="none";
+  const box=L.DomUtil.create("div","lbls",pane);
+  const LB=VEC.lab;
+  function draw(){
+    const z=m.getZoom(),b=m.getBounds().pad(.1);box.innerHTML="";const taken=[];
+    const cand=[];
+    if(z<4.6)LB.dist.forEach(d=>cand.push({t:d[0],x:d[1],y:d[2],c:"ld",fs:z<3?13:16,pr:0}));
+    if(z>=3.3)LB.hood.forEach(h=>{if(z>=4.4||h[3]>=30)cand.push({t:h[0],x:h[1],y:h[2],c:"lh",fs:z>=6?14:12,pr:1+(h[3]>=30?0:1)})});
+    if(z>=3)LB.routes.forEach(r=>cand.push({t:r[0],x:r[2],y:r[3],c:"lr lr-"+r[1],fs:10,pr:2}));
+    if(z>=5.8)LB.street.forEach(s=>cand.push({t:s[0],x:s[1],y:s[2],c:"ls",fs:11,pr:3}));
+    if(z>=6.4)LB.places.forEach(p=>{if(z>=7.4||["civic","transport","leisure","hotel","nature"].includes(p[1]))cand.push({t:p[0],x:p[2],y:p[3],c:"lp",fs:z>=8?12:10.5,pr:4})});
+    cand.sort((a,b)=>a.pr-b.pr);
+    let n=0;
+    for(const c of cand){
+      const lat=-c.y,lng=c.x;if(!b.contains([lat,lng]))continue;
+      const pt=m.latLngToLayerPoint([lat,lng]);const w=c.t.length*c.fs*.58+10,h=c.fs+8;
+      const r=[pt.x-w/2,pt.y-h/2,pt.x+w/2,pt.y+h/2];
+      if(taken.some(t=>!(r[2]<t[0]||r[0]>t[2]||r[3]<t[1]||r[1]>t[3])))continue;
+      taken.push(r);
+      const e=document.createElement("div");e.className="lb "+c.c;e.textContent=c.t;e.style.cssText=`left:${pt.x}px;top:${pt.y}px;font-size:${c.fs}px`;box.appendChild(e);
+      if(++n>260)break;
+    }
+  }
+  m.on("zoomend moveend",draw);draw();
+}
+
 let map=null,mapReady=false,layer=null,base=null,mini=null;
 const BOUNDS=L.latLngBounds([-800,160],[-160,832]);
 const ML=Object.assign({mine:true,cats:{},kinds:{}},S.mapLayers||{});
@@ -297,7 +351,7 @@ function setBase(){
   if(S.mapStyle==="original"){
     const M=window.AFF;const p=(fx,fy)=>[fx*M[0][0]+fy*M[1][0]+M[2][0],fx*M[0][1]+fy*M[1][1]+M[2][1]];
     const a=p(0,0),b=p(1,1);base=L.imageOverlay("map-original.jpg",[[-a[1],a[0]],[-b[1],b[0]]]).addTo(map);
-  }else base=L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minZoom:-1,minNativeZoom:0,maxNativeZoom:5,maxZoom:8,noWrap:true,bounds:BOUNDS,
+  }else base=L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minZoom:-1,minNativeZoom:0,maxNativeZoom:5,maxZoom:11,noWrap:true,bounds:BOUNDS,
     attribution:'<a href="https://github.com/fbritoferreira/gta6" target="_blank" rel="noopener">Open GTA 6 Map</a> (CC BY 4.0) · © Rockstar Games'}).addTo(map);
   base.bringToBack&&base.bringToBack();
 }
@@ -363,21 +417,21 @@ function mapChips(){
 }
 function ensureMap(){
   if(map)return;
-  map=L.map("map",{crs:L.CRS.Simple,minZoom:-1,maxZoom:8,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
-  map.attributionControl.setPrefix(false);
+  map=L.map("map",{crs:L.CRS.Simple,minZoom:-1,maxZoom:8.5,zoomSnap:0.25,zoomDelta:0.5,wheelPxPerZoomLevel:90,maxBounds:BOUNDS.pad(0.3),zoomControl:false,attributionControl:true});
+  map.attributionControl.setPrefix(false);loadVec().then(()=>addVector(map));
   const xs=LOCS.map(l=>l.x),ys=LOCS.map(l=>l.y);window.LAND=L.latLngBounds([-Math.max(...ys),Math.min(...xs)],[-Math.min(...ys),Math.max(...xs)]);map.fitBounds(LAND,{padding:[20,20]});window._map=map;setBase();mapChips();drawPins();mapReady=true;
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
 function focusMap(q){
-  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],6);setTimeout(()=>preview(x),250)}}
-  if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],6);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
+  if(q.i&&BYS[q.i]){const x=BYS[q.i];if(x.x!=null){if(!itemShown(x)){ML.mine=true;ML.cats={};drawPins();mapChips()}map.setView([-x.y,x.x],7);setTimeout(()=>preview(x),250)}}
+  if(q.l&&LBY[q.l]){const l=LBY[q.l];if(!ML.kinds[l.k]){ML.kinds[l.k]=true;drawPins()}map.setView([-l.y,l.x],7.5);setTimeout(()=>preview(Object.assign({L:1},l)),250)}
 }
 function drawMini(x,y,o){
   if(mini){mini.remove();mini=null}
   const el=$("#mini");if(!el)return;
-  mini=L.map(el,{crs:L.CRS.Simple,minZoom:1,maxZoom:8,zoomControl:false,attributionControl:false,maxBounds:BOUNDS.pad(0.2),scrollWheelZoom:false});
-  L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minNativeZoom:0,maxNativeZoom:5,maxZoom:8,noWrap:true,bounds:BOUNDS}).addTo(mini);
-  mini.setView([-y,x],o.ex===0?4:6);
+  mini=L.map(el,{crs:L.CRS.Simple,minZoom:1,maxZoom:8.5,zoomControl:false,attributionControl:false,maxBounds:BOUNDS.pad(0.2),scrollWheelZoom:false});
+  L.tileLayer("tiles/day/{z}/{z},{y},{x}.webp",{tileSize:256,minNativeZoom:0,maxNativeZoom:5,maxZoom:11,noWrap:true,bounds:BOUNDS}).addTo(mini);
+  mini.setView([-y,x],o.ex===0?5:7);const mm=mini;loadVec().then(()=>{if(mini===mm)addVector(mm)});
   if(o.ex===0)L.circle([-y,x],{radius:9,color:"#b9a2ff",weight:2,dashArray:"5 5",fillOpacity:.12}).addTo(mini);
   L.marker([-y,x],{icon:L.divIcon({className:"",html:o.L?`<span class="edot" style="background:${(KINDS[o.k]||{}).c};width:20px;height:20px"></span>`:`<div class="mpin">${glyph(o)}</div>`,iconSize:[28,28],iconAnchor:[14,14]})}).addTo(mini);
 }
