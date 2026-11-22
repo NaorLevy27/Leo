@@ -387,3 +387,5 @@ body.mapmode #nav,body.mapmode .msearch,body.mapmode .mapbar .chip,body.mapmode 
 body.mapmode #nav{background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.03)),rgba(20,12,26,.94)}
 body.mapmode .msearch,body.mapmode .mapbar .chip{background:rgba(20,12,26,.95)}
 .tpin>i{box-shadow:0 2px 4px rgba(0,0,0,.4),inset 0 0 0 2px rgba(255,255,255,.55)}
+.linkb{color:#ffb07a;font:inherit;font-size:11px;letter-spacing:0;text-decoration:underline;text-transform:none;padding:0}
+.fbar .fbtn{padding:10px 6px;font-size:12.5px}

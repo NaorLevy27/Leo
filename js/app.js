@@ -104,6 +104,7 @@ document.addEventListener("click",e=>{
   if(b){e.preventDefault();e.stopPropagation();const x=BY[b.dataset.chk];const on=Store.toggle(x.id);toast(on?"✓ סומן – כל הכבוד":"הסימון הוסר");refreshSoft();return}
   const l=e.target.closest("[data-lchk]");
   if(l){e.preventDefault();const k="L:"+l.dataset.lchk;Store.set(k,!Store.done(k));toast(Store.done(k)?"✓ נמצא":"הסימון הוסר");refreshSoft();return}
+  const ut=e.target.closest("[data-upto]");if(ut){e.preventDefault();const m=BY[ut.dataset.upto];const n=markUpTo(m);toast(`✓ סומנו ${n} משימות סיפור עד כאן`);refreshSoft();return}
   const rv=e.target.closest("[data-rev]");if(rv){e.preventDefault();e.stopPropagation();REV.add(rv.dataset.rev);saveRev();MEMO.clear();refreshSoft();return}
   const sh=e.target.closest("[data-share]");if(sh){e.preventDefault();const x=BYS[sh.dataset.share];share(x.n+" · Leo",`${x.n} ב־GTA 6 – איך עושים, מה מקבלים ואיפה בדיוק 👇`,SITE+"#/i/"+x.s);return}
   const v=e.target.closest(".vid .ph");if(v){v.outerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${v.dataset.id}?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;}
@@ -128,6 +129,20 @@ function installBox(){
   return `<div class="inst"><span class="e">📲</span><div><b>שים את Leo על המסך הבית</b><small>${ios?"ב־Safari: כפתור השיתוף ⬆ › \"הוסף למסך הבית\"":"נפתח כמו אפליקציה, גם בלי אינטרנט"}</small></div>${!ios?`<button class="btn sm pri" id="instb">התקן</button>`:""}<button class="x" id="instx">✕</button></div>`;
 }
 
+
+/* "where am I" – mark the whole story up to a mission in one tap */
+function markUpTo(m){let n=0;STORY.forEach(x=>{if(x.ord<=m.ord&&!done(x)){Store.set(x.id,true);n++}});MEMO.clear();return n}
+function whereSheet(ch){
+  ch=ch||curCh();
+  const list=STORY.filter(x=>x.c===ch);
+  openSheet(`<h3 style="font-size:19px;margin:0 0 4px">📍 איפה אתה בסיפור?</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">בחר את המשימה האחרונה שסיימת – נסמן ✓ את כל משימות הסיפור עד אליה. משימות צד לא נוגעים.</p>
+  <div class="seg wide" style="margin-bottom:10px">${[1,2,3,4,5].map(c=>`<button data-wc="${c}" class="${c===ch?"on":""}">פרק ${c}</button>`).join("")}</div>
+  ${ch>curCh()?`<p class="tag ponr" style="display:block;padding:8px 10px">⚠ הפרק הזה אחרי איפה שאתה – השמות יופיעו כאן כי ביקשת.</p>`:""}
+  ${list.map(x=>`<button class="row${done(x)?" done":""}" style="width:100%;text-align:start" data-wm="${esc(x.id)}">${glyph(x)}<div class="t"><b>${bdi(x.n)}</b><small>${done(x)?"✓ סומן":"סיימתי עד כאן"}</small></div></button>`).join("")}`);
+  $$("[data-wc]").forEach(b=>b.onclick=()=>whereSheet(+b.dataset.wc));
+  $$("[data-wm]").forEach(b=>b.onclick=()=>{const m=BY[b.dataset.wm];const n=markUpTo(m);closeSheet();toast(n?`✓ סומנו ${n} משימות עד ${m.n}`:"הכל כבר מסומן");refreshSoft()});
+}
+
 /* ---------- pages ---------- */
 function pct(a,b){return b?Math.round(a/b*100):0}
 function ring(p,label){const r=40,c=2*Math.PI*r;return `<svg class="ring" viewBox="0 0 96 96"><circle cx="48" cy="48" r="${r}" fill="none" stroke="#1a1020" stroke-width="9"/><circle cx="48" cy="48" r="${r}" fill="none" stroke="url(#rg)" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c*p/100} ${c}" transform="rotate(-90 48 48)"/><defs><linearGradient id="rg"><stop offset="0" stop-color="#ff9a3c"/><stop offset="1" stop-color="#ff3d8b"/></linearGradient></defs><text x="48" y="52" text-anchor="middle">${p}%</text><text class="s" x="48" y="68" text-anchor="middle">${esc(label)}</text></svg>`}
@@ -141,7 +156,7 @@ function pageHome(){
   const soon=IT.filter(x=>avail(x)==="now"&&(missable(x)||timed(x))&&x.c===ch&&!locked(x)&&!x.story&&(!pr||x.ord<=pr.ord+0.5))
     .sort((a,b)=>(timed(b)-timed(a))||(a.ord-b.ord));
   let h=`<section class="hero slim">
-    <div class="where"><div><div class="kick">אתה כאן</div><h1>פרק ${ch}</h1>${last?`<span class="muted">סיימת לאחרונה: ${bdi(last.n)}</span>`:`<span class="muted">עוד לא התחלת – בהצלחה!</span>`}</div>
+    <div class="where"><div><div class="kick">אתה כאן · <button class="linkb" id="wh">לא נכון? עדכן</button></div><h1>פרק ${ch}</h1>${last?`<span class="muted">סיימת לאחרונה: ${bdi(last.n)}</span>`:`<span class="muted">עוד לא התחלת – בהצלחה!</span>`}</div>
     ${S.casual?"":`<div class="mini-ring">${ring(pct(chD,chS.length),`${chD}/${chS.length}`)}</div>`}</div>`;
   if(n)h+=`<a class="cont big" href="#/i/${n.s}">${glyph(n)}<div class="t"><span class="dim" style="font-size:12px;font-weight:800">המשימה הבאה</span><b>${bdi(n.n)}</b><span class="muted" style="font-size:12.5px">${esc(sub(n))}</span></div><span class="go">‹</span></a>`;
   else h+=`<div class="cont big"><div class="t"><b>סיימת את הסיפור! 🎉</b><span class="muted">נשאר לך לאסוף דברים במפה</span></div></div>`;
@@ -187,7 +202,7 @@ function pageList(q){
   let h=`<div class="search"><span>🔎</span><input id="q" placeholder="חפש משימה, מקום, רכב…" value="${esc(LF.q)}">${LF.q?`<button id="qx" class="dim">✕</button>`:""}</div>`;
   h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}"><span>${t[2]}</span>${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
-  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn${LF.ch?" on":""}" id="fch">📚 ${LF.ch?"פרק "+LF.ch:"כל הפרקים"} ▾</button>${S.casual?"":`<button class="fbtn${LF.avail==="now"?" on":""}" id="fnow">✅ זמין עכשיו</button>`}</div>`;
+  h+=`<div class="fbar"><button class="fbtn${nf?" on":""}" id="fopen">⚙ סינון${nf?` <b>${nf}</b>`:""}</button><button class="fbtn" id="fwh">📍 איפה אני</button><button class="fbtn${LF.ch?" on":""}" id="fch">📚 ${LF.ch?"פרק "+LF.ch:"כל הפרקים"} ▾</button>${S.casual?"":`<button class="fbtn${LF.avail==="now"?" on":""}" id="fnow">✅ זמין עכשיו</button>`}</div>`;
   const act=[];
   if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["⏳❗ רק מה שעלול להיעלם","miss"]);
   for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
@@ -246,7 +261,7 @@ function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm
 function bindList(){
   const save=()=>{Store.setS("lists2",LF);route(true)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
-  $("#fopen").onclick=filterSheet;
+  $("#fopen").onclick=filterSheet;$("#fwh").onclick=()=>whereSheet();
   $("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
   const fn=$("#fnow");if(fn)fn.onclick=()=>{LF.avail=LF.avail?"":"now";save()};
   $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
@@ -280,7 +295,7 @@ function pageItem(slug){
   const c=mainCat(x);
   let h=`<div class="ihead"><div class="meta">${glyph(x)}<span class="tag">${CAT[c]?CAT[c][1]+" "+CAT[c][0]:""}</span><span class="tag">פרק ${x.c}</span>${x.w&&WHO[x.w]?`<span class="tag">👤 ${WHO[x.w]}</span>`:""}${tags(x,4)}</div>
   ${locked(x)&&!REV.has(x.id)?`<h1>${esc(title(x))}</h1><button class="btn sm" id="unspoil" style="margin-top:6px">👁 הצג את השם</button>`:`<h1>${bdi(x.n)}</h1>${x.ne&&x.ne!==x.n?`<div class="en ltr">${esc(x.ne)}</div>`:""}`}
-  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
+  <div class="irow">${S.casual?"":`<button class="bigchk${done(x)?" on":""}" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי את זה":"סמן שעשיתי ✓"}</button>`}${x.story&&!done(x)?`<button class="btn" data-upto="${esc(x.id)}" style="font-size:13px">✓ עד כאן</button>`:""}<button class="btn ishare" data-share="${esc(x.s)}" aria-label="שתף">📤</button></div></div>`;
   /* what you get */
   const rw=x.rw||x.why;
   if(rw||x.nt)h+=`<div class="blk reward"><h3><span class="e">🎁</span>מה מקבלים</h3>${rw?`<p>${esc(rw)}</p>`:""}${x.nt&&x.nt!==rw?`<p class="muted" style="font-weight:500">${esc(x.nt)}</p>`:""}</div>`;
@@ -403,6 +418,7 @@ function pageSettings(){
     `<div class="set"><div class="t"><b>מה להסתיר</b><small>"פרקים הבאים" – רואים את כל השמות בפרק שלך (נוח אם עושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>`+
     `<div class="set"><div class="t"><b>שמות שגילית</b><small>${REV.size} שמות גלויים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
     sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`;
+  h+=`<div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>סמן בבת אחת את כל מה שכבר סיימת</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>`;
   h+=`<div class="sec"><h2>מפה</h2></div><div class="card cardlist">`+
     sw("hideDone","הסתר מה שעשיתי","סיכות של דברים שסימנת לא יופיעו במפה.")+
     sw("upTo","רק עד הפרק שלי","מראה במפה רק דברים שכבר אפשר לעשות.")+
@@ -422,6 +438,7 @@ function accountBlock(){
 }
 function bindSettings(){
   $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר")});
+  $("#swh").onclick=()=>whereSheet();
   $$("[data-sl]").forEach(b=>b.onclick=()=>{Store.setS("spoilLvl",b.dataset.sl);$$("[data-sl]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)drawPins();toast("נשמר")});
   const rc=$("#revclr");if(rc)rc.onclick=()=>{REV.clear();saveRev();MEMO.clear();route(true);toast("השמות הוסתרו שוב")};
   $$("[data-ms]").forEach(b=>b.onclick=()=>{Store.setS("mapStyle",b.dataset.ms);$$("[data-ms]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)setBase();toast("נשמר")});
@@ -668,7 +685,7 @@ function route(soft){
   if(page==="home")h=pageHome();else if(page==="list")h=pageList(soft?{}:q);else if(page==="item")h=pageItem(parts[1]);
   else if(page==="loc")h=pageLoc(decodeURIComponent(parts[1]||""));else if(page==="guides")h=pageGuides();else if(page==="guide")h=pageGuide(parts[1]);else if(page==="settings")h=pageSettings();else if(page==="cheats")h=pageCheats();
   $("#main").innerHTML=h;
-  if(page==="home"){const w=$("#wn");if(w)w.onclick=whatsNew;const sh=$("#shr");if(sh)sh.onclick=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים וכפתורים סודיים 👇");const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
+  if(page==="home"){const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=whatsNew;const sh=$("#shr");if(sh)sh.onclick=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים וכפתורים סודיים 👇");const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="guide")gateGuide();
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
