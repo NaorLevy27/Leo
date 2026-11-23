@@ -627,7 +627,7 @@ function pageLoc(id){
 function commentsBlock(key){return `<div class="blk" id="cmts" data-key="${esc(key)}"><h3><span class="e">💬</span>תגובות וטיפים מהקהילה</h3><div id="cmlist" class="dim">טוען…</div></div>`}
 async function loadComments(){
   const box=$("#cmts");if(!box)return;const key=box.dataset.key,L=$("#cmlist");
-  if(!Cloud.on){L.innerHTML=`<p class="muted" style="margin:0">התגובות יופעלו כשהאתר יחובר לשרת (Supabase). ההוראות ב־README.</p>`;return}
+  if(!Cloud.on){const w=L.closest(".blk,.fold,details");if(w)w.remove();else L.remove();return}
   let list=[];try{list=await Cloud.comments(key)}catch(e){L.innerHTML=`<p class="muted">לא הצלחתי לטעון תגובות.</p>`;return}
   const mv=await Cloud.myVotes(list.map(c=>c.id));
   const kids=p=>list.filter(c=>(c.parent_id||null)===p).sort((a,b)=>p?0:(b.score-a.score)||(a.created_at<b.created_at?1:-1));
@@ -693,6 +693,30 @@ function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="b
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
 function pageGuide(id){const g=GUIDES.find(x=>x.id===(id==="focus"?"stats":id));if(!g)return `<div class="empty">לא נמצא</div>`;return (window.LANG==="en"?`<p class="tag" style="display:block;padding:8px 10px;margin:0 0 10px">This guide is in Hebrew for now – English is coming soon.</p>`:"")+`<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
+/* long guides → parts: summary on top, one part at a time, tabs + "next" */
+function splitGuide(active){
+  const b=$("#gbody");if(!b)return;
+  const kids=[...b.children],hs=kids.filter(e=>e.tagName==="H2");
+  if(hs.length<2)return;
+  const top=document.createElement("div"),parts=[];let cur=null;const intro=[];
+  kids.forEach(e=>{if(e.tagName==="H2"){cur={t:e.textContent.trim(),h:e,els:[]};parts.push(cur);return}
+    if(!cur){if(e.classList.contains("tldr"))top.appendChild(e);else intro.push(e)}else cur.els.push(e)});
+  if(intro.length){parts.unshift({t:"הבסיס",els:intro,intro:1})}
+  const off=intro.length?1:0;const act=active<0?0:Math.min(parts.length-1,active+off);
+  const tabs=document.createElement("div");tabs.className="gparts";
+  tabs.innerHTML=parts.map((p,i)=>`<button data-gp="${i}"${i===act?' class="on"':""}><i>${i+1}</i>${esc(p.t)}</button>`).join("");
+  b.innerHTML="";b.appendChild(top);b.appendChild(tabs);
+  parts.forEach((p,i)=>{const w=document.createElement("div");w.className="gpart";w.hidden=i!==act;
+    if(p.h){p.h.classList.add("gph");w.appendChild(p.h)}p.els.forEach(e=>w.appendChild(e));
+    const nav=document.createElement("div");nav.className="gnav";
+    nav.innerHTML=(i>0?`<button class="btn sm" data-gp="${i-1}">${ic("arrow-right")} הקודם</button>`:"<span></span>")+(i<parts.length-1?`<button class="btn sm pri" data-gp="${i+1}">הבא: ${esc(parts[i+1].t)} ${ic("chevron-left")}</button>`:`<a class="btn sm" href="#/guides">סיימת ${ic("check")}</a>`);
+    w.appendChild(nav);b.appendChild(w)});
+  const go=i=>{$$("#gbody .gpart").forEach((w,j)=>w.hidden=j!==i);$$(".gparts button").forEach((x,j)=>x.classList.toggle("on",j===i));
+    const t=$$(".gparts button")[i];if(t)t.scrollIntoView({inline:"center",block:"nearest"});
+    const m=$("#main"),r=tabs.getBoundingClientRect();if(r.top<70||r.top>m.clientHeight*.6)m.scrollTop+=r.top-80};
+  $$("#gbody [data-gp]").forEach(x=>x.onclick=()=>go(+x.dataset.gp));
+  if(act)setTimeout(()=>go(act),30);
+}
 function gateGuide(){
   const b=$("#gbody");if(!b)return;const cur=curCh();let first=true;
   b.querySelectorAll("[data-ch]").forEach(el=>{
@@ -1066,7 +1090,7 @@ function route(soft){
   if(page==="home"){const ms=$("#moresoon");if(ms)ms.onclick=e=>{e.preventDefault();LF.sort="soon";Store.setS("lists2",LF);location.hash="#/list"};const wh=$("#wh");if(wh)wh.onclick=()=>whereSheet();const w=$("#wn");if(w)w.onclick=()=>location.hash="#/news";const sh=$("#shr");if(sh)sh.onclick=shareApp;const ib=$("#instb");if(ib)ib.onclick=async()=>{if(deferredInstall){deferredInstall.prompt();deferredInstall=null}else toast("בתפריט הדפדפן: 'הוסף למסך הבית'")};const ix=$("#instx");if(ix)ix.onclick=()=>{localStorage.setItem("lr_noinst",1);ix.parentElement.remove()}}
   if(page==="list")bindList();
   if(page==="search")bindSearch();
-  if(page==="guide"){gateGuide();if(q.s!=null){const hs=$$("#gbody h2");const t=hs[+q.s];if(t)setTimeout(()=>{t.scrollIntoView({block:"start"});$("#main").scrollTop-=70;t.classList.add("flash")},60)}}
+  if(page==="guide"){gateGuide();splitGuide(q.s!=null?+q.s:-1)}
   if(page==="guides")bindAsk();
   if(page==="welcome")bindWelcome(parts[1]);document.body.classList.toggle("welcomemode",page==="welcome");
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
