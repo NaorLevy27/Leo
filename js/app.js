@@ -13,7 +13,8 @@ applyTheme();if(MQD&&MQD.addEventListener)MQD.addEventListener("change",applyThe
 const [D,LD,EX]=await Promise.all([fetch("data/items.json").then(r=>r.json()),fetch("data/locs.json").then(r=>r.json()),fetch("data/extra.json").then(r=>r.ok?r.json():{}).catch(()=>({}))]);
 /* daily discoveries: extra.json items use the same shape; same id = update an existing item */
 (EX.items||[]).forEach(e=>{const i=D.items.findIndex(x=>x.id===e.id);if(i>=0)D.items[i]=Object.assign(D.items[i],e);else{e.g=e.g||["egg"];e.c=e.c||1;e.pos=e.pos==null?9999:e.pos;e.s=e.s||e.id.toLowerCase().replace(/[^a-z0-9]+/g,"-").slice(0,60);e.isNew=1;D.items.push(e)}});
-const NEWS=(EX.news||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
+const ALLNEWS=(EX.news||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
+function newsVis(){if(!S.spoil)return ALLNEWS;const cur=curCh();return ALLNEWS.filter(n=>{if(n.c&&n.c>cur)return false;if(n.s){const x=BYS[n.s];if(x&&locked(x))return false}return true})}
 const TIPS2=(EX.tips||[]).slice().sort((a,b)=>a.d<b.d?1:-1);
 D.items.forEach(x=>x.ord=x.c*100000+x.pos);const IT=D.items.sort((a,b)=>a.ord-b.ord);
 if(window.LANG==="en"){IT.forEach(x=>{if(x.ne)x.n=x.ne;if(x.src==="guide"&&!x.sp_e)delete x.sp;[["sp","sp_e"],["why","why_e"],["d","d_e"],["lk","lk_e"],["k","k_e"],["nt","nt_e"],["st","st_e"],["wn","wn_e"]].forEach(([a,b])=>{if(x[b])x[a]=x[b]});
@@ -23,6 +24,10 @@ const BY={},BYS={};IT.forEach(x=>{BY[x.id]=x;BYS[x.s]=x});
 const KINDS=LD.kinds;if(window.LANG==="en")for(const k in KINDS)KINDS[k].n=KINDS[k].en||KINDS[k].n;
 const LOCS=LD.locs.map(a=>({id:a[0],k:a[1],x:a[2],y:a[3],n:a[4],t:a[5],d:a[6],a:a[7]}));
 const LBY={};LOCS.forEach(l=>LBY[l.id]=l);
+/* which chapter a map location belongs to (so names/descriptions don't spoil the story) */
+const LCH=[[/\b(Valentina|Abe Gonzalez|Kordell|Raina|Andr[eé]s|Tom[aá]s|Y Hotel)\b/,4],[/\b(Boobie|Dre.?Quan|Tyrone|Yasmani|Raul|Randy|Karim|Andrea|Felipe|Monty|Halifax|Evelyn|Lorena|Real Dimez|Bae-?Luxe|Roxy|Cal Hampton|Bayside Apartments)\b/,3],[/\b(Moses)\b/,2]];
+LOCS.forEach(l=>{let c=1;const m=(l.d||"").match(/Chapter (\d)/i);if(m)c=+m[1];const txt=(l.k==="card"?"":l.n+" ")+(l.d||"");for(const [re,ch] of LCH)if(re.test(txt)&&ch>c){c=ch;break}l.c=c});
+const lockedL=l=>!!S.spoil&&l.c>curCh();
 const STORY=IT.filter(x=>x.story);
 
 const CAT=window.LANG==="en"?{story:["Story","📖"],side:["Side missions","🎭"],op:["Gang ops","💼"],collect:["Collectibles","🃏"],event:["Random events","🎲"],money:["Money","💵"],vehicle:["Vehicles","🚗"],weapon:["Weapons","🔫"],egg:["Easter eggs","🥚"],tip:["Tips","💡"]}:{story:["סיפור","📖"],side:["משימות צד","🎭"],op:["מבצעי כנופיות","💼"],collect:["אספנות","🃏"],event:["אירועים אקראיים","🎲"],money:["כסף","💵"],vehicle:["רכבים","🚗"],weapon:["נשקים","🔫"],egg:["ביצי פסחא","🥚"],tip:["טיפים","💡"]};
@@ -141,9 +146,9 @@ async function share(title,text,url){url=url||SITE;try{if(navigator.share){await
   try{await navigator.clipboard.writeText(text+"\n"+url);toast("הקישור הועתק – הדבק בוואטסאפ")}catch(e){prompt("העתק את הקישור:",url)}}
 const shareApp=()=>share("Leo · המדריך ל־GTA VI בעברית","מצאתי מדריך מטורף ל־GTA 6 בעברית: כל המשימות, מפה, טיפים, צ'יטים וכפתורים סודיים 👇");
 const lastSeen=+(localStorage.getItem("lr_seen")||0);
-const freshNews=NEWS.filter(n=>Date.parse(n.d)+86399e3>lastSeen);
+const freshNewsF=()=>newsVis().filter(n=>Date.parse(n.d)+86399e3>lastSeen);
 function whatsNew(){
-  openSheet(`<h3 style="font-size:19px;margin:0 0 4px">🆕 מה חדש באתר</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">אנחנו מוסיפים תגליות וטיפים כל יום</p>`+NEWS.slice(0,15).map(n=>`<a class="row" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#ff8a3d">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join(""));
+  openSheet(`<h3 style="font-size:19px;margin:0 0 4px">🆕 מה חדש באתר</h3><p class="dim" style="margin:0 0 10px;font-size:12.5px">אנחנו מוסיפים תגליות וטיפים כל יום</p>`+newsVis().slice(0,15).map(n=>`<a class="row" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#ff8a3d">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join(""));
   localStorage.setItem("lr_seen",Date.now());$$(".newdot").forEach(e=>e.remove());
 }
 let deferredInstall=null;addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferredInstall=e});
@@ -212,7 +217,7 @@ function pageHome(){
     if(pr&&toPonr<=3)h+=`<div class="hint warn">${ic("triangle-alert")} ${toPonr===0?"המשימה הבאה סוגרת דברים לתמיד":`עוד ${toPonr} משימות לנקודת אל־חזור`}</div>`;
     if(soon.length){h+=`<div class="sec"><h2>לפני שזה נגמר</h2></div><div class="group">`+soon.slice(0,3).map(x=>row(x,"lite")).join("")+`</div>`;if(soon.length>3)h+=`<a class="morel" href="#/list" id="moresoon">עוד ${soon.length-3} דברים שעלולים להיעלם ›</a>`}
   }
-  if(NEWS.length){const nw=NEWS[0];h+=`<button class="newsline" id="wn"><span class="e">🆕</span><span>${freshNews.length>1?`<b>${freshNews.length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
+  if(newsVis().length){const nw=newsVis()[0];h+=`<button class="newsline" id="wn"><span class="e">🆕</span><span>${freshNewsF().length>1?`<b>${freshNewsF().length} חדשים</b> · `:""}${esc(nw.t)}</span><span class="dim">‹</span></button>`}
   return h;
 }
 
@@ -296,7 +301,7 @@ function ixItem(x){
   let nb="";if(x.x!=null){for(const l of LOCS){const dx=l.x-x.x,dy=l.y-x.y;if(dx*dx+dy*dy<4)nb+=" "+l.n}}
   o={pub:[[norm((x.loc||[]).join(" ")+" "+(x.st||"")),5],[norm(k),2],[norm(nb),2]],
      nm:[[norm(x.n+" "+(x.ne||"")),10]],
-     sec:[[norm([x.sp,x.lk].join(" ")),4],[norm([x.why,x.d,x.k,x.rw,x.nt].join(" ")),3],[norm([...(x.steps||[]),...(x.tips||[]),x.ch].join(" ")),1.5]]};
+     sec:[[norm([x.sp,x.lk].join(" ")),4],[norm([x.why,x.d,S.spoil?"":x.k,x.rw,x.nt].join(" ")),3],[norm([...(x.steps||[]),...(x.tips||[]),x.ch].join(" ")),1.5]]};
   IX.set(x.id,o);return o;
 }
 function searchAll(q,opts={}){
@@ -307,7 +312,7 @@ function searchAll(q,opts={}){
     if(!locked(x)||opts.all){let s=scoreF([...o.nm,...o.pub,...(hid(x)&&!opts.all?[]:o.sec)],terms,1);if(s){if(done(x))s-=2;else if(avail(x)==="now")s+=2;R.items.push([s,x])}}
     else{const s=scoreF([...o.nm,...o.pub,...o.sec],terms,1);if(s){R.hidden.push(x);if(s>=1000)R.hfull=(R.hfull||0)+1}}});
   R.items.sort((a,b)=>b[0]-a[0]);R.full=R.items.filter(a=>a[0]>=1000).length;R.items=R.items.map(a=>a[1]);
-  LOCS.forEach(l=>{const s=scoreF([[norm(l.n),8],[norm((KINDS[l.k]||{}).n+" "+l.t+" "+(l.a||"")),3],[norm(l.d),1.5]],terms,1);if(s)R.locs.push([s,l])});
+  LOCS.forEach(l=>{if(lockedL(l))return;const s=scoreF([[norm(l.n),8],[norm((KINDS[l.k]||{}).n+" "+l.t+" "+(l.a||"")),3],[norm(l.d),1.5]],terms,1);if(s)R.locs.push([s,l])});
   R.locs.sort((a,b)=>b[0]-a[0]);R.locs=R.locs.map(a=>a[1]);
   if(VEC){const L=VEC.lab;
     [["dist","🗺️","מחוז / עיר"],["hood","🏘️","שכונה"],["street","🛣️","רחוב"]].forEach(([k,e,t])=>(L[k]||[]).forEach(h=>{const s=scoreF([[norm(h[0]),9]],terms);if(s)R.places.push([s+(k==="dist"?2:k==="hood"?1:0),{n:h[0],x:h[1],y:h[2],e,t}])}));
@@ -578,7 +583,9 @@ function pageItem(slug){
   else if(x.loc&&x.steps)intro.push(`מתחילים ב־${bdi(x.loc.slice(-2).join(", "))}${x.sp?` – ${esc(x.sp)}`:""}.`);
   if(x.w&&WHO[x.w]&&x.w!=="B")intro.push(`משחקים בתור ${WHO[x.w]}.`);
   if(intro.length)main+=`<p class="intro">${intro.join(" ")}</p>`;
-  if(x.steps&&x.steps.length)main+=`<ol class="steps">${x.steps.map(s=>`<li><span>${esc(s)}</span></li>`).join("")}</ol>`;
+  if(x.steps&&x.steps.length){const cur=curCh(),st=x.steps.map((t,i)=>[t,(x.stc&&x.stc[i])||0]),vis=st.filter(a=>!(S.spoil&&a[1]>cur)),hidN=st.length-vis.length;
+    main+=`<ol class="steps">${vis.map(a=>`<li><span>${esc(a[0])}</span></li>`).join("")}</ol>`;
+    if(hidN)main+=`<p class="dim" style="font-size:13px;margin:6px 0 0">${ic("lock")} עוד ${hidN} שלבים נפתחים בהמשך הסיפור.</p>`}
   else if(x.d)main+=`<p style="font-size:15.5px">${esc(x.d)}</p>`;
   else if(x.sp)main+=`<p style="font-size:15.5px">${esc(x.sp)}</p>`;
   if(rw)main+=`<div class="getline"><span>🎁</span><b>${esc(rw)}</b></div>`;
@@ -620,6 +627,7 @@ function pageItem(slug){
 }
 function pageLoc(id){
   const l=LBY[id];if(!l)return `<div class="empty">לא נמצא</div>`;const k=KINDS[l.k]||{};const key="L:"+l.id;
+  if(lockedL(l))return `<div class="blk lockbox"><h3>${ic("lock")} נפתח בפרק ${l.c}</h3><p class="muted">המקום הזה קשור לחלק בסיפור שעוד לא הגעת אליו.</p></div>`;
   let h=`<div class="ihead"><div class="meta"><span class="edot" style="background:${k.c}">${""}</span><span class="tag">${esc(k.i||"")} ${esc(k.n||l.k)}</span>${l.a?`<span class="tag">${bdi(l.a)}</span>`:""}<span class="tag ex">📍 מדויק</span></div><h1>${bdi(l.n)}</h1>${l.t?`<div class="en ltr">${esc(l.t)}</div>`:""}
   <button class="bigchk${Store.done(key)?" on":""}" data-lchk="${esc(l.id)}">${Store.done(key)?"✓ מצאתי":"סמן שמצאתי ✓"}</button></div>`;
   if(l.d)h+=`<div class="blk"><h3><span class="e">📝</span>תיאור (באנגלית)</h3><p class="ltr" style="text-align:left">${esc(l.d)}</p></div>`;
@@ -684,7 +692,7 @@ const HUB=[
  ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#9a74c2"],
  ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#5a5bc0"],
  ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#8a6cc0"],
- ["#/g/phone","smartphone","הטלפון והאפליקציות","WhatUp, BuckMe, WAiNK…","#b076bf"],
+ ["#/g/phone","smartphone","הטלפון והאפליקציות","WhatUp, BuckMe ועוד","#b076bf"],
  ["#/g/stats","flame","המדדים","כוח, סיבולת, פוקוס","#e7849a"],
  ["#/g/profile","drama","הפרופיל הפלילי","מקצוען או פסיכו","#8a6cc0"],
  ["#/g/shooting","crosshair","ירי","צהוב, אדום ופגיעה","#d06aa0"],
@@ -694,10 +702,10 @@ const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72"
 const skyAt=(i,n)=>SKY[Math.round(i/(Math.max(1,n-1))*(SKY.length-1))];
 const tileSky=list=>list.map((t,i)=>{const c=skyAt(i,list.length);return [...t.slice(0,4),c,t[5],i/(list.length-1)<.42]});
 const tileHtml=(href,t)=>(t=[...t],t[4]=t[4].startsWith("--")?`var(${t[4]})`:t[4],t)[5]?`<a class="tile big${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><span class="tt"><b>${t[2]}</b><small>${t[3]}</small></span></a>`:`<a class="tile${t[6]?" dark":""}" href="${href}" style="--f:${t[4]}"><span class="ti">${ic(t[1])}</span><b>${t[2]}</b><small>${t[3]}</small></a>`;
-const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="glists${norm(AQ).length>=3?" dimmed":""}"><a class="feat" href="#/news"><svg class="palm" viewBox="0 0 150 210" aria-hidden="true"><path fill="currentColor" d="M112 210C104 160 92 110 80 62l6-2c12 48 26 98 36 150zM82 58C60 40 30 38 4 52c26-8 52-4 78 10zM82 58C70 30 48 14 20 12c26 8 46 24 60 50zM82 58c8-30 26-46 54-50-24 12-40 28-52 54zM82 58c26-14 50-12 68 4-22-10-46-8-66 2zM82 60c-16 6-34 26-42 52 14-24 30-38 44-48zM84 60c20 6 36 24 44 48-14-20-28-34-44-44z"/></svg><small>מתעדכן כל יום</small><b>מה חדש ב־Leonida</b><span>${esc((NEWS[0]||{}).t||"תגליות, טיפים ומדריכים חדשים")}</span></a><div class="grp">כלים</div>${glist(HUB.filter(t=>t[5]&&t[0]!=="#/news"),t=>t[0])}<div class="grp">מדריכים</div>${glist(HUB.filter(t=>!t[5]),t=>t[0])}</div>`;
+const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class="search ask">${ic("message-circle")}<input id="aq" type="search" enterkeyhint="search" autocomplete="off" placeholder="שאל שאלה – למשל: איך בורחים מהמשטרה?" value="${esc(AQ)}"></div><div id="ares">${askHtml()}</div><div class="glists${norm(AQ).length>=3?" dimmed":""}"><a class="feat" href="#/news"><svg class="palm" viewBox="0 0 150 210" aria-hidden="true"><path fill="currentColor" d="M112 210C104 160 92 110 80 62l6-2c12 48 26 98 36 150zM82 58C60 40 30 38 4 52c26-8 52-4 78 10zM82 58C70 30 48 14 20 12c26 8 46 24 60 50zM82 58c8-30 26-46 54-50-24 12-40 28-52 54zM82 58c26-14 50-12 68 4-22-10-46-8-66 2zM82 60c-16 6-34 26-42 52 14-24 30-38 44-48zM84 60c20 6 36 24 44 48-14-20-28-34-44-44z"/></svg><small>מתעדכן כל יום</small><b>מה חדש ב־Leonida</b><span>${esc((newsVis()[0]||{}).t||"תגליות, טיפים ומדריכים חדשים")}</span></a><div class="grp">כלים</div>${glist(HUB.filter(t=>t[5]&&t[0]!=="#/news"),t=>t[0])}<div class="grp">מדריכים</div>${glist(HUB.filter(t=>!t[5]),t=>t[0])}</div>`;
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
-const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
+const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+newsVis().map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
 function pageGuide(id){const g=GUIDES.find(x=>x.id===(id==="focus"?"stats":id));if(!g)return `<div class="empty">לא נמצא</div>`;return (window.LANG==="en"?`<p class="tag" style="display:block;padding:8px 10px;margin:0 0 10px">This guide is in Hebrew for now – English is coming soon.</p>`:"")+`<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
 /* long guides → parts: summary on top, one part at a time, tabs + "next" */
@@ -871,7 +879,7 @@ function addLabels(m){
   const pane=m.createPane("labels");pane.style.zIndex=450;pane.style.pointerEvents="none";
   const box=L.DomUtil.create("div","lbls",pane);
   const LB=VEC.lab;
-  const biz=LOCS.filter(l=>["shop","food","store","bank","leisure","civic","transport","safehouse","building","range","arcade","payday","fence"].includes(l.k)).map(l=>[l.n.replace(/ - [^-]+$/,""),l.x,l.y]);
+  const biz=LOCS.filter(l=>!lockedL(l)&&["shop","food","store","bank","leisure","civic","transport","safehouse","building","range","arcade","payday","fence"].includes(l.k)).map(l=>[l.n.replace(/ - [^-]+$/,""),l.x,l.y]);
   let raf=0;
   function draw(){
     const z=m.getZoom(),b=m.getBounds().pad(.05);box.innerHTML="";const taken=[];
@@ -940,7 +948,7 @@ function drawPins(){
   const put=(o,x,y)=>{const k=Math.round(x*4)/4+","+Math.round(y*4)/4;if(!groups.has(k))groups.set(k,{x,y,a:[]});groups.get(k).a.push(o)};
   if(ML.mine)IT.filter(itemShown).forEach(x=>put(x,x.x,x.y));
   const kOn=Object.keys(ML.kinds).filter(k=>ML.kinds[k]);
-  if(kOn.length)LOCS.filter(l=>kOn.includes(l.k)&&!(S.hideDone&&Store.done("L:"+l.id))).forEach(l=>put(Object.assign({L:1},l),l.x,l.y));
+  if(kOn.length)LOCS.filter(l=>kOn.includes(l.k)&&!lockedL(l)&&!(S.hideDone&&Store.done("L:"+l.id))).forEach(l=>put(Object.assign({L:1},l),l.x,l.y));
   groups.forEach(g=>{
     g.a.sort((p,q)=>(p.L?1:0)-(q.L?1:0)||(p.story?0:1)-(q.story?0:1));
     const f=g.a[0];const col=f.L?((KINDS[f.k]||{}).c||"#ccc"):(CATC[mainCat(f)]||"#ffc23c");
@@ -952,6 +960,7 @@ function drawPins(){
   const c=$("#mcount");if(c)c.textContent=[...groups.values()].reduce((s,g)=>s+g.a.length,0);
 }
 function previewHtml(o){
+  if(o.L&&lockedL(o))return `<div class="pcard"><h3>${ic("lock")} נפתח בפרק ${o.c}</h3><p class="muted">קשור לחלק בסיפור שעוד לא הגעת אליו.</p></div>`;
   if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);
     return `<div class="pcard" style="--c:${k.c||"#ffc23c"}"><div class="pch"><span class="pic">${esc(k.i||"📍")}</span><span>${esc(k.n||o.k)}${o.a?` · ${bdi(o.a)}`:""}</span></div><h3>${bdi(o.n)}</h3>${o.d?`<p class="pwhat ltr">${esc(o.d.slice(0,180))}${o.d.length>180?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
   const x=o,lk=hid(x),c=mainCat(x);
@@ -1126,7 +1135,7 @@ function route(soft){
 }
 window.AFF=await fetch("data/affine.json").then(r=>r.json());
 addEventListener("hashchange",()=>route());
-if(freshNews.length){const a=$('#nav a[data-k="home"]');if(a){const d=document.createElement('span');d.className='newdot';d.textContent=freshNews.length;a.appendChild(d)}}
+if(freshNewsF().length){const a=$('#nav a[data-k="home"]');if(a){const d=document.createElement('span');d.className='newdot';d.textContent=freshNewsF().length;a.appendChild(d)}}
 $("#back").onclick=()=>history.length>1?history.back():(location.hash="#/");
 route();
 document.body.classList.add("ready");try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}setTimeout(()=>(window.requestIdleCallback||setTimeout)(()=>loadVec()),2500);
