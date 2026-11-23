@@ -1338,3 +1338,23 @@ html[data-theme="dark"]{background:linear-gradient(180deg,#1d1b4a 0%,#2a1f5a 26%
 .now:not(.hasmap) .ngo{top:auto;bottom:16px}
 .now .nk{margin-top:-6px}
 .now .nt b{font-size:clamp(22px,6.4vw,28px);line-height:1.1}
+/* HUD-style icon chips (shape + colour as in the game, drawn generically) */
+.hi{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:#241341;vertical-align:middle;flex:none}
+.hi .ic{width:18px;height:18px;stroke-width:2.3}
+.hi.f .ic{fill:currentColor}
+.hi.pink{color:#ff4f9a}.hi.teal{color:#33d6c4}.hi.purple{color:#a77bff}
+.hi.white{color:#fff}.hi.gray{color:#9a93a8}.hi.red{color:#ff4b55}.hi.yellow{color:#ffd23f}.hi.dark{color:#c9384a;background:#120a1c}
+.hi.hollow{color:#fff}.hi.hollow .ic{fill:none}
+.hi.blink .ic{animation:hiblink 1s steps(2) infinite}
+@keyframes hiblink{50%{opacity:.15}}
+.tbl td .hi{margin-inline-end:6px}
+#gbody .tbl td:first-child{white-space:nowrap}
+.zone{display:inline-block;width:30px;height:30px;border-radius:50%;vertical-align:middle;box-shadow:0 0 0 3px rgba(36,19,65,.15)}
+.zone.red{background:radial-gradient(circle,#ff4b55 0 45%,rgba(255,75,85,.35) 46% 100%)}
+.zone.yellow{background:radial-gradient(circle,#ffd23f 0 45%,rgba(255,210,63,.35) 46% 100%)}
+html[data-theme="dark"] .hi{background:#120a24;box-shadow:0 0 0 1px rgba(255,255,255,.08)}
+@media (prefers-reduced-motion:reduce){.hi.blink .ic{animation:none;opacity:.5}}
+/* steps: number floats, text flows normally (bold words + links stay inline) */
+ol.steps li{display:block;position:relative;padding-inline-start:36px;min-height:26px}
+ol.steps li::before{position:absolute;inset-inline-start:0;top:8px}
+.hi.bme{font-weight:800;font-size:16px;font-family:var(--head)}
