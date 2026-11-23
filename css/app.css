@@ -1321,3 +1321,20 @@ html[data-theme="dark"] #nav a.on b{color:#fff}
 html[data-theme="dark"] .msearch,html[data-theme="dark"] #mapbar .chip,html[data-theme="dark"] .ctl button{background:rgba(36,24,66,.88)!important;color:#fbeef5;border-color:rgba(251,238,245,.1)!important}
 html[data-theme="dark"] #mapbar .chip.on,html[data-theme="dark"] .ctl .rep{background:var(--acc)!important;color:#fff}
 html[data-theme="dark"] .anyw{background:rgba(160,170,255,.08)}
+/* guide: one-line summary at the top */
+.tldr{background:rgba(201,59,120,.08);border-inline-start:3px solid var(--acc);padding:10px 12px;border-radius:10px;margin:2px 0 14px;font-size:14.5px;line-height:1.5}
+.tldr.warn{background:rgba(232,149,95,.16);border-color:var(--warn);margin-top:14px}
+html[data-theme="dark"] .tldr{background:rgba(255,95,160,.1)}
+#gbody .tbl td small{color:var(--tx3);font-weight:400}
+/* "what to do" cover */
+.howcover{text-align:center;padding:10px 4px 4px}
+.howcover p{color:var(--tx2);margin:0 0 12px;font-size:14.5px}
+/* fill the whole screen (iOS home-indicator area included) */
+html{min-height:100%;min-height:100lvh;background:linear-gradient(180deg,#8f93d6 0%,#b39bd2 22%,#d6a0be 48%,#efb3a4 74%,#f6c49c 100%) #f6c49c}
+body,html[data-theme] body{background:transparent!important;min-height:100lvh}
+html[data-theme="dark"]{background:linear-gradient(180deg,#1d1b4a 0%,#2a1f5a 26%,#3a2257 52%,#4a2550 78%,#5a2d4c 100%) #5a2d4c}
+/* hero card: button on the map, title has room */
+.now .ngo{bottom:auto;top:12px;inset-inline-end:auto;inset-inline-start:12px;z-index:3}
+.now:not(.hasmap) .ngo{top:auto;bottom:16px}
+.now .nk{margin-top:-6px}
+.now .nt b{font-size:clamp(22px,6.4vw,28px);line-height:1.1}

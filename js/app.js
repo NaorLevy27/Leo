@@ -39,6 +39,9 @@ const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side"
 /* ---------- derived state ---------- */
 let REV;try{REV=new Set(JSON.parse(localStorage.getItem('lr_rev')||'[]'))}catch(e){REV=new Set()}
 let REVC;try{REVC=new Set(JSON.parse(localStorage.getItem('lr_revc')||'[]'))}catch(e){REVC=new Set()}
+let HREV;try{HREV=new Set(JSON.parse(localStorage.getItem('lr_howrev')||'[]'))}catch(e){HREV=new Set()}
+const saveHrev=()=>{try{localStorage.setItem('lr_howrev',JSON.stringify([...HREV]))}catch(e){}};
+const howHid=x=>!!S.hideHow&&!HREV.has(x.id)&&!!((x.steps&&x.steps.length)||x.d||x.rw||x.tips);
 const saveRev=()=>{try{localStorage.setItem('lr_rev',JSON.stringify([...REV]));localStorage.setItem('lr_revc',JSON.stringify([...REVC]))}catch(e){}};
 const hid=x=>locked(x)&&!REVC.has(x.id);
 const done=x=>Store.done(x.id);
@@ -445,7 +448,7 @@ function bindRm(){$$("[data-rm]").forEach(b=>b.onclick=()=>{const r=b.dataset.rm
   Store.setS("lists2",LF);if($("#sheet").classList.contains("on"))filterSheet();route(true)})}
 /* ---------- ask a question in the guides hub: finds the guide section that answers it ---------- */
 const QSTOP=new Set(["איך","מה","למה","איפה","מתי","כמה","האם","אפשר","אני","צריך","לעשות","עושים","יכול","יכולים","רוצה","שלי","שלו","לי","לו","אם","כדי","דרך","משהו","יותר","בכלל","נכון","מישהו","זה","זו","זאת","הזה","הזאת","ככה","הכי","מתי","בבקשה","כדאי","למצוא","מוצאים","מוצא","להגיע","מגיעים","לקבל","מקבלים","עובד","עובדים","צריכים","שווה","בעצם","find","how","what","where","why","when","can","i","do","does","to","get","is","are","my"].map(norm));
-const ASKSYN=[["לברוח","בורחים","בורח","בריחה","להתחמק","להיפטר","להיעלמ","להעלמ","לאבד","escape","lose","evade"],["משטרה","שוטרים","שוטר","מבוקש","מבוקשים","כוכבים","כוכב","police","cops","wanted","stars","heat"],["לגנוב","גונבים","גונב","גניבה","לגנוב רכב","steal","stealing","theft"],["לשמור","שומרים","שומר","שמירה","לשמירה","save","saving","keep"],["לרשום","רושמים","רישום","להירשמ","register","registration"],["להרויח","מרויחים","להשיג","להרוויח","earn","make","farm"],["טרקר","טראקר","מעקב","tracker"],["סמל","סמלים","אייקון","אייקונים","סימנ","סימנים","icon","icons","marker"],["פוקוס","focus"],["טלפונ","phone","אפליקציה","אפליקציות","app","apps"],["להפקיד","הפקדה","מפקידים","deposit"],["כספומט","כספומטים","atm","atms"],["לפספס","פספוס","מפספסים","פוספס","missable","miss","missed"],["אל חזור","נקודת אל חזור","ponr","point of no return"],["רכב","רכבים","מכונית","מכוניות","אוטו","car","cars","vehicle"],["מוסכ","חניה","garage","parking"],["בגדים","בגד","להחליפ בגדים","clothes","outfit"],["נשק","נשקים","רובה","אקדח","weapon","gun"],["כפתור","כפתורים","לחיצה","ללחוצ","שליטה","button","buttons","controls"],["ציט","ציטים","קוד","קודים","cheat","cheats","code"],["כסף","מזומן","money","cash","buckme"]].map(a=>a.map(norm));
+const ASKSYN=[["לברוח","בורחים","בורח","בריחה","להתחמק","להיפטר","להיעלמ","להעלמ","לאבד","escape","lose","evade"],["משטרה","שוטרים","שוטר","מבוקש","מבוקשים","כוכבים","כוכב","police","cops","wanted","stars","heat"],["לגנוב","גונבים","גונב","גניבה","לגנוב רכב","steal","stealing","theft"],["לשמור","שומרים","שומר","שמירה","לשמירה","save","saving","keep"],["לרשום","רושמים","רישום","להירשמ","register","registration"],["להרויח","מרויחים","להשיג","להרוויח","earn","make","farm"],["טרקר","טראקר","מעקב","tracker"],["סמל","סמלים","אייקון","אייקונים","סימנ","סימנים","icon","icons","marker"],["פוקוס","focus"],["טלפונ","phone","אפליקציה","אפליקציות","app","apps"],["להפקיד","הפקדה","מפקידים","deposit"],["כספומט","כספומטים","atm","atms"],["לפספס","פספוס","מפספסים","פוספס","missable","miss","missed"],["אל חזור","נקודת אל חזור","ponr","point of no return"],["רכב","רכבים","מכונית","מכוניות","אוטו","car","cars","vehicle"],["מוסכ","חניה","garage","parking"],["בגדים","בגד","להחליפ בגדים","clothes","outfit"],["נשק","נשקים","רובה","אקדח","weapon","gun"],["כפתור","כפתורים","לחיצה","ללחוצ","שליטה","button","buttons","controls"],["ציט","ציטים","קוד","קודים","cheat","cheats","code"],["כסף","מזומן","money","cash","buckme"],["פרופיל","פרופיל פלילי","מוניטין","criminal profile","profile","professional","psycho","פסיכו","מקצוען"],["מדד","מדדים","כוח","חיים","בריאות","סיבולת","ריצה","כושר","אימונ","חדר כושר","stats","strength","health","cardio","stamina","fitness","gym"],["טלפונ","פלאפונ","אפליקציה","אפליקציות","phone","app","apps","whatup","snapmatic","waink","ווינק"]].map(a=>a.map(norm));
 ASKSYN.forEach(g=>g.forEach(w=>{(SYN[w]=SYN[w]||new Set());g.forEach(v=>v!==w&&SYN[w].add(v))}));
 let GSEC=null,GSEC_K="";
 function guideSections(){
@@ -469,7 +472,7 @@ function askHtml(){
   if(norm(q).length<3)return "";
   const terms=askTerms(q);
   const how=/^(איך|how)\b/i.test(norm(q))||/איכ /.test(norm(q)+" ");
-  const secs=guideSections().map(s=>{let v=scoreF(s.f,terms,1);if(v&&how&&/class="steps"/.test(s.html))v+=v>=1000?60:0;if(v&&s.i<0&&how)v-=5;return [v,s]}).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);
+  const secs=guideSections().map(s=>{let v=scoreF(s.f,terms,1);if(v&&s.i<0&&how)v-=5;return [v,s]}).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);
   const tipS=tipList(999).map(t=>[scoreF([[norm(t.t+" "+(t.x||"")),4]],terms,1),t]).filter(a=>a[0]).sort((a,b)=>b[0]-a[0]);let tips=tipS.map(a=>a[1]);
   const R=searchAll(terms.map(a=>a[0]).join(" "));
   let h="";
@@ -480,8 +483,8 @@ function askHtml(){
   else if(!gFull&&tipS.length&&tipS[0][0]>=1000&&!(top&&R.full>0&&/\d|[A-Z]/.test(""))){const t=tips.shift();
     h+=`<div class="answer"><div class="ah">${ic(t.k==="btn"?"gamepad-2":"lightbulb")}<span><b>${esc(t.t.split(/[:–]/)[0].slice(0,60))}</b><small>${t.k==="btn"?"כפתור סודי":"טיפ"}</small></span></div><div class="gbody"><p>${esc(t.t)}</p>${t.x?`<p>${esc(t.x)}</p>`:""}</div><a class="btn sm" href="#/${t.k==="btn"?"buttons":"tips"}">לכל ה${t.k==="btn"?"כפתורים":"טיפים"} ${ic("chevron-left")}</a></div>`;itemFirst=true}
   else itemFirst=top&&R.full>0&&!gFull;
-  if(h);else if(itemFirst){const x=top,hd=hid(x);
-    h+=`<div class="answer"><div class="ah">${ic(CI[mainCat(x)]||"sparkles")}<span><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></span></div><div class="gbody">${hd?`<p>${ic("lock")} התוכן מוסתר כי זה מפרק שעוד לא הגעת אליו.</p>`:`${x.why||x.d?`<p>${esc(x.why||x.d)}</p>`:""}${x.sp?`<p><b>איפה:</b> ${esc(x.sp)}</p>`:""}${(x.steps||[]).length?`<ol class="steps">${x.steps.slice(0,5).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`:""}`}</div><a class="btn sm" href="#/i/${x.s}">לדף המלא ${ic("chevron-left")}</a></div>`;
+  if(h);else if(itemFirst){const x=top,hd=hid(x)||howHid(x);
+    h+=`<div class="answer"><div class="ah">${ic(CI[mainCat(x)]||"sparkles")}<span><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></span></div><div class="gbody">${hd?`<p>${ic("lock")} ${hid(x)?"התוכן מוסתר כי זה מפרק שעוד לא הגעת אליו.":"הפירוט מוסתר לפי ההגדרה שלך – פתח את הדף המלא כדי לראות."}</p>`:`${x.why||x.d?`<p>${esc(x.why||x.d)}</p>`:""}${x.sp?`<p><b>איפה:</b> ${esc(x.sp)}</p>`:""}${(x.steps||[]).length?`<ol class="steps">${x.steps.slice(0,5).map(t=>`<li>${esc(t)}</li>`).join("")}</ol>`:""}`}</div><a class="btn sm" href="#/i/${x.s}">לדף המלא ${ic("chevron-left")}</a></div>`;
     R.items.shift()}
   else if(secs.length){const s=secs[0][1];
     h+=`<div class="answer"><div class="ah">${ic(GI[s.g.id]||"book-open")}<span><b>${esc(s.i<0?s.g.t:s.title)}</b><small>מתוך המדריך "${esc(s.g.t)}"</small></span></div><div class="gbody">${s.html}</div><a class="btn sm" href="#/g/${s.g.id}${s.i>=0?"?s="+s.i:""}">למדריך המלא ${ic("chevron-left")}</a></div>`}
@@ -494,7 +497,7 @@ function askHtml(){
   else h+=`<button class="linkb askmiss" id="asksend">לא מצאת מה שחיפשת? שלח לנו את השאלה</button>`;
   return h;
 }
-const GI={"map-icons":"map-pinned","steal-cars":"key-round","keep-cars":"square-parking",police:"siren",money:"banknote",saves:"save",focus:"scan-eye","how-site":"circle-help"};
+const GI={"map-icons":"map-pinned","steal-cars":"key-round","keep-cars":"square-parking",police:"siren",money:"banknote",saves:"save",phone:"smartphone",stats:"flame",profile:"drama","how-site":"circle-help"};
 function bindAsk(){
   const i=$("#aq");if(!i)return;
   const draw=()=>{$("#ares").innerHTML=deco(askHtml());$(".glists").classList.toggle("dimmed",norm(AQ).length>=3);bindAres()};
@@ -574,6 +577,7 @@ function pageItem(slug){
   if(rw)main+=`<div class="getline"><span>🎁</span><b>${esc(rw)}</b></div>`;
   if(x.tips&&x.tips.length)main+=`<div class="tipline"><span>💡</span><span>${esc(x.tips[0])}</span></div>`;
   if(x.src==="kg")main+=`<p class="dim" style="font-size:12px;margin:8px 0 0">זה תקציר – מדריך מלא שלב־אחרי־שלב למשימה הזאת יתווסף בקרוב.</p>`;
+  if(howHid(x))main=`<div class="howcover"><p>הפירוט מוסתר, כדי לא להרוס לך את המשימה.</p><button class="btn pri" id="showhow">הצג מה עושים</button></div>`;
   h+=`<div class="blk primary"><h3><span class="e">🎯</span>מה עושים</h3>${main||`<p class="muted">עוד אין פירוט – יש לך טיפ? כתוב בתגובות.</p>`}${x.x!=null?"":`<p class="anyw">🌍 אין לזה נקודה קבועה – ${x.g.includes("event")?"זה יכול לקרות בכל מקום במפה, תוך כדי נסיעה":"זה פזור בכמה מקומות במפה"}.</p>`}</div>`;
   /* layer 2: details on demand */
   if(x.loc||x.sp||x.x!=null){let w="";
@@ -598,7 +602,7 @@ function pageItem(slug){
   if(wn)h+=fold("🕒","מתי לעשות",wn);
   let tp="";if(x.tips&&x.tips.length)tp+=`<ul class="tips">${x.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`;if(x.ch)tp+=`<p>🔀 ${esc(x.ch)}</p>`;
   if(x.nt&&x.nt!==rw)tp+=`<p class="muted">${esc(x.nt)}</p>`;
-  if(tp)h+=fold("💡","טיפים ובחירות",tp);
+  if(tp&&!howHid(x))h+=fold("💡","טיפים ובחירות",tp);
   if(x.veh)h+=fold("🅿️","איך שומרים את הרכב",vehText(x));
   const vids=(x.v||[]).map(ytId).filter(Boolean);
   if(vids.length||x.q){let v=vids.map(id=>`<div class="vid"><div class="ph" data-id="${id}" style="background-image:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)">▶</div></div>`).join("");
@@ -673,7 +677,9 @@ const HUB=[
  ["#/g/money","banknote","כסף ו־BuckMe","איפה לשמור","#9a74c2"],
  ["#/g/saves","save","נקודות אל־חזור","מה נסגר לתמיד","#5a5bc0"],
  ["#/g/map-icons","map-pinned","סימני המפה","מה כל סמל אומר","#8a6cc0"],
- ["#/g/focus","scan-eye","פוקוס וטלפון","האפליקציות","#b076bf"],
+ ["#/g/phone","smartphone","הטלפון והאפליקציות","WhatUp, BuckMe, WAiNK…","#b076bf"],
+ ["#/g/stats","flame","המדדים","כוח, סיבולת, פוקוס","#e7849a"],
+ ["#/g/profile","drama","הפרופיל הפלילי","מקצוען או פסיכו","#8a6cc0"],
  ["#/g/how-site","circle-help","איך משתמשים","3 דברים","#d06aa0"]];
 const glist=(arr,hf)=>`<div class="glist">`+arr.map(t=>`<a href="${hf(t)}"><span class="gi" style="--c:${t[4]}">${ic(t[1])}</span><span class="t"><b>${t[2]}</b><small>${t[3]}</small></span><span class="chv">${ic("chevron-left")}</span></a>`).join("")+`</div>`;
 const SKY=["#6a0a82","#8e0b8c","#b8108f","#e0188c","#f42f7e","#fc5072","#ff7a72","#ff9b78","#ffb37f","#ffc58a"];
@@ -684,7 +690,7 @@ const pageGuides=()=>`<div class="ihead"><h1>מדריכים</h1></div><div class
 function pageTipsK(btn){const tl=tipList(999).filter(t=>btn?t.k==="btn":t.k!=="btn"),hid=TIPS2.filter(t=>btn?t.k==="btn":t.k!=="btn").length-tl.length;
   return `<div class="ihead"><div class="kick">${btn?"PS5 · ב־Xbox בסוגריים":"מתעדכן כל יום"}</div><h1 style="margin-top:4px">${btn?"🎮 כפתורים סודיים":"💡 טיפים"}</h1></div>`+(tl.map(tipHtml).join("")||`<div class="empty">עוד אין</div>`)+(hid?`<p class="dim" style="font-size:12px">🔒 ${hid} נוספים ייפתחו בהמשך המשחק</p>`:"")}
 const pageNews=()=>`<div class="ihead"><div class="kick">מתעדכן כל יום</div><h1 style="margin-top:4px">🆕 מה חדש</h1></div>`+NEWS.map(n=>`<a class="row" style="--c:#3fd08a" href="${n.s?"#/i/"+esc(n.s):"#/guides"}"><span class="gl coll" style="--c:#3fd08a">🆕</span><div class="t"><b>${esc(n.t)}</b><small class="ltr">${esc(n.d.split("-").reverse().join("/"))}</small></div></a>`).join("");
-function pageGuide(id){const g=GUIDES.find(x=>x.id===id);if(!g)return `<div class="empty">לא נמצא</div>`;return (window.LANG==="en"?`<p class="tag" style="display:block;padding:8px 10px;margin:0 0 10px">This guide is in Hebrew for now – English is coming soon.</p>`:"")+`<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
+function pageGuide(id){const g=GUIDES.find(x=>x.id===(id==="focus"?"stats":id));if(!g)return `<div class="empty">לא נמצא</div>`;return (window.LANG==="en"?`<p class="tag" style="display:block;padding:8px 10px;margin:0 0 10px">This guide is in Hebrew for now – English is coming soon.</p>`:"")+`<div class="ihead"><div class="kick">מדריך · אתה בפרק ${curCh()}</div><h1 style="margin-top:4px">${g.e} ${esc(g.t)}</h1></div><div class="blk gbody" id="gbody">${g.h}</div>${commentsBlock("g:"+g.id)}`}
 /* parts of a guide marked data-ch="N" stay closed until you reach chapter N */
 function gateGuide(){
   const b=$("#gbody");if(!b)return;const cur=curCh();let first=true;
@@ -722,7 +728,9 @@ function pageSettings(sec){
     <p class="muted" style="font-size:13px;margin:8px 4px">במשימה מוסתרת יש שני כפתורים: <b>👁 הצג שם</b> ו־<b>📖 הצג מה עושים</b> – אתה מחליט מה לראות.</p>
     <div class="card cardlist" style="margin-top:12px"><div class="set stack"><div class="t"><b>מה נחשב "עוד לא הגעת"</b><small>"פרקים הבאים" – כל מה שבפרק שלך גלוי (נוח כשעושים משימות לא לפי הסדר).</small></div><div class="seg"><button data-sl="ch" class="${S.spoilLvl!=="strict"?"on":""}">פרקים הבאים</button><button data-sl="strict" class="${S.spoilLvl==="strict"?"on":""}">כל מה שאחרי הבאה</button></div></div>
     <div class="set"><div class="t"><b>מה שכבר גילית</b><small>${REV.size} שמות · ${REVC.size} תיאורים</small></div><button class="btn sm" id="revclr">הסתר שוב</button></div>`+
-    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+`</div>`+
+    sw("casual","מצב 'סתם מתעניין'","בלי סימונים ואחוזים – רק לגלות ולקרוא.")+
+    sw("hideHow","להסתיר את 'מה עושים'","בכל משימה – גם בזו שאתה באמצע. השלבים, הטיפים ומה מקבלים נפתחים רק כשתלחץ.")+
+    (HREV.size?`<div class="set"><div class="t"><b>מה שכבר פתחת</b><small>${HREV.size} משימות</small></div><button class="btn sm" id="rehow">הסתר שוב</button></div>`:"")+`</div>`+
     `<div class="sec"><h2>מראה</h2></div><div class="card cardlist" style="padding:12px 14px"><div class="seg wide">`+[["auto","לפי הטלפון"],["light","בהיר"],["dark","כהה"]].map(m=>`<button data-thm="${m[0]}" class="${(S.theme||"auto")===m[0]?"on":""}">${m[1]}</button>`).join("")+`</div><small class="dim" style="display:block;margin-top:8px;font-size:12.5px">"לפי הטלפון" עובר לכהה לבד כשהטלפון במצב כהה.</small></div>`;}
   if(sec==="progress")h+=`<div class="card cardlist"><div class="set"><div class="t"><b>📍 איפה אתה בסיפור</b><small>בחר את המשימה האחרונה שסיימת – נסמן הכל עד אליה</small></div><button class="btn sm pri" id="swh">עדכן</button></div></div>
    <div class="card cardlist" style="margin-top:10px"><div class="set"><div class="t"><b>💾 קוד התקדמות</b><small>גיבוי, או העברה ממכשיר אחר / מהגרסה הקודמת. ייבוא רק מוסיף – לא מוחק.</small></div></div>
@@ -745,6 +753,7 @@ function accountBlock(){
 function bindSettings(){
   $$("[data-thm]").forEach(b=>b.onclick=()=>{Store.setS("theme",b.dataset.thm);S.theme=b.dataset.thm;applyTheme();$$("[data-thm]").forEach(x=>x.classList.toggle("on",x===b))});
   const on=(sel,f)=>{const e=$(sel);if(e)e.onclick=f};
+  const rh=$("#rehow");if(rh)rh.onclick=()=>{HREV.clear();saveHrev();toast("הוסתר שוב");route(true)};
   $$("[data-sw]").forEach(b=>b.onclick=()=>{const k=b.dataset.sw;Store.setS(k,!S[k]);b.classList.toggle("on",S[k]);b.setAttribute("aria-checked",S[k]);if(mapReady)drawPins();toast("נשמר");if(k==="spoil")route(true)});
   on("#swh",()=>whereSheet());
   $$("[data-sl]").forEach(b=>b.onclick=()=>{Store.setS("spoilLvl",b.dataset.sl);$$("[data-sl]").forEach(x=>x.classList.toggle("on",x===b));if(mapReady)drawPins();toast("נשמר")});
@@ -914,8 +923,9 @@ function previewHtml(o){
   if(o.L){const k=KINDS[o.k]||{};const d=Store.done("L:"+o.id);
     return `<div class="pcard" style="--c:${k.c||"#ffc23c"}"><div class="pch"><span class="pic">${esc(k.i||"📍")}</span><span>${esc(k.n||o.k)}${o.a?` · ${bdi(o.a)}`:""}</span></div><h3>${bdi(o.n)}</h3>${o.d?`<p class="pwhat ltr">${esc(o.d.slice(0,180))}${o.d.length>180?"…":""}</p>`:""}<div class="acts"><a class="btn pri" href="#/l/${encodeURIComponent(o.id)}">לעמוד המלא ›</a><button class="btn" data-lchk="${esc(o.id)}">${d?"✓ נמצא":"סמן ✓"}</button></div></div>`}
   const x=o,lk=hid(x),c=mainCat(x);
-  const what=lk?"":(x.steps&&x.steps[0])||x.d||x.sp||"";
-  const get=lk?"":(x.rw||x.why||"");
+  const hh=howHid(x);
+  const what=lk||hh?"":(x.steps&&x.steps[0])||x.d||x.sp||"";
+  const get=lk||hh?"":(x.rw||x.why||"");
   const where=lk?"":(x.steps||x.d)?(x.sp||""):"";
   return `<div class="pcard" style="--c:${CATC[c]||"#ffc23c"}">
    <div class="pch">${glyph(x)}<span>${CAT[c]?CAT[c][0]:""} · פרק ${x.c}${x.w&&WHO[x.w]?` · ${WHO[x.w]}`:""}</span>${x.ex?`<span class="pex">📍 מדויק</span>`:`<span class="pex ap">≈ אזור</span>`}</div>
@@ -1061,6 +1071,7 @@ function route(soft){
   if(page==="cheats"){drawCheats("");$$("[data-cc]").forEach(b=>b.onclick=()=>{$$("[data-cc]").forEach(x=>x.classList.toggle("on",x===b));drawCheats(b.dataset.cc)})}
   if(page==="settings")bindSettings();
   const un=$("#unspoil");if(un)un.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REV.add(x.id);saveRev();MEMO.clear()}route(true)};
+  const shw=$("#showhow");if(shw)shw.onclick=()=>{const x=BYS[parse().parts[1]];if(x){HREV.add(x.id);saveHrev()}route(true)};
   const uc=$("#uncontent");if(uc)uc.onclick=()=>{const x=BYS[parse().parts[1]];if(x){REVC.add(x.id);saveRev()}route(true)};
   if(page==="item"){const x=BYS[parts[1]];if(x&&x.x!=null){const f=$("#fwhere");if(f){if(f.open){f._m=1;setTimeout(()=>drawMini(x.x,x.y,x),0)}f.addEventListener("toggle",()=>{if(f.open&&!f._m){f._m=1;drawMini(x.x,x.y,x)}})}}document.title=(x?title(x)+" · ":"")+"Leo"}else document.title="Leo · המדריך ל־Leonida";
   if(page==="loc"){const l=LBY[decodeURIComponent(parts[1]||"")];if(l)setTimeout(()=>drawMini(l.x,l.y,Object.assign({L:1},l)),0)}
