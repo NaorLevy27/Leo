@@ -39,6 +39,11 @@ const mainCat=x=>x.story?"story":(x.g.find(g=>g!=="tip"&&CAT[g])||x.g[0]||"side"
 /* ---------- derived state ---------- */
 let REV;try{REV=new Set(JSON.parse(localStorage.getItem('lr_rev')||'[]'))}catch(e){REV=new Set()}
 let REVC;try{REVC=new Set(JSON.parse(localStorage.getItem('lr_revc')||'[]'))}catch(e){REVC=new Set()}
+let MYR;try{MYR=JSON.parse(localStorage.getItem('lr_route')||'[]')}catch(e){MYR=[]}
+const saveMyr=()=>{try{localStorage.setItem('lr_route',JSON.stringify(MYR))}catch(e){}};
+const inRoute=id=>MYR.includes(id);
+function toggleRoute(id){const i=MYR.indexOf(id);if(i>=0)MYR.splice(i,1);else MYR.push(id);saveMyr();toast(i>=0?"הוסר מהמסלול":`נוסף למסלול (${MYR.length})`);$$(`[data-rt="${CSS.escape(id)}"]`).forEach(b=>{b.classList.toggle("on",inRoute(id));b.innerHTML=rtLabel(id)});if(typeof mapChips==="function"&&mapReady)mapChips()}
+const rtLabel=id=>inRoute(id)?`${ic("check")} במסלול שלי`:`${ic("plus")} למסלול שלי`;
 let HREV;try{HREV=new Set(JSON.parse(localStorage.getItem('lr_howrev')||'[]'))}catch(e){HREV=new Set()}
 const saveHrev=()=>{try{localStorage.setItem('lr_howrev',JSON.stringify([...HREV]))}catch(e){}};
 const howHid=x=>!!S.hideHow&&!HREV.has(x.id)&&!!((x.steps&&x.steps.length)||x.d||x.rw||x.tips);
@@ -123,6 +128,7 @@ document.addEventListener("click",e=>{
   if(l){e.preventDefault();const k="L:"+l.dataset.lchk;Store.set(k,!Store.done(k));toast(Store.done(k)?"✓ נמצא":"הסימון הוסר");refreshSoft();return}
   const ut=e.target.closest("[data-upto]");if(ut){e.preventDefault();const m=BY[ut.dataset.upto];const n=markUpTo(m);toast(`✓ סומנו ${n} משימות סיפור עד כאן`);refreshSoft();return}
   const rv=e.target.closest("[data-rev]");if(rv){e.preventDefault();e.stopPropagation();REV.add(rv.dataset.rev);saveRev();MEMO.clear();refreshSoft();return}
+  const rt=e.target.closest("[data-rt]");if(rt){e.preventDefault();e.stopPropagation();toggleRoute(rt.dataset.rt);return}
   const sh=e.target.closest("[data-share]");if(sh){e.preventDefault();const x=BYS[sh.dataset.share];share(x.n+" · Leo",`${x.n} ב־GTA 6 – איך עושים, מה מקבלים ואיפה בדיוק 👇`,SITE+"#/i/"+x.s);return}
   const v=e.target.closest(".vid .ph");if(v){v.outerHTML=`<iframe src="https://www.youtube-nocookie.com/embed/${v.dataset.id}?autoplay=1" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;}
 });
@@ -366,7 +372,7 @@ function pageList(q){
   h+=`<div class="tabs">`+TABS.map(t=>`<button class="tab${LF.tab===t[0]?" on":""}" style="--c:${CATC[t[0]]||"#ff8a3d"}" data-tab="${t[0]}">${t[1]}</button>`).join("")+`</div>`;
   const nf=nFilters();
   const SORTN={chrono:"לפי הסדר",near:"הכי קרוב",soon:"מה נגמר קודם",type:"לפי סוג"};
-  h+=`<div class="fbar"><span class="cntl">${list.length} · ${SORTN[LF.sort||"chrono"]}</span><button class="fbtn${nf?" on":""}" id="fopen" aria-label="סינון ומיון">${ic("sliders-horizontal")}${nf?` <b>${nf}</b>`:""}</button></div>`;
+  h+=`<div class="fbar"><span class="cntl">${list.length} דברים</span><button class="fbtn sortb" id="fsortb">${ic("arrow-up-down")} ${SORTN[LF.sort||"chrono"]}</button><button class="fbtn${nf?" on":""}" id="fopen" aria-label="סינון ומיון">${ic("sliders-horizontal")}${nf?` <b>${nf}</b>`:""}</button></div>`;
   const act=[];
   if(LF.stat)act.push([`מצב: ${STL[LF.stat]}`,"stat"]);if(LF.miss)act.push(["רק מה שעלול להיעלם","miss"]);
   for(const k in LF.ex)if(LF.ex[k])act.push([`בלי ${CAT[k][0]}`,"ex:"+k]);
@@ -515,6 +521,7 @@ function bindList(){
   const save=()=>{Store.setS("lists2",LF);route(true)};
   $$("[data-tab]").forEach(b=>b.onclick=()=>{LF.tab=b.dataset.tab;LF.kt={};save()});
   $("#fopen").onclick=filterSheet;
+  const fsb=$("#fsortb");if(fsb)fsb.onclick=()=>window.sortSheet();
   window.sortSheet=()=>{const M=[["chrono","📖 לפי הסדר","כמו במשחק – פרק אחרי פרק, ומה שנפתח אחרי כל משימה"],["near","🧭 הכי קרוב","מסלול מהמשימה הבאה – כל תחנה הכי קרובה לקודמת"],["soon","⏳ מה נגמר קודם","מה שעלול להיעלם – למעלה"],["type","🗂 לפי סוג","קלפים, רכבים, נשקים…"]];openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איך לסדר?</h3>`+M.map(m=>`<button class="row" style="width:100%;text-align:start" data-so="${m[0]}"><div class="t"><b>${m[1]}</b><small>${m[2]}</small></div>${(LF.sort||"chrono")===m[0]?"✓":""}</button>`).join(""));$$("[data-so]").forEach(b=>b.onclick=()=>{LF.sort=b.dataset.so;closeSheet();save()})};
   if(false)$("#fch").onclick=()=>{openSheet(`<h3 style="font-size:19px;margin:0 0 10px">איזה פרק?</h3>`+[0,1,2,3,4,5].map(c=>`<button class="row" style="width:100%" data-pc="${c}"><div class="t"><b>${c?"פרק "+c:"כל הפרקים"}</b>${c===curCh()?`<small>אתה כאן</small>`:""}</div>${LF.ch===c?"✓":""}</button>`).join(""));$$("[data-pc]").forEach(b=>b.onclick=()=>{LF.ch=+b.dataset.pc;closeSheet();save()})};
   $$("[data-tog]").forEach(b=>b.onclick=()=>{const c=/^t/.test(b.dataset.tog)?b.dataset.tog:+b.dataset.tog;const cur=b.parentElement.classList.contains("open");LF.open[c]=!cur;save()});
@@ -584,7 +591,7 @@ function pageItem(slug){
     if(x.x!=null)w+=`<p style="margin:0 0 6px">${x.ex?`<span class="tag ex">📍 מדויק</span>`:`<span class="tag ap">≈ אזור משוער</span>`}</p>`;
     if(x.loc)w+=`<div class="path">${x.loc.map(p=>`<span>${bdi(p)}</span>`).join("")}${x.st?`<span>${bdi(x.st)}</span>`:""}</div>`;
     if(x.sp&&(x.steps||x.d))w+=`<p>${esc(x.sp)}</p>`;if(x.lk)w+=`<p class="muted">👀 איך זה נראה: ${esc(x.lk)}</p>`;
-    if(x.x!=null)w+=`<div class="minimap" id="mini"></div><a class="btn pri wide" style="margin-top:10px" href="#/map?i=${x.s}">🗺️ פתח במפה הגדולה – בדיוק כאן</a>`;
+    if(x.x!=null)w+=`<div class="minimap" id="mini"></div><a class="btn pri wide" style="margin-top:10px" href="#/map?i=${x.s}">🗺️ פתח במפה הגדולה – בדיוק כאן</a><button class="btn wide rtb${inRoute(x.id)?" on":""}" style="margin-top:8px" data-rt="${esc(x.id)}">${rtLabel(x.id)}</button>`;
     h+=fold("📍","איפה בדיוק",w,"fwhere").replace("<details class=\"fold\" id=\"fwhere\">","<details class=\"fold\" id=\"fwhere\" open>");}
   const wh=[];
   if(x.af)wh.push(["נפתח אחרי",x.af]);if(x.in)wh.push(["במהלך",x.in]);if(x.prev)wh.push(["משימה קודמת",x.prev]);
@@ -959,7 +966,7 @@ function previewHtml(o){
    ${what?`<div class="pline"><span>🎯</span><p>${esc(what.length>140?what.slice(0,140)+"…":what)}</p></div>`:""}
    ${get?`<div class="pline get"><span>🎁</span><p><b>${esc(get.length>110?get.slice(0,110)+"…":get)}</b></p></div>`:""}
    ${where?`<div class="pline"><span>📍</span><p class="muted">${esc(where.length>110?where.slice(0,110)+"…":where)}</p></div>`:""}
-   <div class="acts"><a class="btn pri" href="#/i/${x.s}">${lk?"לעמוד":"פרטים מלאים"} ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}</div></div>`;
+   <div class="acts"><a class="btn pri" href="#/i/${x.s}">${lk?"לעמוד":"פרטים מלאים"} ›</a>${S.casual?"":`<button class="btn" data-chk="${esc(x.id)}">${done(x)?"✓ עשיתי":"סמן ✓"}</button>`}${x.x!=null?`<button class="btn rtb${inRoute(x.id)?" on":""}" data-rt="${esc(x.id)}">${rtLabel(x.id)}</button>`:""}</div></div>`;
 }
 function preview(o){openSheet(previewHtml(o))}
 function groupSheet(a){
@@ -984,7 +991,8 @@ function mapChips(){
   $("#msearch").innerHTML=`${ic("search")}<input id="mq" placeholder="חיפוש במפה">`;
   const mq=$("#mq");mq.onkeydown=e=>{if(e.key==="Enter")mq.blur()};mq.oninput=()=>{clearTimeout(mq._t);mq._t=setTimeout(()=>mapSearch(mq.value),250)};
   const nL=Object.values(ML.cats).filter(Boolean).length+Object.values(ML.kinds).filter(Boolean).length;
-  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">${ML.game?"מה פתוח עכשיו":"הכל"}</button><button class="chip" id="mlay">${ic("layers-2")} שכבות${nL?` <b class="nb">${nL}</b>`:""}</button>`;
+  $("#mapbar").innerHTML=`<button class="chip gm${ML.game?" on":""}" id="mgame">${ML.game?"מה פתוח עכשיו":"הכל"}</button><button class="chip" id="mlay">${ic("layers-2")} שכבות${nL?` <b class="nb">${nL}</b>`:""}</button><button class="chip${RMODE?" on":""}" id="mroute">${ic("route")} ${RMODE==="auto"?"מסלול מוצע":"המסלול שלי"}${MYR.length&&RMODE!=="auto"?` <b class="nb">${MYR.length}</b>`:""}${RMODE?` <span class="rx" id="rclr">${ic("x")}</span>`:""}</button>`;
+  $("#mroute").onclick=e=>{if(e.target.closest("#rclr")){clearRoute();return}if(RMODE==="auto"){clearRoute();return}if(!MYR.length||RMODE==="mine")routeSheet();else showRoute(true)};
   $("#mlay").onclick=layersSheet;
   $("#mgame").onclick=()=>{ML.game=!ML.game;Store.setS("mapLayers",ML);mapChips();drawPins();toast(ML.game?"🎮 רואים רק מה שאפשר לעשות עכשיו":"רואים הכל")};
   $$("[data-mc]").forEach(b=>b.onclick=()=>{const k=b.dataset.mc;ML.cats[k]=!ML.cats[k];b.classList.toggle("on",!!ML.cats[k]);Store.setS("mapLayers",ML);drawPins()});
@@ -1025,15 +1033,28 @@ function ensureMap(){
   $("#zin").onclick=()=>map.zoomIn();$("#zout").onclick=()=>map.zoomOut();$("#zfit").onclick=()=>map.fitBounds(LAND,{padding:[20,20]});
 }
 let RLAYER=null;
-function showRoute(){
+function showRoute(mine){
   if(RLAYER){map.removeLayer(RLAYER);RLAYER=null}
-  const r=routeFrom(IT.filter(x=>x.x!=null&&!x.tip&&avail(x)==="now"&&passes(x))).slice(0,25);if(!r.length)return toast("אין מסלול כרגע");
+  const r=mine?MYR.map(id=>BY[id]).filter(x=>x&&x.x!=null):routeFrom(IT.filter(x=>x.x!=null&&!x.tip&&avail(x)==="now"&&passes(x))).slice(0,25);if(!r.length)return toast(mine?"המסלול שלך ריק":"אין מסלול כרגע");
   RLAYER=L.layerGroup().addTo(map);L.polyline(r.map(x=>[-x.y,x.x]),{color:"#ff3d8b",weight:4,opacity:.85,dashArray:"8 8"}).addTo(RLAYER);
   r.forEach((x,i)=>L.marker([-x.y,x.x],{zIndexOffset:1000,icon:L.divIcon({className:"",html:`<div class="rpin">${i+1}</div>`,iconSize:[26,26],iconAnchor:[13,13]})}).on("click",()=>preview(x)).addTo(RLAYER));
   map.fitBounds(L.latLngBounds(r.map(x=>[-x.y,x.x])).pad(.2));
-  $("#mapbar").insertAdjacentHTML("afterbegin",`<button class="chip on" id="rclr">🧭 מסלול · ${r.length} ✕</button>`);$("#rclr").onclick=()=>{map.removeLayer(RLAYER);RLAYER=null;$("#rclr").remove()};
+  RMODE=mine?"mine":"auto";mapChips();
 }
-let FOCUS=null;
+let FOCUS=null,RMODE=null;
+function clearRoute(){if(RLAYER){map.removeLayer(RLAYER);RLAYER=null}RMODE=null;mapChips()}
+function routeSheet(){
+  const a=MYR.map(id=>BY[id]).filter(Boolean);
+  let h=`<h3 style="font-size:19px;margin:0 0 4px">המסלול שלי</h3><p class="dim" style="margin:0 0 10px;font-size:13px">${a.length?"התחנות לפי הסדר. אפשר להזיז או להסיר.":"עוד אין תחנות. במפה או בדף משימה לחץ \"למסלול שלי\"."}</p>`;
+  if(a.length){h+=`<div class="group">`+a.map((x,i)=>`<div class="row rrow"><span class="rnum">${i+1}</span><div class="t"><b>${bdi(title(x))}</b><small>${esc(sub(x))}</small></div><button class="rbtn" data-rup="${i}" aria-label="למעלה"${i?"":" disabled"}>${ic("chevron-down")}</button><button class="rbtn" data-rdel="${i}" aria-label="הסר">${ic("x")}</button></div>`).join("")+`</div>`;
+    h+=`<div class="acts" style="margin-top:12px"><button class="btn pri" id="rshow">${ic("route")} הצג במפה</button><button class="btn" id="rnear">סדר לפי הכי קרוב</button><button class="btn" id="rclear">נקה</button></div>`}
+  openSheet(h);
+  $$("[data-rdel]").forEach(b=>b.onclick=()=>{MYR.splice(+b.dataset.rdel,1);saveMyr();if(RMODE==="mine")MYR.length?showRoute(true):clearRoute();else mapChips();routeSheet()});
+  $$("[data-rup]").forEach(b=>b.onclick=()=>{const i=+b.dataset.rup;if(!i)return;[MYR[i-1],MYR[i]]=[MYR[i],MYR[i-1]];saveMyr();if(RMODE==="mine")showRoute(true);routeSheet()});
+  const sh=$("#rshow");if(sh)sh.onclick=()=>{closeSheet();showRoute(true)};
+  const nr=$("#rnear");if(nr)nr.onclick=()=>{const pts=MYR.map(id=>BY[id]).filter(x=>x&&x.x!=null);if(!pts.length)return;const out=[pts.shift()];while(pts.length){const l=out[out.length-1];let bi=0,bd=1e9;pts.forEach((p,i)=>{const d=(p.x-l.x)**2+(p.y-l.y)**2;if(d<bd){bd=d;bi=i}});out.push(pts.splice(bi,1)[0])}MYR=out.map(x=>x.id).concat(MYR.filter(id=>!out.some(x=>x.id===id)));saveMyr();if(RMODE==="mine")showRoute(true);routeSheet();toast("סודר לפי הכי קרוב")};
+  const cl=$("#rclear");if(cl)cl.onclick=()=>{MYR=[];saveMyr();if(RMODE==="mine")clearRoute();else mapChips();closeSheet();toast("המסלול נוקה")};
+}
 function focusMap(q){
   if(q.route){setTimeout(showRoute,300);return}
   if(q.at){const [ax,ay]=q.at.split(",").map(Number);map.setView([-ay,ax],7);L.marker([-ay,ax]).addTo(map);return}
