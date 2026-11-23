@@ -617,7 +617,7 @@ function pageItem(slug){
   let tp="";if(x.tips&&x.tips.length)tp+=`<ul class="tips">${x.tips.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`;if(x.ch)tp+=`<p>🔀 ${esc(x.ch)}</p>`;
   if(x.nt&&x.nt!==rw)tp+=`<p class="muted">${esc(x.nt)}</p>`;
   if(tp&&!howHid(x))h+=fold("💡","טיפים ובחירות",tp);
-  if(x.veh)h+=fold("🅿️","איך שומרים את הרכב",vehText(x));
+  if(x.veh&&!howHid(x))h+=fold("🅿️","איך שומרים את הרכב",vehText(x));
   const vids=(x.v||[]).map(ytId).filter(Boolean);
   if(vids.length||x.q){let v=vids.map(id=>`<div class="vid"><div class="ph" data-id="${id}" style="background-image:url(https://i.ytimg.com/vi/${id}/hqdefault.jpg)">▶</div></div>`).join("");
     if(x.q)v+=`<a class="btn sm" style="margin-top:8px" target="_blank" rel="noopener" href="https://www.youtube.com/results?search_query=${encodeURIComponent("GTA 6 "+x.q)}">חפש עוד סרטונים ב־YouTube</a>`;h+=fold("▶","סרטון",v)}

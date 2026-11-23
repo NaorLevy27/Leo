@@ -9,7 +9,7 @@
   const subs=new Set();
   function save(){try{localStorage.setItem(K,JSON.stringify(st))}catch(e){};subs.forEach(f=>f())}
   function merge(a,b){const r=Object.assign({},a);for(const k in b){const v=b[k];if(!(k in r)||Math.abs(v)>Math.abs(r[k]))r[k]=v}return r}
-  const DEF={spoil:true,casual:false,hideDone:false,upTo:false,mapStyle:"rockstar",exactOnly:false,lists:{}};
+  const DEF={spoil:true,hideHow:true,casual:false,hideDone:false,upTo:false,mapStyle:"rockstar",exactOnly:false,lists:{}};
   let S;try{S=Object.assign({},DEF,JSON.parse(localStorage.getItem(KS)||"{}"))}catch(e){S=Object.assign({},DEF)}
   window.Store={
     done:id=>st[id]>0,
