@@ -2,6 +2,11 @@
  "updated": "2026-11-22",
  "news": [
   {
+   "d": "2026-11-23",
+   "t": "🎈 נוסף: הליצן הרוצח במעלית של Haymarket ב־Vice Beach",
+   "s": "c1-killer-clown-in-the-haymarket-lift"
+  },
+  {
    "d": "2026-11-22",
    "t": "🏎️ מדריך מלא: האחוזה ב־Vespucci – הסופרקאר האדום, הרובה האגדי ושתי הכספות",
    "s": "c3-royal-ruby-emerus"
@@ -827,6 +832,41 @@
     "האחוזה מלאה אנשים – תתקדם לאט ובשקט"
    ],
    "src": "guide"
+  },
+  {
+   "id": "c1-Killer clown in the Haymarket lift",
+   "n": "הליצן הרוצח במעלית של Haymarket",
+   "ne": "Killer clown in the Haymarket lift",
+   "c": 1,
+   "g": [
+    "egg"
+   ],
+   "w": "B",
+   "why": "ביצת פסחא מפחידה בסגנון Pennywise: ליצן מופיע במעלית, מנסה לתקוף ונעלם – והבלונים מתפוצצים.",
+   "loc": [
+    "Vice City",
+    "Vice Beach"
+   ],
+   "sp": "בניין Haymarket ב־Vice Beach, ליד המפרץ של Starfish Island",
+   "steps": [
+    "נכנסים לבניין Haymarket ב־Vice Beach (ליד המפרץ של Starfish Island)",
+    "הולכים ללובי המעליות בצד שמאל",
+    "קוראים למעלית השנייה – זו שהאור מעליה מהבהב",
+    "נכנסים: האורות נכבים, הליצן קופץ, מנסה לתקוף ונעלם",
+    "מחכים שכל הבלונים יתפוצצו – ואז אפשר לצאת"
+   ],
+   "rw": "רק הפחדה – אין פרס",
+   "tips": [
+    "דווח עד עכשיו במקור אחד – אם זה לא עובד לך, ספר לנו",
+    "בקרבת מקום ב־Key Lento יש גם לוח זיכרון ללהקת הליצנים Fatal Incursion"
+   ],
+   "x": 545,
+   "y": 500,
+   "ex": 0,
+   "src": "guide",
+   "src_urls": [
+    "https://nerdschalk.com/pennywise-easter-egg-location-gta-6"
+   ]
   }
  ],
  "tips": [
